@@ -45,6 +45,11 @@ The application's crown jewel is its mathematical screen-edge docking and mouse-
   1. The cursor is placed within the window boundary or its active native child controls (retrieved recursively via Win32 `GetAncestor` calls).
   2. The window remains the active Windows foreground window element.
   Definitive state switches (moving cursor away AND activating a separate typing window) trigger clean, interpolated sliding back to edge margins.
+- **Damped Drag Resistance Curve**: Left-click dragging a peek-untucked window away from its docked screen margin is restricted using non-linear resistance. Standard mouse coordinates map to window coordinates using a steep 4x damping reduction multiplier:
+  $$\text{resistedDeltaX} = \Delta X \times 0.25$$
+  Parallel dragging coordinates are restricted with a 2x damping parameter ($0.5$).
+- **Hysteresis Pop-off Threshold**: If the resisted drag direction displacement exceeds 120 absolute screen pixels ($\text{pullDistance} > 120\text{px}$), the docking structural anchor snaps. The window is removed from the stowed registry maps, plays an audio pitch, and is restored as a free-floating window.
+- **Ctrl-Hold Dock-Seeking Indicator Overlay**: Holding the `Ctrl` key during a stowed window drag disables physical resistance and enters a Dock-Seeking Mode. The engine calculates the closest screen margin of the mouse's active monitor layout, instantiates a click-through translucent cyan GUI indicator overlay bar (60px thickness) aligned to that edge, and immediately snaps and docks the stowed window to the selected monitor margin upon left-clicked mouse release.
 
 ## 🛰️ 4. Commands, Keybindings & Context Flags
 Every action from simple moves to grid mapping is indexed inside the INI command table:

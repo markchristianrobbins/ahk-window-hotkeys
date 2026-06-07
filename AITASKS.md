@@ -14,6 +14,10 @@
 
 <!-- Ai To Maintain and work from this list -->
 ## [x] Incoming tasks from chat
+- [x] Move untucked window to the top of the Z-order index upon edge bump
+- [x] Implement physical drag resistance (4x perpendicular and 2x parallel damping tension) when pulling nestled windows from stowed bounds
+- [x] Implement hysteresis pop-off release threshold (120px) to restore normal free-floating window states
+- [x] Add dynamic Ctrl-hold Dock-Seeking mechanism with translucent cyan (`00FFCC`) predicted edge indicator band and snap-to-dock binding on release
 - [x] Reverse engineer HotWinAHK window nudging and docking codebase
 - [x] Complete README.md with detailed script features and description
 - [x] Complete BUILD.md documenting compilation and asset pipelines
@@ -35,6 +39,11 @@
     - Resolved `0x0014` coord/size jumping issue by utilizing native `0x0053` (`SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW`) drawing to pin without changing bounds or activating.
 - [x] Enhance the help screen
     - Implemented a gorgeous, highly structured 3-column color coded keybinding reference matrix above the live filter and commands table.
+- [x] Robust Stowed Window Drag Interaction
+    - Ensure stowed windows are physically elevated to the top of the Z-order index upon untuck.
+    - Drag pull-off resistance: Restrain stowed window drags away from the edge with a 4x movement damping profile.
+    - Threshold Pop-off: Permanently restore peek-untucked windows to regular status if pulled beyond 120px from their docked edge.
+    - Ctrl-hold Dock Seeking: Dynamically reposition peek-untucked windows with a translucent cyan overlay indicator of the predicted new screen docking edge when moving and holding Ctrl. Snapping binds to the target edge on release.
 
 ## [ ] New Changes
 

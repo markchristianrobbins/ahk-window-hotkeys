@@ -37,6 +37,9 @@
 ### Inline Tasks
 - comments in the form of //! {instructions} found in ts code are AI Tasks
 
+### Commit & Lifecycle Workflow
+- **Commit Trigger**: When the user says they committed, clean up the commit message in `AILOG.md` (clear it) and transfer the completed lowercase `[x]` items from `Incoming tasks from chat` in `AITASKS.md` to the AI Log Entry.
+
 ## Project Context
 - **Test Fixture**: The `test-fixture` directory is not part of the application code; it is used exclusively for testing purposes and AI interaction.
 

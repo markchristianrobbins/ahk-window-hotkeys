@@ -15,7 +15,7 @@
 
 ## Commit Message
 ```text
-
+feat(ahk): implement stowed window dragging resistance, pop-off thresholds, and Ctrl-hold adaptive dock seeking
 ```
 
 <!-- Example AI Log Entry
@@ -28,6 +28,29 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-07T19:49:00Z]
+### 🎯 Primary Goals & Requirements
+- Deliver highly responsive, satisfying interactive stowed window dragging capabilities that bridge fluid gestures with precise window positioning.
+- Elevate stowed peeked windows to the absolute top of the Z-order index upon edge bump.
+- Add damped perpendicular and parallel physical drag resistance on stowed window edges to simulate mechanical tension.
+- Support drag pop-off release triggers above 120px to permanently restore stowed windows to free-floating layout states.
+- Integrate Ctrl-holding layout Dock-Seeking Mode with real-time translucent prediction bands and snapping transitions.
+
+### 🛠️ Completed Changes in this Session
+- **HotWinAHK.ahk**: Declared `g_PeekX` and `g_PeekY` global variables. Refined `"BumpEdgeUntuck"` and `"BumpEdgeUntuckActivate"` to pull windows to the front using `WinMoveTop` without stealing foreground focus, and cached coordinates. Embedded a robust left-click drag tracking routine into `TrackUntuckedFocusLifecycle` that acts as a physical controller: limits movement with 4x perpendicular and 2x parallel drag dampening filters, executes Pop-off when a 120px travel trigger is exceeded, and activates a stunning translucent click-through cyan overlay band predicting screen margins when holding `Ctrl`, relocating and docking the window on release.
+- **FEATURES.md**: Documented the addition, behaviors, and hotkeys of the new drag, physical resistance, and Ctrl-hold adaptive docking features.
+- **MANUAL.md**: Added the physical equations, displacement resistance multipliers ($\Delta X \times 0.25$), pop-off limits, and overlay predicted docking coordinates.
+- **SPEC.md**: Indexed the specifications of the HWND_TOP index upgrades, drag hysteresis curbs, and predictive cyan highlight panels.
+- **AITASKS.md**: Verified and ticked off stowed window drag tasks as fully complete.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/FEATURES.md`
+- `/MANUAL.md`
+- `/SPEC.md`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-07T19:32:00Z]
 ### 🎯 Primary Goals & Requirements

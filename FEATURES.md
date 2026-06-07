@@ -45,6 +45,7 @@ Pistol-tuck active screens past monitor walls, hiding them with real-time gestur
 - **[Tac-Edge Margin Docking](#tac-edge-margin-docking)** - Lock windows off-screen, leaving a thin customizable visible indicator strip (e.g., 20px).
 - **[Velocity Bump Restorations](#velocity-bump-restorations)** - Polling loop detects cursor flick direction vectors. Shoving the cursor hard against screen walls instantly slides tucked windows out.
 - **[Active Untuck Focus Lock](#active-untuck-focus-lock)** - Temporary thread locking prevents stowed windows from hiding unexpectedly when hovered.
+- **[Stowed Window Drag & Seek Controller](#stowed-window-drag--seek-controller)** - Intercepts stowed window click-drags, adding 4x drag resistance, a 120px pop-off restoration threshold, and Ctrl-hold edge-indicators to easily seek new docking margins.
 
 ### 📂 5. Dedicated Subprocess Shell Minification
 <a id="z5" name="z.5"></a>
@@ -120,6 +121,13 @@ Spawns individual tray notifier processes (`HotWinAHK_tray.ahk`) for each hidden
 ### Velocity Bump Restorations
 - Group: [Boundary Docking & Mouse Fling Untuck](#z4)
 Active mouse polling compares vector velocities against tension boundaries, sliding hidden windows out when a threshold is met.
+
+### Stowed Window Drag & Seek Controller
+- Group: [Boundary Docking & Mouse Fling Untuck](#z4)
+Provides a rich, physics-inspired mouse dragging mechanism for stowed/docked windows.
+- **Physical Resistance**: Dragging a peek-untucked window away from its screen edge encounters strong 4x motion dampening (resistance).
+- **Threshold Pop-off**: Pulling the window beyond 120 pixels away from its docked edge pops it loose from its stowed state permanently, playing a beautiful audio cue and restoring it as a standard window.
+- **Ctrl-Hold Dock Seeking**: Holding `Ctrl` while moving the window disables resistance and lets it seek any of the four monitor edges. The interface draws a translucent cyan overlay indicator visual band representing the predicted docking zone. Releasing the button docks the window to that edge instantly.
 
 ### Welcome Tone focus Beeper
 - Group: [Administrative Controls & Dynamic Compiler](#z1)
