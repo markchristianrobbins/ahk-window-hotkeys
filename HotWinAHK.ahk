@@ -32,7 +32,8 @@ Global g_PrevMouseX := -1
 Global g_PrevMouseY := -1
 Global g_UntuckCooldown := false
 Global g_BaselineActiveWindow := 0 ; Tracks your primary application window handle
-Global g_ResetBumpMemory := false ; Controls mouse vector memory flushes; #endregion
+Global g_ResetBumpMemory := false ; Controls mouse vector memory flushes
+Global g_UntuckGraceTicks := 0 ; Grace period countdown latch for untucking; #endregion
 
 ; --- CUSTOM VELOCITY BUMP SENSITIVITY REGISTRY ---
 ; Lower numbers make the flick speed more sensitive (5 is ultra-sensitive, 10 is moderate, 20 is heavy wrist snap)
@@ -690,7 +691,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
             }
 
         case "BumpEdgeUntuck", "BumpEdgeUntuckActivate":
-            global g_ActiveUntuckedHwnd, g_UntuckCooldown, g_BaselineActiveWindow
+            global g_ActiveUntuckedHwnd, g_UntuckCooldown, g_BaselineActiveWindow, g_UntuckGraceTicks
 
             CoordMode("Mouse", "Screen")
             MouseGetPos(&mX, &mY)
@@ -787,6 +788,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                             DllCall("SetWindowPos", "ptr", closestHwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x0053)
 
                             g_ActiveUntuckedHwnd := closestHwnd
+                            g_UntuckGraceTicks := 10
 
                             ; Launch a highly reactive focus and hover monitor loop ticking every 50ms
                             SetTimer(TrackUntuckedFocusLifecycle, 0)
@@ -820,6 +822,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                             WinActivate("ahk_id " . closestHwnd)
 
                             g_ActiveUntuckedHwnd := closestHwnd
+                            g_UntuckGraceTicks := 10
 
                             SetTimer(TrackUntuckedFocusLifecycle, 0)
                             SetTimer(TrackUntuckedFocusLifecycle, 50)
@@ -2371,7 +2374,7 @@ TrackUntuckedFocusLifecycle() {
     ; 1. VALIDATION GATE: Break out safely if tracking pointer is unassigned
     if (g_ActiveUntuckedHwnd == 0 || !WinExist("ahk_id " . g_ActiveUntuckedHwnd)) {
         SetTimer(TrackUntuckedFocusLifecycle, 0)
-        global g_UntuckGraceTicks := 0
+        g_UntuckGraceTicks := 0
         g_ResetBumpMemory := true
         SetTimer(ExecuteCleanBumperReArm, -200)
         return
@@ -2381,7 +2384,7 @@ TrackUntuckedFocusLifecycle() {
     ; If our countdown latch is still active, tick it down and exit early!
     ; This forces the window to stay locked wide open on your screen canvas.
     if (g_UntuckGraceTicks > 0) {
-        global g_UntuckGraceTicks := g_UntuckGraceTicks - 1
+        g_UntuckGraceTicks := g_UntuckGraceTicks - 1
         return
     }
 

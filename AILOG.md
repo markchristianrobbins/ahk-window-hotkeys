@@ -15,7 +15,7 @@
 
 ## Commit Message
 ```text
-feat(ahk): implement interactive dark themed commands reference help panel
+
 ```
 
 <!-- Example AI Log Entry
@@ -28,6 +28,28 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-07T19:32:00Z]
+### 🎯 Primary Goals & Requirements
+- Resolve the runtime/compiler scoping crash involving the `g_UntuckGraceTicks` global variable inside `TrackUntuckedFocusLifecycle` when executing an untuck action.
+- Ensure all global variables are correctly pre-declared at the script's entry point and properly registered within event handlers.
+- Refine the design of the interactive keyboard and gesture command guide (`Win + /`) by adding a beautiful, highly structured 3-column physical matrix layout above the list table.
+
+### 🛠️ Completed Changes in this Session
+- **HotWinAHK.ahk**: Formally pre-declared `Global g_UntuckGraceTicks := 0` in the global variable registry header. Refactored references inside the `BumpEdgeUntuck` and `BumpEdgeUntuckActivate` handlers to initialize the grace countdown successfully. Stripped out illegal inline `global` redeclarations inside assignment blocks which were causing AutoHotkey runtime exception faults. Enhanced the graphical help layout with a clean 3-column color-coded matrix representing Numpad, Arrow, and Mouse matrices.
+- **FEATURES.md**: Documented the addition and implementation details of the new interactive reference panel under the configuration matrix group.
+- **MANUAL.md**: Added structural information detailing the hardened dual-anchor protection algorithm, recursive `GetAncestor` controller checks, and the `g_UntuckGraceTicks` countdown period logic.
+- **SPEC.md**: Updated structural spec sheets to list the unified dual-anchor physical cursor/keyboard focus logic alongside the grace latch thresholds.
+- **AITASKS.md**: Checked off completed task line-items related to bumper re-arming bugs, unticking coordination shifts, and reference help display refinements.
+- **AILOG.md**: Added this development log entry describing the scoping crash fix and the list of affected files.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/FEATURES.md`
+- `/MANUAL.md`
+- `/SPEC.md`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-07T19:01:00Z]
 ### 🎯 Primary Goals & Requirements

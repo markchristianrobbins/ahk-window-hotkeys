@@ -38,6 +38,7 @@ To deliver ultra-low overhead, maximum robustness, and seamless user experiences
 - **User32 API Layer Bypass**: Rather than calling nested high-level helpers, the engine communicates directly with User32 DLLs (e.g., `SetLayeredWindowAttributes` for transparent alpha maps, and `SetWindowHasTranslucency` properties) to maximize responsiveness.
 - **Tray Helper Subprocess Isolation**: Minimizing applications to the system tray spawns a lightweight standalone helper context (`HotWinAHK_tray.ahk`) per window handle. This keeps the primary keyboard polling threads free from GUI wait states.
 - **Modifier Casing Standardization Layer**: Converts complex INI key definitions (like LAlt, RCtrl, etc.) to clean standard lowercase strings before registering combinations, eliminating AutoHotkey v2 crash states on compound modifier double-registration.
+- **Dual-Anchor Tracking with Grace Period Latch**: Utilizes a dual checking mechanism (system focus check and physical cursor hover validation using Win32 API `GetAncestor` calls recursively on child handles) alongside a 500ms (`10` tick) grace countdown system (`g_UntuckGraceTicks`). This prevents erratic window collapse and focus theft during complex desktop mouse interactions.
 
 
 ---

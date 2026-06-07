@@ -21,6 +21,7 @@ Welcome to CherryPucker! A fast, keyboard-driven window alignment and docking as
 <a id="z1" name="z.1"></a>
 This component controls core engine reload, hotkey customization, logs, and process states.
 - **[Configuration Matrix Compiler](#configuration-matrix-compiler)** - Reads active hotkey bindings from INI and compiles them to native AHK definitions.
+- **[Interactive Commands Reference Panel](#interactive-commands-reference-panel)** - Provides a gorgeous, color-coded, searchable 3-column desktop guide (`Win + /`) containing all active matrix keybindings for instant lookup.
 - **[Live Hotkey Suspension](#live-hotkey-suspension)** - Toggle entire macro listener functionality with a master hotkey combination to prevent shortcut collisions.
 - **[Inline Program Recalibration](#inline-program-recalibration)** - Instantly edits, saves, and hot-swaps active keybindings without restarting the main script thread.
 
@@ -75,6 +76,10 @@ Snaps and reshapes window frames along customizable proportional grid block dime
 ### Inline Program Recalibration
 - Group: [Administrative Controls & Dynamic Compiler](#z1)
 Launches the user's default INI editor. Saving changes automatically triggers the script re-compiler, instantly registering the newest key mappings.
+
+### Interactive Commands Reference Panel
+- Group: [Administrative Controls & Dynamic Compiler](#z1)
+Opens a hardware-accelerated dark theme GUI (`#121214`) presenting a 3-column physical matrix representing all Numpad, Arrow, and Mouse commands. It hosts a 25ms real-time typing filter for rapid list searching and can be dismissed instantly with `[ESC]`.
 
 ### Live Hotkey Suspension
 - Group: [Administrative Controls & Dynamic Compiler](#z1)

@@ -41,6 +41,10 @@ The application's crown jewel is its mathematical screen-edge docking and mouse-
   This aligns window corners cleanly to standard columns and rows without overlapping borders.
 - **Quadratic Easing Motion Animation**: Smoothes window snaps using quadratic ease-out interpolation over a 150ms segment containing 12 linear intermediate frames:
   $$\text{easeProgress} = t \times (2 - t)$$
+- **Hardened Dual-Anchor Protection & Countdown Latch**: When a stowed window is peek-revealed, a 50ms polling thread (`TrackUntuckedFocusLifecycle`) checks both focus state and mouse positioning. To prevent erratic retucking during transition phases, the system activates a countdown latch of `g_UntuckGraceTicks := 10` (500ms). The window is locked open while:
+  1. The cursor is placed within the window boundary or its active native child controls (retrieved recursively via Win32 `GetAncestor` calls).
+  2. The window remains the active Windows foreground window element.
+  Definitive state switches (moving cursor away AND activating a separate typing window) trigger clean, interpolated sliding back to edge margins.
 
 ## 🛰️ 4. Commands, Keybindings & Context Flags
 Every action from simple moves to grid mapping is indexed inside the INI command table:
