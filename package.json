@@ -1,5 +1,7 @@
 {
   "name": "ahk-script-assistant",
+  "displayName" :"HotWinAHK",
+  "description": "High-performance window-management suite written in AutoHotkey v2.0",
   "publisher": "markrobbins",
   "private": true,
   "version": "0.0.1",
@@ -9,6 +11,6 @@
   "dependencies": {
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.14.0"
   }
 }

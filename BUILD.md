@@ -13,16 +13,26 @@
 - ▪️[TESTING.md](TESTING.md)
 
 ---
-<!-- AI to add/remove sections as needed -->
 
 ## 🛠️ Build & Packaging Pipeline
-<!-- AI to reverse engineer and complete this section -->
+CherryPucker comprises a dynamically compiling AutoHotkey system. The core engine translates highly customizable matrix definitions from a simple structure file (`WindowHotkeys.ini`) directly into clean AutoHotkey macros (`WindowHotkeys.ahk`). On runtime initialization, these hotkeys compiled to static assets are dynamically parsed and registered natively with Windows Shell.
 
 ### 📦 Key Components
-<!-- AI to reverse engineer and complete this section -->
+- **`WindowNudger.ahk`**: The main execution engine. Operates as the orchestrator, initializing logging, diagnostic window systems, focus listener hooks, thread queues, and the velocity-bump poll loops.
+- **`WindowHotkeys.ini`**: The master user preference panel. Standardized key combination layout mapping strings to commands and conditional activation filters (such as window title patterns or program executable names).
+- **`WindowHotkeys.ahk`**: The generated middle-layer compiled script. Restructures definitions from the INI file natively into standard AHK Hotkey mappings with execution handlers.
+- **`TrayHelper.ahk`**: Independent system tray delegator application. Handles custom status tray iconography, hover instructions, and right-click window restoration/closing behaviors for minimized applications.
 
 ## 🚀 Execution & Packing Commands
-<!-- AI to reverse engineer and complete this section -->
+- **Dynamic On-The-Fly Compilation**:
+  - The script automatically compiles modified INI profiles back into native keybindings whenever changes are detected or on manual reload (`ReloadIniConfig()`).
+  - Native command executed internally: `CompileIniToStaticHotkeys()` reads `/WindowHotkeys.ini`, validates combinations using `IsValidAhkKey()`, formats keys using `CompileStrokeToAHK(...)`, and rewrites `/WindowHotkeys.ahk` using safe stream flushes.
+- **Packaging and Compilation to Standalone Executables**:
+  - To compile the script files into standalone `.exe` programs for Windows environment distribution:
+    - Run `Ahk2Exe.exe /in WindowNudger.ahk /out WindowNudger.exe`
+    - Run `Ahk2Exe.exe /in TrayHelper.ahk /out TrayHelper.exe`
+  - Ensure Windows Defender exclusions are defined for generated binaries, as custom keyboard hooking tools sometimes trigger generic false positives on basic heuristics.
+
 ---
 ## Go back to...
 - ▪️[AGENTS.md](AGENTS.md)
