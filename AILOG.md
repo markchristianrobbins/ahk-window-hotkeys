@@ -15,7 +15,7 @@
 
 ## Commit Message
 ```text
-fix(input): resolve keyboard hook interception issues on suspension/exit and add explicit Help GUI exit button
+feat(tuck): add PeekTucked/Untuck menus, active window status dot, and overhaul stowed drag physics with progress & auto-docking
 ```
 
 <!-- Example AI Log Entry
@@ -28,6 +28,26 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-10T23:17:00Z]
+### 🎯 Primary Goals & Requirements
+- Implement the "Peek Tucked" and "Untuck" commands with dynamic menus displaying all tucked windows and their properties.
+- Add an elegant active window status dot indicator at the top-left of the currently active window, indicating suspension state through distinct color codings (green for active, yellow for suspended).
+- Overhaul stowed window dragging interaction by removing tension resistance below pop-off threshold, implementing real-time pull-to-free progression indicators and audio feedback, and automatically displaying predictive docking overlays when dragging popped-off windows near monitor boundaries.
+- Refurbish and widen the interactive help command matrix screen, optimizing spacing and filtering out verbose navigation/numpad hotkeys to maintain structural clarity.
+
+### 🛠️ Completed Changes in this Session
+- **Integrated Peek Tucked and Untuck Modules**: Programmed `Menu_PeekTucked()` and `Menu_Untuck()` inside `HotWinAHK.ahk` along with dedicated action routing cases and `.ini` binding templates (`Win+Ctrl+Shift+P`, `Win+Ctrl+Shift+U`). The menus dynamically fetch titles and sides of currently stowed windows, delivering seamless instant peeking or clean restoration positioning on selection.
+- **Formulated Active Window Dot Indicator**: Constructed `UpdateActiveWindowDot()` running on a reactive 100ms background thread, which paints a click-through, always-on-top status dot at the active window's top-left corner (color-coded `#00FF55` for active, `#EEDC00` for suspended) with automated blacklists for system layers.
+- **Redesigned Stowed Window Pulling Hysteresis**: Re-engineered dragging physics inside `HandleTuckedDrag()` to move 1:1 under 120px pull-distance, adding an interactive ASCII progress bar tooltip (`"Pull to Free: X% [███░░░]"`) showing the exact detachment progress, with an auditory confirmation beep upon release.
+- **Proactive Boundary Predicted Snapping**: Programmed dynamic docking indicator bounds highlight overlays (`dockIndicatorGui`) which render automatically when dragging a popped-off window within 80px of any monitor margin, enabling intuitive mouse snaps on click release.
+- **Polished and Widened Help Dashboard**: Expanded the help menu dimensions to `w1000 y720` and refitted structural layouts. Programmed high-efficiency regex filters during view generation to suppress arrow navigation and numpad layouts, ensuring only core organizational mappings are rendered.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-10T22:00:00Z]
 ### 🎯 Primary Goals & Requirements

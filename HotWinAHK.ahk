@@ -73,6 +73,7 @@ try {
 }
 
 SetTimer(CheckScreenEdgeBumps, 25)
+SetTimer(UpdateActiveWindowDot, 100)
 ; Execute the initializer hook immediately on script launch
 InitializeGlobalFocusBeeper()
 if !FileExist(g_sGeneratedFile) {
@@ -452,7 +453,7 @@ CompileIniToStaticHotkeys() {
                 sPrefix := ""
             }
             ScriptBuffer .= sPrefix sAHKStroke ":: {`n"
-            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings") {
+            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "PeekTucked" || sCmd == "Untuck") {
                 ScriptBuffer .= '    Suspend("Permit")`n'
             }
             ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
@@ -523,7 +524,7 @@ LoadHotkeysAtRuntime() {
 ; #region  _engine 
 IsMetaCommand(sCmd) {
     ; Add your untuck commands to the meta-command bypass list
-    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings")) {
+    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck")) {
         return true
     }
 
@@ -645,6 +646,12 @@ ExecuteCommandRegistry(sCmd, hWnd) {
     switch sCmd, false {
         case "HelpScreen":
             ShowHelpScreen(hWnd)
+
+        case "PeekTucked":
+            Menu_PeekTucked()
+
+        case "Untuck":
+            Menu_Untuck()
 
         case "TuckLeft", "TuckRight", "TuckUp", "TuckDown":
             ; Force global registry data attachment directly inside the local case context
@@ -794,50 +801,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 if (closestHwnd != 0) {
                     activeTuckProfile := g_TuckedWindows[closestHwnd]
                     if (sCmd == "BumpEdgeUntuck") {
-                        try {
-                            ; Capture currently active editor window handle
-                            global g_BaselineActiveWindow := DllCall("GetForegroundWindow", "ptr")
-
-                            WinGetPos(&tX, &tY, &tW, &tH, closestHwnd)
-
-                            nX := tX
-                            nY := tY
-                            switch targetEdge {
-                                case "Left":
-                                    nX := mLeft
-
-                                case "Right":
-                                    nX := mRight - Number(activeTuckProfile.w)
-
-                                case "Top":
-                                    nY := mTop
-
-                                case "Bottom":
-                                    nY := mBottom - Number(activeTuckProfile.h)
-                            }
-
-                            ; Slide the window open cleanly using your SafeMove engine
-                            SafeMove(nX, nY, Number(activeTuckProfile.w), Number(activeTuckProfile.h), closestHwnd)
-                            
-                            ; --- HIGHLY ROBUST Z-ORDER SEIZURE (NON-ACTIVE) ---
-                            WinSetAlwaysOnTop(1, "ahk_id " . closestHwnd)
-                            WinSetAlwaysOnTop(0, "ahk_id " . closestHwnd)
-                            WinMoveTop("ahk_id " . closestHwnd) ; Elevate window to top of Z-order index
-
-                            ; --- NO-ACTIVATE SHOW-ON-TOP FLAG ---
-                            ; 0x0053 = SWP_NOMOVE (0x02) | SWP_NOSIZE (0x01) | SWP_NOACTIVATE (0x10) | SWP_SHOWWINDOW (0x40)
-                            ; Ensures the window draws on top of stack without stealing baseline text cursor focus
-                            DllCall("SetWindowPos", "ptr", closestHwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x0053)
-
-                            g_PeekX := nX
-                            g_PeekY := nY
-                            g_ActiveUntuckedHwnd := closestHwnd
-                            g_UntuckGraceTicks := 10
-
-                            ; Launch a highly reactive focus and hover monitor loop ticking every 50ms
-                            SetTimer(TrackUntuckedFocusLifecycle, 0)
-                            SetTimer(TrackUntuckedFocusLifecycle, 50)
-                        }
+                        RevealTuckedWindow(closestHwnd, targetEdge, activeTuckProfile)
                     }
                     else if (sCmd == "BumpEdgeUntuckActivate") {
                         try {
@@ -1797,6 +1761,13 @@ ShutdownEngine() {
     ; Clear any lingering tooltips on the screen instantly
     ToolTip()
 
+    ; Destroy active window dot indicator
+    global g_DotGui
+    if (g_DotGui) {
+        try g_DotGui.Destroy()
+        g_DotGui := ""
+    }
+
     ; Release WinEvent focus tracking hooks safely
     global g_DiagnosticFocusHook, g_OsFocusHookHandle
     if (g_DiagnosticFocusHook) {
@@ -2584,118 +2555,97 @@ ShowHelpScreen(hWnd := 0) {
 
     ; Header Display Heading (Visual Accent & Typography Pairing)
     helpGui.SetFont("s16 bold c00FFCC", "Segoe UI")
-    helpGui.Add("Text", "w780 Center y15", "HotWinAHK Command Matrix & Keybindings")
+    helpGui.Add("Text", "w940 Center x30 y15", "HotWinAHK Command Matrix & Keybindings")
     helpGui.SetFont("s9 c8A8A93", "Segoe UI")
-    helpGui.Add("Text", "w780 Center y+4", "Precision Window Management & Gesture Edge-Docking Suite")
+    helpGui.Add("Text", "w940 Center x30 y+4", "Precision Window Management & Gesture Edge-Docking Suite")
 
     ; --- 3-COLUMN REFERENCE MATRIX (ABOVE THE LOOKUP GRID) ---
-    ; Column backgrounds (subtle dark cards for each category)
-    helpGui.Add("GroupBox", "x20 y60 w310 h170 c55555C", "NUMPAD MATRIX")
-    helpGui.Add("GroupBox", "x345 y60 w220 h170 c55555C", "ARROW MOVEMENT")
-    helpGui.Add("GroupBox", "x580 y60 w220 h170 c55555C", "MOUSE ACTIONS")
+    helpGui.Add("GroupBox", "x30 y60 w360 h170 c55555C", "NUMPAD MATRIX")
+    helpGui.Add("GroupBox", "x410 y60 w260 h170 c55555C", "ARROW MOVEMENT")
+    helpGui.Add("GroupBox", "x690 y60 w280 h170 c55555C", "MOUSE ACTIONS")
 
     ; --- COLUMN 1: NUMPAD ---
-    ; Row 1: MoveToGrid -
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x35 y80 w120", "MoveToGrid")
-    helpGui.Add("Text", "x165 y80 w140", "Numpad 1-9")
+    helpGui.Add("Text", "x45 y80 w140", "MoveToGrid")
+    helpGui.Add("Text", "x200 y80 w180", "Numpad 1-9")
 
-    ; Row 2: JumpGrid (Blue) -> Alt
-    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI") ; blue/cyan
-    helpGui.Add("Text", "x35 y98 w120", "JumpGrid")
-    helpGui.Add("Text", "x165 y98 w140", "Alt + Numpad 1-9")
+    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
+    helpGui.Add("Text", "x45 y98 w140", "JumpGrid")
+    helpGui.Add("Text", "x200 y98 w180", "Alt + Numpad 1-9")
 
-    ; Row 3: Edge (Red) -> Ctrl
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI") ; red
-    helpGui.Add("Text", "x35 y116 w120", "Edge")
-    helpGui.Add("Text", "x165 y116 w140", "Ctrl + Numpad 1-9")
+    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
+    helpGui.Add("Text", "x45 y116 w140", "Edge")
+    helpGui.Add("Text", "x200 y116 w180", "Ctrl + Numpad 1-9")
 
-    ; Row 4: StretchToGrid (Cyan) -> Win
-    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI") ; cyan
-    helpGui.Add("Text", "x35 y134 w120", "StretchToGrid")
-    helpGui.Add("Text", "x165 y134 w140", "Win + Numpad 1-9")
+    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI")
+    helpGui.Add("Text", "x45 y134 w140", "StretchToGrid")
+    helpGui.Add("Text", "x200 y134 w180", "Win + Numpad 1-9")
 
-    ; Row 5: PullToGrid (Blue) -> Win+Alt
-    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI") ; blue/cyan
-    helpGui.Add("Text", "x35 y152 w120", "PullToGrid")
-    helpGui.Add("Text", "x165 y152 w140", "Win + Alt + Numpad")
+    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
+    helpGui.Add("Text", "x45 y152 w140", "PullToGrid")
+    helpGui.Add("Text", "x200 y152 w180", "Win + Alt + Numpad")
 
-    ; Row 6: Stretch (Red) -> Win+Ctrl
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI") ; red
-    helpGui.Add("Text", "x35 y170 w120", "Stretch")
-    helpGui.Add("Text", "x165 y170 w140", "Win + Ctrl + Numpad")
+    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
+    helpGui.Add("Text", "x45 y170 w140", "Stretch")
+    helpGui.Add("Text", "x200 y170 w180", "Win + Ctrl + Numpad")
 
-    ; Row 7: SnapToGridEnlarge Add / SnapToGridShrink Subtract
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x35 y188 w120", "SnapToGridEnlarge/Shrink")
-    helpGui.Add("Text", "x165 y188 w140", "Add / Subtract")
+    helpGui.Add("Text", "x45 y188 w140", "SnapToGridEnlarge/Shrink")
+    helpGui.Add("Text", "x200 y188 w180", "Add / Subtract")
 
-    ; Row 8: ScaleExpand10px / ScaleReduce10px
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI") ; red
-    helpGui.Add("Text", "x35 y206 w120", "ScaleExpand/Reduce")
-    helpGui.Add("Text", "x165 y206 w140", "Ctrl + Add / Subtract")
-
+    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
+    helpGui.Add("Text", "x45 y206 w140", "ScaleExpand/Reduce")
+    helpGui.Add("Text", "x200 y206 w180", "Ctrl + Add / Subtract")
 
     ; --- COLUMN 2: ARROW MOVEMENT ---
-    ; Row 1: Move10px (Blue) -> Win + Alt
-    helpGui.SetFont("s9 bold c4476ff", "Segoe UI") ; red
-    helpGui.Add("Text", "x360 y80 w100", "Move10px")
-    helpGui.Add("Text", "x465 y80 w90", "Win + Alt + Arrows")
+    helpGui.SetFont("s9 bold c4476ff", "Segoe UI")
+    helpGui.Add("Text", "x425 y80 w110", "Move10px")
+    helpGui.Add("Text", "x545 y80 w110", "Win + Alt + Arrows")
 
-    ; Row 2: Move1px (Yellow) -> Win + Shift
-    helpGui.SetFont("s9 bold cFFCC00", "Segoe UI") ; yellow
-    helpGui.Add("Text", "x360 y98 w100", "Move1px")
-    helpGui.Add("Text", "x465 y98 w90", "Win + Shift + Arrows")
+    helpGui.SetFont("s9 bold cFFCC00", "Segoe UI")
+    helpGui.Add("Text", "x425 y98 w110", "Move1px")
+    helpGui.Add("Text", "x545 y98 w110", "Win + Shift + Arrows")
 
-    ; Row 3: Add (Green) -> Win + Alt + Shift
-    helpGui.SetFont("s9 bold c44FF44", "Segoe UI") ; green
-    helpGui.Add("Text", "x360 y116 w100", "Add (Grow)")
-    helpGui.Add("Text", "x465 y116 w90", "Win+Alt+Shift+Arrows")
+    helpGui.SetFont("s9 bold c44FF44", "Segoe UI")
+    helpGui.Add("Text", "x425 y116 w110", "Add (Grow)")
+    helpGui.Add("Text", "x545 y116 w110", "Win+Alt+Shift+Arrows")
 
-    ; Row 4: Sub (Purple) -> Win + Ctrl + Alt
-    helpGui.SetFont("s9 bold cCC66FF", "Segoe UI") ; purple
-    helpGui.Add("Text", "x360 y134 w100", "Sub (Shrink)")
-    helpGui.Add("Text", "x465 y134 w90", "Win+Ctrl+Alt+Arrows")
+    helpGui.SetFont("s9 bold cCC66FF", "Segoe UI")
+    helpGui.Add("Text", "x425 y134 w110", "Sub (Shrink)")
+    helpGui.Add("Text", "x545 y134 w110", "Win+Ctrl+Alt+Arrows")
 
-    ; Row 5: Trim -> Win + Alt
-    helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI") ; default high-contrast white
-    helpGui.Add("Text", "x360 y152 w100", "Trim")
-    helpGui.Add("Text", "x465 y152 w90", "Win + Alt + Arrows")
-
+    helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
+    helpGui.Add("Text", "x425 y152 w110", "Trim")
+    helpGui.Add("Text", "x545 y152 w110", "Win + Alt + Arrows")
 
     ; --- COLUMN 3: MOUSE ACTIONS ---
-    ; Row 1: ToGrid Win + MButton
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x595 y80 w100", "ToGrid")
-    helpGui.Add("Text", "x700 y80 w90", "Win + MButton")
+    helpGui.Add("Text", "x705 y80 w100", "ToGrid")
+    helpGui.Add("Text", "x815 y80 w140", "Win + MButton")
 
-    ; Row 2: RelativeSize Win + LButton
-    helpGui.Add("Text", "x595 y98 w100", "RelativeSize")
-    helpGui.Add("Text", "x700 y98 w90", "Win + LButton")
-
+    helpGui.Add("Text", "x705 y98 w100", "RelativeSize")
+    helpGui.Add("Text", "x815 y98 w140", "Win + LButton")
 
     ; --- INTERACTION SEPARATOR ---
-    ; Divider Line Decorator
-    helpGui.Add("Text", "w780 h1 Background3A3A3D x20 y242", "")
+    helpGui.Add("Text", "w940 h1 Background3A3A3D x30 y242", "")
 
     ; Live Dynamic Filter Box Row
     helpGui.SetFont("s10 bold c00FFCC", "Segoe UI")
-    helpGui.Add("Text", "w100 x20 y255 h24 +0x200", "Live Filter:")
+    helpGui.Add("Text", "w100 x30 y255 h24 +0x200", "Live Filter:")
     helpGui.SetFont("s10 norm cFFFFFF", "Segoe UI")
-    searchBox := helpGui.Add("Edit", "w320 x105 y255 Background1E1E22 cFFFFFF Border r1 h24", "")
+    searchBox := helpGui.Add("Edit", "w400 x115 y255 Background1E1E22 cFFFFFF Border r1 h24", "")
     
     helpGui.SetFont("s9 c8A8A93", "Segoe UI")
-    helpGui.Add("Text", "w300 x500 y255 h24 +0x200 Right", "Press [ESC] at any time to close")
+    helpGui.Add("Text", "w320 x650 y255 h24 +0x200 Right", "Press [ESC] at any time to close")
 
     ; Create the Main ListView
     helpGui.SetFont("s10 cE0E0E6", "Segoe UI")
-    helpLV := helpGui.Add("ListView", "x20 y290 w780 h320 Background111112 cFFFFFF +Grid -Multi -ReadOnly", ["Category", "Action Command", "Trigger Key combo", "Functional Description"])
+    helpLV := helpGui.Add("ListView", "x30 y290 w940 h350 Background111112 cFFFFFF +Grid -Multi -ReadOnly", ["Category", "Action Command", "Trigger Key combo", "Functional Description"])
     
-    ; Adjust ListView column headers width to distribute elegantly
-    helpLV.ModifyCol(1, 115) ; Category
-    helpLV.ModifyCol(2, 140) ; Action
-    helpLV.ModifyCol(3, 150) ; Hotkey Combo
-    helpLV.ModifyCol(4, 330) ; Description
+    helpLV.ModifyCol(1, 140) ; Category
+    helpLV.ModifyCol(2, 150) ; Action Command
+    helpLV.ModifyCol(3, 160) ; Trigger Key combo
+    helpLV.ModifyCol(4, 490) ; Functional Description
 
     ; Inline Static Help Data Array
     localHelpRows := [
@@ -2706,6 +2656,7 @@ ShowHelpScreen(hWnd := 0) {
         {cat: "Administrative", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
         {cat: "Administrative", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
         {cat: "Administrative", cmd: "RestartProgram", key: "Win + .", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
+        {cat: "Administrative", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
         
         {cat: "System Layer", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},
         {cat: "System Layer", cmd: "SetOpacity70", key: "Win + Shift + O", desc: "Set alpha opacity transparency level to 70% on active window frame."},
@@ -2733,6 +2684,8 @@ ShowHelpScreen(hWnd := 0) {
         
         {cat: "Docking & Fling", cmd: "TuckLeft Dock", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
         {cat: "Docking & Fling", cmd: "Edge Untuck", key: "Mouse Speed Fling", desc: "Gesture-fling cursor past monitor border to untuck stowed frames."},
+        {cat: "Docking & Fling", cmd: "PeekTucked", key: "Win + Ctrl + Shift + P", desc: "Offers a menu of all tucked windows listing their titles and edge."},
+        {cat: "Docking & Fling", cmd: "Untuck", key: "Win + Ctrl + Shift + U", desc: "Offers a menu of all tucked windows to completely restore them."},
         
         {cat: "Window Cycling", cmd: "Next/Prev Window", key: "Win + PgUp / PgDn", desc: "Cycle focus smoothly across all un-minimized open windows on desktop."},
         {cat: "Window Cycling", cmd: "Mouse Wheel Cycle", key: "Alt + WheelUp/Down", desc: "Cycle focus across active windows via mouse scrollwheel combos."},
@@ -2745,6 +2698,10 @@ ShowHelpScreen(hWnd := 0) {
         helpLV.Delete()
         
         for row in localHelpRows {
+            ; FILTER OUT ARROWS AND NUMPAD COMBOS FROM LIST
+            if (RegExMatch(row.key, "i)Arrows|Arrow|Left|Right|Up|Down|Numpad|Add|Sub|Subtract")) {
+                continue
+            }
             if (searchTerm != "") {
                 if (!InStr(row.cat, searchTerm) && !InStr(row.cmd, searchTerm) && !InStr(row.key, searchTerm) && !InStr(row.desc, searchTerm)) {
                     continue
@@ -2763,18 +2720,18 @@ ShowHelpScreen(hWnd := 0) {
 
     ; Setup footer button and label
     helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
-    exitBtn := helpGui.Add("Button", "x20 y630 w240 h30", "Exit HotWinAHK Completely")
+    exitBtn := helpGui.Add("Button", "x30 y660 w240 h30", "Exit HotWinAHK Completely")
     exitBtn.OnEvent("Click", (*) => ShutdownEngine())
     
     helpGui.SetFont("s9 c8A8A93", "Segoe UI")
-    helpGui.Add("Text", "x280 y630 w520 h30 +0x200", "Note: Window Nudger runs continuously in the background. Press Win+Alt+X or click Exit to unload.")
+    helpGui.Add("Text", "x290 y660 w680 h30 +0x200", "Note: Window Nudger runs continuously in the background. Press Win+Alt+X or click Exit to unload.")
 
     ; Setup closure behaviors
     helpGui.OnEvent("Escape", (*) => helpGui.Destroy())
     helpGui.OnEvent("Close", (*) => helpGui.Destroy())
 
     ; Render on screen
-    helpGui.Show("w820 h680 Center")
+    helpGui.Show("w1000 h720 Center")
 }
 ; #endregion
 
@@ -2836,7 +2793,7 @@ HandleTuckedDrag() {
         return
     }
     
-    ; User is dragging! Perform the custom dragging loop with resistance, transition indicator and pop-off
+    ; User is dragging!
     try {
         WinGetPos(&startWinX, &startWinY, &wW, &wH, g_ActiveUntuckedHwnd)
     } catch {
@@ -2857,8 +2814,10 @@ HandleTuckedDrag() {
         ; Silent fallback container guard
     }
     
-    hasIndicatorShown := false
+    isPoppedOff := false
+    soundPlayed := false
     currentIndEdge := ""
+    hasIndicatorShown := false
     
     While (GetKeyState("LButton", "P")) {
         Sleep(15)
@@ -2869,8 +2828,11 @@ HandleTuckedDrag() {
         deltaY := curY - startY
         
         isCtrl := GetKeyState("Ctrl", "P")
+        
         if (isCtrl) {
-            ; DOCK SEEKING MODE
+            ; Ctrl is pressed: standard dock seeking!
+            isPoppedOff := true ; Holding Ctrl overrides resistance/pull progress entirely
+            
             hMon := DllCall("MonitorFromPoint", "int64", (curY << 32) | (curX & 0xFFFFFFFF), "uint", 2, "ptr")
             MI := Buffer(40)
             NumPut("uint", 40, MI, 0)
@@ -2913,82 +2875,128 @@ HandleTuckedDrag() {
                 }
             }
             
-            ; 1:1 motion
+            ToolTip() ; Clear any pull progress tooltips
             WinMove(startWinX + deltaX, startWinY + deltaY, wW, wH, g_ActiveUntuckedHwnd)
             
         } else {
-            ; NORMAL MODE WITH PHYSICAL RESISTANCE
-            if (hasIndicatorShown) {
-                dockIndicatorGui.Hide()
-                currentIndEdge := ""
-                hasIndicatorShown := false
-            }
-            
-            pullDist := 0
-            switch tuckProfile.edge {
-                case "Left":   pullDist := deltaX
-                case "Right":  pullDist := -deltaX
-                case "Top":    pullDist := deltaY
-                case "Bottom": pullDist := -deltaY
-            }
-            
-            if (pullDist > 120) {
-                ; POP OFF! De-register tucked profile, let the window be free!
-                g_TuckedWindows.Delete(g_ActiveUntuckedHwnd)
-                SoundBeep(980, 100)
+            ; Normal drag (No Ctrl):
+            if (!isPoppedOff) {
+                pullDist := 0
+                switch tuckProfile.edge {
+                    case "Left":   pullDist := deltaX
+                    case "Right":  pullDist := -deltaX
+                    case "Top":    pullDist := deltaY
+                    case "Bottom": pullDist := -deltaY
+                }
                 
+                if (pullDist > 120) {
+                    isPoppedOff := true
+                    if (!soundPlayed) {
+                        SoundBeep(1100, 150) ; Distinct high pitch beep for popping off
+                        soundPlayed := true
+                    }
+                    ; Remove from tucked list
+                    if (g_TuckedWindows.Has(g_ActiveUntuckedHwnd)) {
+                        g_TuckedWindows.Delete(g_ActiveUntuckedHwnd)
+                    }
+                    ToolTip()
+                } else {
+                    ; UNDER PULL THRESHOLD:
+                    ; Moves 1:1 with NO motion resistance!
+                    WinMove(startWinX + deltaX, startWinY + deltaY, wW, wH, g_ActiveUntuckedHwnd)
+                    
+                    ; Pull Indicator (Graphical Progress Bar matching original design guidelines)
+                    pct := Max(0, Min(pullDist / 120, 1))
+                    pctPct := Round(pct * 100)
+                    progressBar := MakeProgressBarStr(pullDist, 120)
+                    ToolTip("Pull to Free: " . pctPct . "%`n" . progressBar, curX + 15, curY + 15)
+                }
+            }
+            
+            ; If we popped off, we are dragging it around freely.
+            ; Let's show indicators if they are in range (within 80px) of any edge to dock!
+            if (isPoppedOff) {
+                hMon := DllCall("MonitorFromPoint", "int64", (curY << 32) | (curX & 0xFFFFFFFF), "uint", 2, "ptr")
+                MI := Buffer(40)
+                NumPut("uint", 40, MI, 0)
+                if (DllCall("GetMonitorInfo", "ptr", hMon, "ptr", MI)) {
+                    mLeft   := NumGet(MI, 20, "int")
+                    mTop    := NumGet(MI, 24, "int")
+                    mRight  := NumGet(MI, 28, "int")
+                    mBottom := NumGet(MI, 32, "int")
+                    
+                    distL := Abs(curX - mLeft)
+                    distR := Abs(curX - mRight)
+                    distT := Abs(curY - mTop)
+                    distB := Abs(curY - mBottom)
+                    
+                    minD := Min(distL, distR, distT, distB)
+                    
+                    if (minD < 80) {
+                        newEdge := ""
+                        if (minD == distL) {
+                            newEdge := "Left"
+                        } else if (minD == distR) {
+                            newEdge := "Right"
+                        } else if (minD == distT) {
+                            newEdge := "Top"
+                        } else if (minD == distB) {
+                            newEdge := "Bottom"
+                        }
+                        
+                        if (newEdge != currentIndEdge) {
+                            currentIndEdge := newEdge
+                            switch newEdge {
+                                case "Left":
+                                    dockIndicatorGui.Show("x" . mLeft . " y" . mTop . " w60 h" . (mBottom - mTop) . " NoActivate")
+                                case "Right":
+                                    dockIndicatorGui.Show("x" . (mRight - 60) . " y" . mTop . " w60 h" . (mBottom - mTop) . " NoActivate")
+                                case "Top":
+                                    dockIndicatorGui.Show("x" . mLeft . " y" . mTop . " w" . (mRight - mLeft) . " h60 NoActivate")
+                                case "Bottom":
+                                    dockIndicatorGui.Show("x" . mLeft . " y" . (mBottom - 60) . " w" . (mRight - mLeft) . " h60 NoActivate")
+                            }
+                            hasIndicatorShown := true
+                        }
+                    } else {
+                        if (hasIndicatorShown) {
+                            dockIndicatorGui.Hide()
+                            currentIndEdge := ""
+                            hasIndicatorShown := false
+                        }
+                    }
+                }
+                
+                ; 1:1 motion
                 WinMove(startWinX + deltaX, startWinY + deltaY, wW, wH, g_ActiveUntuckedHwnd)
-                dockIndicatorGui.Destroy()
-                g_ActiveUntuckedHwnd := 0
-                g_ResetBumpMemory := true
-                g_IsUntuckLocked := false
-                SetTimer(ExecuteCleanBumperReArm, -200)
-                return
             }
-            
-            resistedX := deltaX
-            resistedY := deltaY
-            switch tuckProfile.edge {
-                case "Left":
-                    if (deltaX > 0)
-                        resistedX := deltaX * 0.25
-                    resistedY := deltaY * 0.5
-                case "Right":
-                    if (deltaX < 0)
-                        resistedX := deltaX * 0.25
-                    resistedY := deltaY * 0.5
-                case "Top":
-                    if (deltaY > 0)
-                        resistedY := deltaY * 0.25
-                    resistedX := deltaX * 0.5
-                case "Bottom":
-                    if (deltaY < 0)
-                        resistedY := deltaY * 0.25
-                    resistedX := deltaX * 0.5
-            }
-            
-            WinMove(startWinX + resistedX, startWinY + resistedY, wW, wH, g_ActiveUntuckedHwnd)
         }
     }
     
+    ToolTip() ; Clear pull indicator tooltip
     dockIndicatorGui.Destroy()
     
-    isReleaseCtrl := GetKeyState("Ctrl", "P")
-    if (isReleaseCtrl && currentIndEdge != "") {
-        if (g_TuckedWindows.Has(g_ActiveUntuckedHwnd)) {
-            oldProfile := g_TuckedWindows[g_ActiveUntuckedHwnd]
-            g_TuckedWindows.Delete(g_ActiveUntuckedHwnd)
-            g_TuckedWindows[g_ActiveUntuckedHwnd] := { edge: currentIndEdge, x: oldProfile.x, y: oldProfile.y, w: oldProfile.w, h: oldProfile.h }
+    if (isPoppedOff) {
+        if (currentIndEdge != "") {
+            ; Retuck to the selected edge!
+            g_TuckedWindows[g_ActiveUntuckedHwnd] := { edge: currentIndEdge, x: startWinX + deltaX, y: startWinY + deltaY, w: wW, h: wH }
+            SoundBeep(1400, 80)
+            ExecuteRetuckSequence(g_ActiveUntuckedHwnd)
+            g_ActiveUntuckedHwnd := 0
+            g_ResetBumpMemory := true
+            g_IsUntuckLocked := false
+            SetTimer(ExecuteCleanBumperReArm, -200)
+            return
+        } else {
+            ; Free floating snapped release
+            g_ActiveUntuckedHwnd := 0
+            g_ResetBumpMemory := true
+            g_IsUntuckLocked := false
+            SetTimer(ExecuteCleanBumperReArm, -200)
+            return
         }
-        
-        SoundBeep(1400, 80)
-        ExecuteRetuckSequence(g_ActiveUntuckedHwnd)
-        g_ActiveUntuckedHwnd := 0
-        g_ResetBumpMemory := true
-        g_IsUntuckLocked := false
-        SetTimer(ExecuteCleanBumperReArm, -200)
-        return
     } else {
+        ; Never popped off - snap back to tucked position safely
         SafeMove(g_PeekX, g_PeekY, wW, wH, g_ActiveUntuckedHwnd)
     }
     
@@ -3066,6 +3074,216 @@ $LButton:: {
 }
 #HotIf
 ; #endregion
+
+; =======================================================================================
+;          NEW IMPLEMENTATIONS FOR STOWED WINDOW MANAGERS & DOT INDICATOR
+; =======================================================================================
+
+global g_DotGui := ""
+
+MakeProgressBarStr(val, maxVal) {
+    pct := (val < 0) ? 0 : (val > maxVal ? 1 : val / maxVal)
+    filledCount := Round(pct * 10)
+    emptyCount := 10 - filledCount
+    bar := ""
+    Loop filledCount {
+        bar .= "█"
+    }
+    Loop emptyCount {
+        bar .= "░"
+    }
+    return bar
+}
+
+UpdateActiveWindowDot() {
+    global g_DotGui, g_bSuspended
+    
+    ; Get the active window handle
+    activeHwnd := DllCall("GetForegroundWindow", "ptr")
+    if (activeHwnd == 0 || !WinExist("ahk_id " . activeHwnd)) {
+        if (g_DotGui) {
+            try g_DotGui.Hide()
+        }
+        return
+    }
+    
+    ; Skip painting the dot on on-screen-keyboard, taskbar, tooltips, or our own help & utility windows!
+    try {
+        winClass := WinGetClass("ahk_id " . activeHwnd)
+        winTitle := WinGetTitle("ahk_id " . activeHwnd)
+        if (InStr(winClass, "Shell_TrayWnd") || InStr(winClass, "Progman") || InStr(winClass, "WorkerW") || InStr(winTitle, "HotWinAHK")) {
+            if (g_DotGui) {
+                try g_DotGui.Hide()
+            }
+            return
+        }
+    } catch {
+        return
+    }
+    
+    ; Determine dot color: green when program is not suspended, otherwise yellow
+    dotColor := g_bSuspended ? "EEDC00" : "00FF55"
+    
+    ; If GUI doesn't exist, instantiate it
+    if (g_DotGui == "") {
+        g_DotGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20") ; Click-through
+    }
+    
+    ; Update color and position
+    g_DotGui.BackColor := dotColor
+    
+    try {
+        WinGetPos(&wX, &wY, &wW, &wH, "ahk_id " . activeHwnd)
+        ; Position dot at top-left inside window boundaries
+        if (wW > 100 && wH > 100) {
+            g_DotGui.Show("x" . (wX + 12) . " y" . (wY + 12) . " w8 h8 NoActivate")
+        } else {
+            g_DotGui.Hide()
+        }
+    } catch {
+        try g_DotGui.Hide()
+    }
+}
+
+RevealTuckedWindow(closestHwnd, targetEdge, activeTuckProfile) {
+    try {
+        global g_BaselineActiveWindow := DllCall("GetForegroundWindow", "ptr")
+        global g_PeekX, g_PeekY, g_ActiveUntuckedHwnd, g_UntuckGraceTicks
+        
+        hMon := DllCall("MonitorFromWindow", "ptr", closestHwnd, "uint", 2, "ptr")
+        MI := Buffer(40)
+        NumPut("uint", 40, MI, 0)
+        mLeft := 0, mTop := 0, mRight := A_ScreenWidth, mBottom := A_ScreenHeight
+        if (DllCall("GetMonitorInfo", "ptr", hMon, "ptr", MI)) {
+            mLeft   := NumGet(MI, 20, "int")
+            mTop    := NumGet(MI, 24, "int")
+            mRight  := NumGet(MI, 28, "int")
+            mBottom := NumGet(MI, 32, "int")
+        }
+
+        WinGetPos(&tX, &tY, &tW, &tH, closestHwnd)
+
+        nX := tX
+        nY := tY
+        switch targetEdge {
+            case "Left":
+                nX := mLeft
+            case "Right":
+                nX := mRight - Number(activeTuckProfile.w)
+            case "Top":
+                nY := mTop
+            case "Bottom":
+                nY := mBottom - Number(activeTuckProfile.h)
+        }
+
+        ; Slide open cleanly
+        SafeMove(nX, nY, Number(activeTuckProfile.w), Number(activeTuckProfile.h), closestHwnd)
+        
+        WinSetAlwaysOnTop(1, "ahk_id " . closestHwnd)
+        WinSetAlwaysOnTop(0, "ahk_id " . closestHwnd)
+        WinMoveTop("ahk_id " . closestHwnd)
+
+        ; Ensure window draws on top without stealing focus
+        DllCall("SetWindowPos", "ptr", closestHwnd, "ptr", 0, "int", 0, "int", 0, "int", 0, "int", 0, "uint", 0x0053)
+
+        g_PeekX := nX
+        g_PeekY := nY
+        g_ActiveUntuckedHwnd := closestHwnd
+        g_UntuckGraceTicks := 10
+
+        SetTimer(TrackUntuckedFocusLifecycle, 0)
+        SetTimer(TrackUntuckedFocusLifecycle, 50)
+    }
+}
+
+Menu_PeekTucked() {
+    global g_TuckedWindows
+    if (g_TuckedWindows.Count == 0) {
+        ShowTargetToolTip("No windows are currently tucked.")
+        return
+    }
+    
+    mMenu := Menu()
+    mMenu.Add("--- Stowed Windows Menu ---", (*) => 0)
+    mMenu.Disable("--- Stowed Windows Menu ---")
+    mMenu.Add()
+    
+    for hwnd, profile in g_TuckedWindows {
+        if (!WinExist("ahk_id " . hwnd)) {
+            continue
+        }
+        wTitle := WinGetTitle("ahk_id " . hwnd)
+        if (wTitle == "") {
+            wTitle := "Untitled (ahk_id " . hwnd . ")"
+        }
+        if (StrLen(wTitle) > 50) {
+            wTitle := SubStr(wTitle, 1, 47) . "..."
+        }
+        
+        menuLabel := "[" . profile.edge . "] " . wTitle
+        mMenu.Add(menuLabel, Menu_PeekTucked_Callback.Bind(hwnd, profile.edge, profile))
+    }
+    
+    mMenu.Show()
+}
+
+Menu_PeekTucked_Callback(hwnd, edge, profile, *) {
+    RevealTuckedWindow(hwnd, edge, profile)
+}
+
+Menu_Untuck() {
+    global g_TuckedWindows
+    if (g_TuckedWindows.Count == 0) {
+        ShowTargetToolTip("No windows are currently tucked.")
+        return
+    }
+    
+    mMenu := Menu()
+    mMenu.Add("--- Select Window to Untuck ---", (*) => 0)
+    mMenu.Disable("--- Select Window to Untuck ---")
+    mMenu.Add()
+    
+    for hwnd, profile in g_TuckedWindows {
+        if (!WinExist("ahk_id " . hwnd)) {
+            continue
+        }
+        wTitle := WinGetTitle("ahk_id " . hwnd)
+        if (wTitle == "") {
+            wTitle := "Untitled (ahk_id " . hwnd . ")"
+        }
+        if (StrLen(wTitle) > 50) {
+            wTitle := SubStr(wTitle, 1, 47) . "..."
+        }
+        
+        menuLabel := "[" . profile.edge . "] " . wTitle
+        mMenu.Add(menuLabel, Menu_Untuck_Callback.Bind(hwnd, profile))
+    }
+    
+    mMenu.Show()
+}
+
+Menu_Untuck_Callback(hwnd, profile, *) {
+    global g_TuckedWindows, g_ActiveUntuckedHwnd, g_IsUntuckLocked
+    
+    if (g_TuckedWindows.Has(hwnd)) {
+        g_TuckedWindows.Delete(hwnd)
+    }
+    
+    SoundBeep(1200, 100)
+    
+    ; Restore original coordinate positioning
+    SafeMove(Number(profile.x), Number(profile.y), Number(profile.w), Number(profile.h), hwnd)
+    WinActivate("ahk_id " . hwnd)
+    
+    if (g_ActiveUntuckedHwnd == hwnd) {
+        g_ActiveUntuckedHwnd := 0
+    }
+    g_IsUntuckLocked := false
+    SetTimer(TrackUntuckedFocusLifecycle, 0)
+    SetTimer(ExecuteCleanBumperReArm, -100)
+    
+    ShowTargetToolTip("Window untucked & restored!")
+}
 
 #Include "HotWinAHK_aux.ahk"
 ; #endregion
