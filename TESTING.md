@@ -1,6 +1,6 @@
 # Testing
 
-You can use this interactive test sheet directly with VS Code / Cursor to verify that all systems in **CherryPucker** are fully functional. Put your cursor on these checkbox lines, and mark them done!
+You can use this interactive test sheet directly with VS Code / Cursor to verify that all systems in **HotWinAHK** are fully functional. Put your cursor on these checkbox lines, and mark them done!
 
 ---
 ## Back to...
@@ -38,7 +38,7 @@ where items are
     - **Instructions**: Switch focus between various open application windows (e.g., NotePad, VS Code).
     - **Expected Results**: Responsive short, crisp beep sounds (750Hz, 40ms) fire on every active focus redirection.
 - [ ] Status Tray Setup & Reload Beeps
-    - **Instructions**: Ensure CherryPucker icon renders in status tray. Right-click and choose "Reload INI".
+    - **Instructions**: Ensure HotWinAHK icon renders in status tray. Right-click and choose "Reload INI".
     - **Expected Results**: Status tray registers the mouse context event and emits a diagnostic 2-tone audio beep confirmation.
 
 ## 🟢 Template & Basic Copying Checks

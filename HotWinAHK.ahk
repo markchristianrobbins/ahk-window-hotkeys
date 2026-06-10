@@ -2712,7 +2712,7 @@ IsMouseOverHwnd(targetHwnd) {
 }
 
 HandleTuckedDrag() {
-    global g_ActiveUntuckedHwnd, g_TuckedWindows, g_ResetBumpMemory, g_TuckedVisiblePixels, g_PeekX, g_PeekY
+    global g_ActiveUntuckedHwnd, g_TuckedWindows, g_ResetBumpMemory, g_TuckedVisiblePixels, g_PeekX, g_PeekY, g_IsUntuckLocked
     
     if (g_ActiveUntuckedHwnd == 0 || !WinExist("ahk_id " . g_ActiveUntuckedHwnd)) {
         Click("Down")
@@ -2720,6 +2720,10 @@ HandleTuckedDrag() {
         Click("Up")
         return
     }
+    
+    ; --- IMMEDIATELY ACQUIRE LOCK & DISABLE LIFE CYCLE TIMER TO PREVENT RETUCK RACE FREEZES ---
+    g_IsUntuckLocked := true
+    SetTimer(TrackUntuckedFocusLifecycle, 0)
     
     CoordMode("Mouse", "Screen")
     MouseGetPos(&startX, &startY)
@@ -2740,6 +2744,17 @@ HandleTuckedDrag() {
         Click("Down")
         KeyWait("LButton")
         Click("Up")
+        
+        ; Restore state safely
+        g_IsUntuckLocked := false
+        SetTimer(TrackUntuckedFocusLifecycle, 50)
+        return
+    }
+    
+    ; Protect against edge-case where window profile vanished during threshold check
+    if (!g_TuckedWindows.Has(g_ActiveUntuckedHwnd)) {
+        g_IsUntuckLocked := false
+        SetTimer(TrackUntuckedFocusLifecycle, 50)
         return
     }
     
@@ -2747,6 +2762,8 @@ HandleTuckedDrag() {
     try {
         WinGetPos(&startWinX, &startWinY, &wW, &wH, g_ActiveUntuckedHwnd)
     } catch {
+        g_IsUntuckLocked := false
+        SetTimer(TrackUntuckedFocusLifecycle, 50)
         return
     }
     
@@ -2755,13 +2772,15 @@ HandleTuckedDrag() {
     ; Create the translucent cyan indicator GUI
     dockIndicatorGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20") ; Click-through
     dockIndicatorGui.BackColor := "00FFCC"
-    WinSetTransparent(100, "ahk_id " . dockIndicatorGui.Hwnd)
+    try {
+        dockIndicatorGui.Show("Hide")
+        WinSetTransparent(100, "ahk_id " . dockIndicatorGui.Hwnd)
+    } catch {
+        ; Silent fallback container guard
+    }
     
     hasIndicatorShown := false
     currentIndEdge := ""
-    
-    ; Turn off the untuck focus check timer during drag
-    SetTimer(TrackUntuckedFocusLifecycle, 0)
     
     While (GetKeyState("LButton", "P")) {
         Sleep(15)
@@ -2844,6 +2863,7 @@ HandleTuckedDrag() {
                 dockIndicatorGui.Destroy()
                 g_ActiveUntuckedHwnd := 0
                 g_ResetBumpMemory := true
+                g_IsUntuckLocked := false
                 SetTimer(ExecuteCleanBumperReArm, -200)
                 return
             }
@@ -2877,20 +2897,24 @@ HandleTuckedDrag() {
     
     isReleaseCtrl := GetKeyState("Ctrl", "P")
     if (isReleaseCtrl && currentIndEdge != "") {
-        oldProfile := g_TuckedWindows[g_ActiveUntuckedHwnd]
-        g_TuckedWindows.Delete(g_ActiveUntuckedHwnd)
-        g_TuckedWindows[g_ActiveUntuckedHwnd] := { edge: currentIndEdge, x: oldProfile.x, y: oldProfile.y, w: oldProfile.w, h: oldProfile.h }
+        if (g_TuckedWindows.Has(g_ActiveUntuckedHwnd)) {
+            oldProfile := g_TuckedWindows[g_ActiveUntuckedHwnd]
+            g_TuckedWindows.Delete(g_ActiveUntuckedHwnd)
+            g_TuckedWindows[g_ActiveUntuckedHwnd] := { edge: currentIndEdge, x: oldProfile.x, y: oldProfile.y, w: oldProfile.w, h: oldProfile.h }
+        }
         
         SoundBeep(1400, 80)
         ExecuteRetuckSequence(g_ActiveUntuckedHwnd)
         g_ActiveUntuckedHwnd := 0
         g_ResetBumpMemory := true
+        g_IsUntuckLocked := false
         SetTimer(ExecuteCleanBumperReArm, -200)
         return
     } else {
         SafeMove(g_PeekX, g_PeekY, wW, wH, g_ActiveUntuckedHwnd)
     }
     
+    g_IsUntuckLocked := false
     SetTimer(TrackUntuckedFocusLifecycle, 50)
 }
 

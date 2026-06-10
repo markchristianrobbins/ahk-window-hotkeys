@@ -31,6 +31,7 @@
 ## [x] Errors
 - [x] lint 1: Resolved warning where `ExecuteActionWithCondition` was considered an unassigned local variable. Fixed by placing the `#Include "HotWinAHK_aux.ahk"` statement at the bottom of `HotWinAHK.ahk` after the global function definitions.
 - [x] lint 2: Resolved warning where `ShowHelpScreen` was flagged as an unassigned local variable inside case `HelpScreen`. Built a fully-featured, dark-themed interactive help dashboard in `HotWinAHK.ahk`.
+- [x] WinSetTransparent Exception: Fixed "Target window not found" error during drag initialization by invoking `dockIndicatorGui.Show("Hide")` to physically register the window with the OS manager before modifying its alpha value, wrapped in a robust try/catch guard.
 
 ## [x] New Fails
 - [x] Window is not at top of z-order when it is revealed from a tucked state (Resolved via robust momentary AlwaysOnTop Z-order seizure toggle)
@@ -57,7 +58,8 @@
 - [x] new command CopyCommands (Completely built and mapped to Win+Ctrl+C)
 - [x] new command CopyBindings (Completely built and mapped to Win+Alt+C)
 
-## [ ] New Changes
+## [x] New Changes
+- [x] Resolve tuck-revealed window drag deadlock issue via immediate focus-lifecycle timer suspension and atomic state locking
 
 ## [ ] New Settings
 

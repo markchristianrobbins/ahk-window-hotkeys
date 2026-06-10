@@ -1,6 +1,6 @@
 # Manual
 
-This guide describes the structural architecture, module layout, internal algorithms, optimization behaviors, and technical specifications of the **CherryPucker** codebase.
+This guide describes the structural architecture, module layout, internal algorithms, optimization behaviors, and technical specifications of the **HotWinAHK** codebase.
 ---
 ## Back to...
 - ▪️[AGENTS.md](AGENTS.md)
@@ -45,6 +45,7 @@ The application's crown jewel is its mathematical screen-edge docking and mouse-
   1. The cursor is placed within the window boundary or its active native child controls (retrieved recursively via Win32 `GetAncestor` calls).
   2. The window remains the active Windows foreground window element.
   Definitive state switches (moving cursor away AND activating a separate typing window) trigger clean, interpolated sliding back to edge margins.
+  While dragging or clicking a tuck-revealed window, the polling thread is immediately unregistered and an atomic thread lock (`g_IsUntuckLocked := true`) is acquired to prevent cross-thread race conditions or deadlocks with native OS title-bar moving routines. State is restored atomically upon action completion.
 - **Damped Drag Resistance Curve**: Left-click dragging a peek-untucked window away from its docked screen margin is restricted using non-linear resistance. Standard mouse coordinates map to window coordinates using a steep 4x damping reduction multiplier:
   $$\text{resistedDeltaX} = \Delta X \times 0.25$$
   Parallel dragging coordinates are restricted with a 2x damping parameter ($0.5$).

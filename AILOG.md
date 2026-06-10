@@ -15,7 +15,7 @@
 
 ## Commit Message
 ```text
-feat(ahk): implement robust LButton mouse hook dragging, z-order reveals, and copy clipboard helpers
+fix(drag): resolve tuck-revealed window drag exceptions including deadlock and "target window not found" GUI failures
 ```
 
 <!-- Example AI Log Entry
@@ -28,6 +28,42 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-10T21:44:00Z]
+### 🎯 Primary Goals & Requirements
+- Fix the bug where a window revealed from its tucked position completely locks up the application when clicking on the title bar and attempting to drag/move it.
+- Correct the v2 runtime fatal error: "Error: Target window not found" on drag start when attempting to set transparency on `dockIndicatorGui` prior to its OS-level window handle registration.
+- Eliminate cross-thread race conditions between the continuous background focus-lifecycle monitoring timer (`TrackUntuckedFocusLifecycle`) and active `$LButton` dragging sessions.
+- Safeguard the system against property accessor failures and runtime exceptions by introducing robust collection containment guards.
+
+### 🛠️ Completed Changes in this Session
+- **Atomic GUI Instantiation & Transparency Safeguards**: Fixed the `WinSetTransparent` failure inside `HandleTuckedDrag()` by invoking `dockIndicatorGui.Show("Hide")` to fully register the window handle with the OS shell before applying alpha adjustments. Wrapped this routine inside a robust `try...catch` block to guarantee unhandled exceptions can never crash the script loop.
+- **Immediate State Locking & Polling Suspensions**: Upgraded `HandleTuckedDrag()` inside `HotWinAHK.ahk` to immediately acquire `g_IsUntuckLocked := true` and unregister `TrackUntuckedFocusLifecycle` on initial key down. This guarantees no focus/hover calculations can interfere with active layout transactions.
+- **Robust containment safeguards**: Added `g_TuckedWindows.Has(g_ActiveUntuckedHwnd)` guards at key threshold check boundaries to cleanly handle late timer triggers or vanished targets without throwing property-of-undefined runtime fatal exceptions.
+- **Graceful Restoration lanes**: Mapped state-restoration execution blocks across all exits (normal pass-through clicks, successful pop-off releases, repositioning, and aborted maneuvers) to atomically release the locks and re-register standard polling timers smoothly.
+- **Documentation**: Updated `MANUAL.md` to reflect the multi-threaded synchronization architecture and deadlock prevention scheme.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/MANUAL.md`
+- `/AITASKS.md`
+- `/AILOG.md`
+
+## [2026-06-10T21:22:00Z]
+### 🎯 Primary Goals & Requirements
+- Standardize all application naming references to `HotWinAHK` globally.
+- Ensure 100% brand consistency across documentation, technical developer guides, and interactive testing manuals.
+
+### 🛠️ Completed Changes in this Session
+- **Global Naming Synchronization**: Replaced legacy "CherryPucker" identifiers with unified `HotWinAHK` references in `TESTING.md`, `BUILD.md`, `MANUAL.md`, and `FEATURES.md`.
+- **Validation**: Performed full codebase pattern searches to guarantee total naming alignment.
+
+### 🔸 Affected Files
+- `/BUILD.md`
+- `/FEATURES.md`
+- `/MANUAL.md`
+- `/TESTING.md`
+- `/AILOG.md`
 
 ## [2026-06-07T20:30:00Z]
 ### 🎯 Primary Goals & Requirements
@@ -210,7 +246,7 @@ bulleted file list
 ## [2026-06-07T17:58:00Z]
 ### 🎯 Primary Goals & Requirements
 - Reverse engineer codebases (`WindowNudger.ahk`, `TrayHelper.ahk`, etc.) in-depth.
-- Structure and document CherryPucker's core mechanics and features.
+- Structure and document HotWinAHK's core mechanics and features.
 - Provide clear developers manuals, user guides, specifications sheets, build commands, and testing regression sheets.
 
 ### 🛠️ Completed Changes in this Session

@@ -13,7 +13,7 @@
 - ▪️[SPEC.md](SPEC.md)
 - ▪️[TESTING.md](TESTING.md)
 
-Welcome to CherryPucker! A fast, keyboard-driven window alignment and docking assistant for Windows. Here is a breakdown of its features:
+Welcome to HotWinAHK! A fast, keyboard-driven window alignment and docking assistant for Windows. Here is a breakdown of its features:
 
 ## Feature Groups
 
