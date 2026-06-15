@@ -35,7 +35,11 @@ Local $iStyle = $aStyle[0]
 If BitAND($iStyle, 0x40000000) <> 0 Or BitAND($iStyle, 0x80000000) <> 0 Then Exit
 
 ; 4. Find the main HotWinAHK instance
-Local $hAHK = WinGetHandle("[CLASS:AutoHotkey]")
+AutoItSetOption("WinDetectHiddenWindows", 1)
+Local $hAHK = WinGetHandle("HotWinAHK_Main_Orchestrator_Window")
+If @error Or Not $hAHK Then
+    $hAHK = WinGetHandle("[CLASS:AutoHotkey]")
+EndIf
 If @error Or Not $hAHK Then
     MsgBox($MB_ICONERROR + $MB_SYSTEMMODAL, "Error", "HotWinAHK orchestrator engine is not running.")
     Exit

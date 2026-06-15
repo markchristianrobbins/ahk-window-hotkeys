@@ -59,6 +59,8 @@ Global g_TuckedVisiblePixels := 20
 ; #region  _startups 
 ; Cleanly terminate any prior crashed/dangling zombie/helper threads on startup.
 ; This releases their keyboard resource allocations and hooks before we register our own!
+Global g_bIsSilentRestart := false
+wasAlreadyRunning := false
 try {
     DetectHiddenWindows(true)
     currentPID := DllCall("GetCurrentProcessId")
@@ -68,6 +70,7 @@ try {
             thisTitle := WinGetTitle("ahk_id " hAhk)
             thisPID := WinGetPID("ahk_id " hAhk)
             if (thisPID != currentPID && InStr(thisTitle, "HotWinAHK")) {
+                wasAlreadyRunning := true
                 WinClose("ahk_id " hAhk)
                 Sleep(50) ; Give it a brief moment of grace to unload
                 if WinExist("ahk_id " hAhk) {
@@ -78,10 +81,16 @@ try {
     }
 }
 
+if (wasAlreadyRunning && A_Args.Length > 0) {
+    g_bIsSilentRestart := true
+}
+
 SetTimer(CheckScreenEdgeBumps, 25)
 SetTimer(UpdateActiveWindowDot, 100)
 SetTimer(UpdateHomeIndicators, 250)
 OnMessage(0x004A, ReceiveCopyData)
+DetectHiddenWindows(true)
+WinSetTitle("HotWinAHK_Main_Orchestrator_Window", "ahk_id " . g_hMainScriptHWND)
 ; Execute the initializer hook immediately on script launch
 InitializeGlobalFocusBeeper()
 if !FileExist(g_sGeneratedFile) {
@@ -92,8 +101,27 @@ if !FileExist(g_sGeneratedFile) {
 UpdateSavedHomesCache()
 CompileIniToStaticHotkeys()
 ; Sound confirmation beep on successful loading
-SoundBeep(1000, 300)
-try TrayTip("Engine Reloaded", "Window Nudger Active", 1)
+if (!g_bIsSilentRestart) {
+    SoundBeep(1000, 300)
+    try TrayTip("Engine Reloaded", "Window Nudger Active", 1)
+}
+
+if (A_Args.Length > 0) {
+    CoordMode("Mouse", "Screen")
+    MouseGetPos(, , &mHwnd)
+    if (mHwnd) {
+        mRoot := DllCall("GetAncestor", "ptr", mHwnd, "uint", 2, "ptr")
+        targetHwnd := mRoot ? mRoot : mHwnd
+        
+        for cmd in A_Args {
+            if (targetHwnd && WinExist("ahk_id " . targetHwnd)) {
+                ExecuteCommandRegistry(cmd, targetHwnd)
+            } else {
+                ExecuteActionWithCondition(cmd, "")
+            }
+        }
+    }
+}
 
 ; Build Custom Tray Menu Layout using standard named callbacks
 A_TrayMenu.Delete() ; Clear defaults

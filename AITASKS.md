@@ -30,6 +30,7 @@
 - [x] Rename WindowNudger, WindowHotkeys.ahk, and WindowHotkeys.ini to HotWinAHK/displayName variants, and update all codebase references
 - [x] Rename helper subprocess script from TrayHelper.ahk to HotWinAHK_tray.ahk and update all reference models
 - [x] Implement SnapToGridEnlarge/Shrink grid snapping and multi-sided enlargement/shrinkage logic
+- [x] Make app single-instance with auto-replacement of existing instance, silent on parameter-driven restarts, and direct command-line parameter execution on the hovered window's parent ancestor
 
 ## [x] Errors
 - [x] lint 1: Resolved warning where `ExecuteActionWithCondition` was considered an unassigned local variable. Fixed by placing the `#Include "HotWinAHK_aux.ahk"` statement at the bottom of `HotWinAHK.ahk` after the global function definitions.
@@ -127,6 +128,8 @@
 - [x] Developed robust compiled AutoIt Au3 script (ahk-window-cmdr.au3) supporting command execution on target ancestors via dynamic IPC/CopyData messages.
 - [x] Crafted a highly polished, persistent Window Home management module using fuzzy matching criteria for title-based window tracking.
 - [x] Replaced standard ToolTips with a magnificent dark center screen overlay GUI with intelligent sizing and context-adaptive iconography.
+- [x] Resolved commander messaging bug by locking the main orchestrator script window title and configuring AutoIt to find it with hidden windows matching enabled.
+- [x] Implemented single-instance auto-replacement logic with quiet startup options and parameter routing to hovered parent window ancestors.
 ---
 ## Go Back to...
 - ▪️[AGENTS.md](AGENTS.md)

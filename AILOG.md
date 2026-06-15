@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-feat(overlay-tooltips): implement elegant center screen dark overlay GUI with custom icons for all tooltipping feedback
+feat(cmd-line-args): enable single-instance parameter execution with quiet restart paths
 ```
 
 <!-- Example AI Log Entry
@@ -32,6 +32,20 @@ bulleted file list
 -->
 ## Log Entries
 
+## [2026-06-15T18:05:00Z]
+### 🎯 Primary Goals & Requirements
+- **Single-Instance Parameter Execution**: Process command-line parameters targetting the root ancestor window underneath the cursor instantly upon launch.
+- **Silent Restart Latch**: Keep parameter-driven restarts completely silent without any activation notifications or startup sound confirmation beeps to avoid user desktop disruptions.
+
+### 🛠️ Completed Changes in this Session
+- **Integrated Startup Argument Router**: Process launch arguments (`A_Args`) by matching the window beneath the mouse cursor and finding its topmost parent ancestor, sending commands directly to the core executor.
+- **Configured Silent Reboot Path**: Developed a `g_bIsSilentRestart` latch that, when starting the script with command line arguments, suppresses sounds (`SoundBeep`) and notifications (`TrayTip`) if a previous running orchestrator instance is located and closed dynamically.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/AITASKS.md`
+- `/AILOG.md`
+
 ## [2026-06-15T17:30:00Z]
 ### 🎯 Primary Goals & Requirements
 - **Obsidian Centered Tooltip Overlays**: Implement a beautiful center screen overlay with a high-contrast dark theme, custom typography, status boundaries, and pretty context-adaptive iconography to replace standard legacy ToolTips for all system notifications.
@@ -41,9 +55,11 @@ bulleted file list
 - **Context-Adaptive Iconography Mapping**: Integrated an automatic keyword detector that selects tailored icons (✔, ✕, ⏸, ▶, 📌, ⚡, 🏠, ✦) and matching accent colors based on notification text.
 - **Unified Messaging Systems**: Routed all command execution tracing, homing countdown ticks/actions, suspension/activation confirmations, and storage fallbacks through `ShowTargetToolTip()`.
 - **Refined Cleanup Lifecycles**: Standardized `ClearToolTip` and `ClearCustomOverlay` to destroy existing instances upon new triggers or manual cancels.
+- **Robust Commander Targeting Fix**: Assigned a unique window title (`HotWinAHK_Main_Orchestrator_Window`) to the main hidden script window and updated the AutoIt commander script to search for this specific title under `Opt("WinDetectHiddenWindows", 1)` conditions, preventing visible overlays or indicator dot GUIs from hijacking the IPC channel.
 
 ### 🔸 Affected Files
 - `/HotWinAHK.ahk`
+- `/ahk-window-cmdr.au3`
 - `/AITASKS.md`
 - `/AILOG.md`
 - `/FEATURES.md`
