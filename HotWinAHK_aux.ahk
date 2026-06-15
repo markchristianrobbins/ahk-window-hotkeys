@@ -4,47 +4,47 @@
 #Requires AutoHotkey v2.0
 
 $#/:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("HelpScreen", "")
 }
 
 $^#/:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("WinInfo", "")
 }
 
 $^#c:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("CopyCommands", "")
 }
 
 $!#c:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("CopyBindings", "")
 }
 
 $!#s:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("ToggleSuspension", "")
 }
 
 $#f12:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("ReloadConfig", "")
 }
 
 $!#e:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("EditConfig", "")
 }
 
 $!#x:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("ExitProgram", "")
 }
 
 $#.:: {
-    Suspend("Permit")
+    try Suspend("Permit")
     ExecuteActionWithCondition("RestartProgram", "")
 }
 
@@ -298,5 +298,20 @@ $^+#up:: {
 
 $^+#down:: {
     ExecuteActionWithCondition("TuckDown", "")
+}
+
+$^+#p:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("PeekTucked", "")
+}
+
+$^+#u:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("Untuck", "")
+}
+
+$^+#c:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("CmdPalette", "")
 }
 

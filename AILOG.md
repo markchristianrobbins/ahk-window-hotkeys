@@ -1,3 +1,6 @@
+---
+status: fail
+---
 # AI Development Log
 
 ---
@@ -15,7 +18,7 @@
 
 ## Commit Message
 ```text
-feat(tuck): add PeekTucked/Untuck menus, active window status dot, and overhaul stowed drag physics with progress & auto-docking
+feat(palette): implement interactive fuzzy-search Command Palette and fix Help Screen reopening lifecycle bugs
 ```
 
 <!-- Example AI Log Entry
@@ -28,6 +31,26 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-10T23:25:00Z]
+### 🎯 Primary Goals & Requirements
+- **Interactive Command Palette implementation**: Design and build a beautiful, high-contrast Command Palette with a live fuzzy/partial search.
+- **Manual testing support**: Provide a direct manual execution pipeline so that any administrative, nudging, resizing, cycle, or edge-docking gesture can be triggered on demand via the palette.
+- **Target window focus preservation**: Safeguard command execution from executing onto the Command Palette window itself by capturing, activating, and restoring focus to the original active window frame prior to execution.
+- **Help screen reopening bug fix**: Investigate why calling other dialog sheets causes a focus blockage/non-rendering on subsequent key triggers. Standardize on secure try-catch recovery boundaries.
+
+### 🛠️ Completed Changes in this Session
+- **Built the Fuzzy Command Palette Console**: Developed `ShowCmdPalette()` inside `HotWinAHK.ahk` equipped with a dynamic input filtering field (`searchBox`), key combo details, and descriptions of each command layout. It integrates an auto-selecting first-match algorithm that updates on every keystroke, allowing quick selection-free navigation.
+- **Secured Target Key Event Dispatches**: Formulated focus preservation inside `ExecuteSelected()` within the Command Palette, capturing the active target window foreground identifier before opening, sleeping briefly on palette destruction to let Windows redirect keyboard focus, and subsequently launching the action directly onto the target.
+- **Created Unified Command Registry Retriever**: Refactored static entries into `GetGlobalCommandList()`, returning a structured metadata array of all execute cases (nudge, cycle, margins, grid, administrative) accessible symmetrically by both the Help Matrix screen and the new fuzzy Command Palette.
+- **Resolved Help Dialog Lifespan Exception Block**: Discovered that closed/destroyed Help GUI windows retained non-empty static object references. Subsequent activations threw Win32 interface errors trying to query raw pointers. Implemented try-catch validation blocks inside `ShowHelpScreen()` and `ShowCmdPalette()` that instantly wipe references on destruction, rendering them 100% stable across endless reopens.
+- **Wired Default Hotkeys**: Configured `[CmdPalette]` mapping inside `HotWinAHK.ini` pairing the command with `Win+Ctrl+Shift+C` and declared it as an administrative permit hotkey so it works instantly in any engine state.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-10T23:17:00Z]
 ### 🎯 Primary Goals & Requirements

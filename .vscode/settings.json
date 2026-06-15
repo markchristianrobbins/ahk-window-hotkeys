@@ -1,3 +1,5 @@
 {
-    "editor.glyphMargin": true
+    "editor.glyphMargin": true,
+    "explorer.incrementalNaming": "disabled",
+    "explorer.confirmDragAndDrop": false
 }

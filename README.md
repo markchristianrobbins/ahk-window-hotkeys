@@ -1,5 +1,6 @@
 # Read Me
 
+![icon.jpg](icon.jpg)
 ## HotWinAHK (AHK Windows Hotkeys)
 Hotkeys to make your windows jump through hoops! HotWinAHK is a highly optimized, high-performance window-management suite written in AutoHotkey v2.0. It features seamless pixel nudging, proportional grid alignment, edge tucking, and dynamic mouse bump acceleration vectors for administrative efficiency.
 

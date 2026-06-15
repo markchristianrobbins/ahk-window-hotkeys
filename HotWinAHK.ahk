@@ -37,6 +37,7 @@ Global g_UntuckGraceTicks := 0 ; Grace period countdown latch for untucking; #en
 Global g_DiagnosticFocusHook := 0 ; Global focus monitoring hook handle
 Global g_PeekX := 0 ; Tracks peek position X
 Global g_PeekY := 0 ; Tracks peek position Y
+Global g_DotGui := "" ; Early declared active window top-left indicator dot GUI hook
 
 ; --- CUSTOM VELOCITY BUMP SENSITIVITY REGISTRY ---
 ; Lower numbers make the flick speed more sensitive (5 is ultra-sensitive, 10 is moderate, 20 is heavy wrist snap)
@@ -453,8 +454,8 @@ CompileIniToStaticHotkeys() {
                 sPrefix := ""
             }
             ScriptBuffer .= sPrefix sAHKStroke ":: {`n"
-            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "PeekTucked" || sCmd == "Untuck") {
-                ScriptBuffer .= '    Suspend("Permit")`n'
+            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "PeekTucked" || sCmd == "Untuck" || sCmd == "CmdPalette") {
+                ScriptBuffer .= '    try Suspend("Permit")`n'
             }
             ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
             ScriptBuffer .= "}`n`n"
@@ -524,7 +525,7 @@ LoadHotkeysAtRuntime() {
 ; #region  _engine 
 IsMetaCommand(sCmd) {
     ; Add your untuck commands to the meta-command bypass list
-    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck")) {
+    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette")) {
         return true
     }
 
@@ -646,6 +647,9 @@ ExecuteCommandRegistry(sCmd, hWnd) {
     switch sCmd, false {
         case "HelpScreen":
             ShowHelpScreen(hWnd)
+
+        case "CmdPalette":
+            ShowCmdPalette(hWnd)
 
         case "PeekTucked":
             Menu_PeekTucked()
@@ -2542,10 +2546,15 @@ ShowHelpScreen(hWnd := 0) {
     static helpGui := ""
     
     ; If Gui already exists, just show it and bring it to front
-    if (helpGui != "" && WinExist("ahk_id " helpGui.Hwnd)) {
-        helpGui.Show()
-        WinActivate("ahk_id " helpGui.Hwnd)
-        return
+    if (helpGui != "") {
+        try {
+            if (WinExist("ahk_id " helpGui.Hwnd)) {
+                helpGui.Show()
+                WinActivate("ahk_id " helpGui.Hwnd)
+                return
+            }
+        }
+        helpGui := ""
     }
 
     ; Create a highly polished, dark themed AHK v2 GUI window conforming exactly to user color scheme and dimensions
@@ -2647,50 +2656,8 @@ ShowHelpScreen(hWnd := 0) {
     helpLV.ModifyCol(3, 160) ; Trigger Key combo
     helpLV.ModifyCol(4, 490) ; Functional Description
 
-    ; Inline Static Help Data Array
-    localHelpRows := [
-        {cat: "Administrative", cmd: "HelpScreen", key: "Win + /", desc: "Display this interactive keyboard command reference panel."},
-        {cat: "Administrative", cmd: "WinInfo", key: "Win + Ctrl + /", desc: "Display active window physical bounds, handle ID, class, and executable name."},
-        {cat: "Administrative", cmd: "ToggleSuspension", key: "Win + Alt + S", desc: "Suspend or resume all HotWinAHK modifier triggers instantly."},
-        {cat: "Administrative", cmd: "ReloadConfig", key: "Win + F12", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
-        {cat: "Administrative", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
-        {cat: "Administrative", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
-        {cat: "Administrative", cmd: "RestartProgram", key: "Win + .", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
-        {cat: "Administrative", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
-        
-        {cat: "System Layer", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},
-        {cat: "System Layer", cmd: "SetOpacity70", key: "Win + Shift + O", desc: "Set alpha opacity transparency level to 70% on active window frame."},
-        {cat: "System Layer", cmd: "RemoveOpacity", key: "Win + Alt + Shift + O", desc: "Restore active window opacity to full solid visibility."},
-        {cat: "System Layer", cmd: "SendToBack", key: "Win + Backspace", desc: "Push active window frame to the bottom of the active desktop stack."},
-        {cat: "System Layer", cmd: "MinimizeToTray", key: "Win + Shift + PgDn", desc: "Stow active window into an autonomous system-tray notification process."},
-        {cat: "System Layer", cmd: "PickFromTray", key: "Win + Shift + PgUp", desc: "Open stowed window tray instances via right-click contextual list."},
-        
-        {cat: "Pixel Nudges", cmd: "Fine-Move 1px", key: "Win + Shift + Arrows", desc: "Nudge active window precisely by 1 pixel in any direction."},
-        {cat: "Pixel Nudges", cmd: "Coarse-Move 10px", key: "Win + Ctrl + Arrows", desc: "Shift active window coarse-scale by 10 pixels in any direction."},
-        
-        {cat: "Sizing & Margins", cmd: "ScaleExpand10px", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
-        {cat: "Sizing & Margins", cmd: "ScaleReduce10px", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
-        {cat: "Sizing & Margins", cmd: "Trim Borders", key: "Win + Alt + Arrows", desc: "Trim boundaries from Left, Right, Up, or Down edge margins."},
-        {cat: "Sizing & Margins", cmd: "Add Borders", key: "Win + Alt + Shift + Arrows", desc: "Grow borders outward from Left, Right, Up, or Down edge margins."},
-        {cat: "Sizing & Margins", cmd: "Subtract Borders", key: "Win + Ctrl + Alt + Arrows", desc: "Contract margin boundaries on specific directional axes."},
-        
-        {cat: "Grid Matrix", cmd: "JumpGrid Tiles", key: "Alt + Numpad 2/4/6", desc: "Hop window positions between virtual grid aspect quadrants."},
-        {cat: "Grid Matrix", cmd: "MouseToGrid", key: "Win + RButton", desc: "Warp window beneath mouse cursor directly to closest grid block."},
-        {cat: "Grid Matrix", cmd: "SnapToGridEnlarge", key: "NumpadAdd", desc: "Grow active window boundaries to span next adjacent grid aspect cell."},
-        {cat: "Grid Matrix", cmd: "SnapToGridShrink", key: "NumpadSub", desc: "Contract active window grid spanning aspect cell size."},
-        {cat: "Grid Matrix", cmd: "MoveToGrid", key: "Numpad 4/6/2", desc: "Shift active window between virtual grid units (Left/Right/Down)."},
-        {cat: "Grid Matrix", cmd: "StretchToGrid", key: "Win + Numpad 4/6/2", desc: "Symmetrically stretch window bounds to clamp onto adjacent grid edges."},
-        {cat: "Grid Matrix", cmd: "PullToGrid", key: "Win + Alt + Numpad 2/4/6", desc: "Clamp window boundaries directly onto nearest grid coordinate matrices."},
-        
-        {cat: "Docking & Fling", cmd: "TuckLeft Dock", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
-        {cat: "Docking & Fling", cmd: "Edge Untuck", key: "Mouse Speed Fling", desc: "Gesture-fling cursor past monitor border to untuck stowed frames."},
-        {cat: "Docking & Fling", cmd: "PeekTucked", key: "Win + Ctrl + Shift + P", desc: "Offers a menu of all tucked windows listing their titles and edge."},
-        {cat: "Docking & Fling", cmd: "Untuck", key: "Win + Ctrl + Shift + U", desc: "Offers a menu of all tucked windows to completely restore them."},
-        
-        {cat: "Window Cycling", cmd: "Next/Prev Window", key: "Win + PgUp / PgDn", desc: "Cycle focus smoothly across all un-minimized open windows on desktop."},
-        {cat: "Window Cycling", cmd: "Mouse Wheel Cycle", key: "Alt + WheelUp/Down", desc: "Cycle focus across active windows via mouse scrollwheel combos."},
-        {cat: "Window Cycling", cmd: "Next/Prev Class", key: "Win + Alt + PgUp / PgDn", desc: "Cycle focus specifically between windows of the same process class."}
-    ]
+    ; Populate rows based on global list
+    localHelpRows := GetGlobalCommandList()
 
     ; Function to populate rows based on a search term
     PopulateLV(searchTerm := "") {
@@ -2727,11 +2694,195 @@ ShowHelpScreen(hWnd := 0) {
     helpGui.Add("Text", "x290 y660 w680 h30 +0x200", "Note: Window Nudger runs continuously in the background. Press Win+Alt+X or click Exit to unload.")
 
     ; Setup closure behaviors
-    helpGui.OnEvent("Escape", (*) => helpGui.Destroy())
-    helpGui.OnEvent("Close", (*) => helpGui.Destroy())
+    helpGui.OnEvent("Escape", (*) => (helpGui.Destroy(), helpGui := ""))
+    helpGui.OnEvent("Close", (*) => (helpGui.Destroy(), helpGui := ""))
 
     ; Render on screen
     helpGui.Show("w1000 h720 Center")
+}
+
+GetGlobalCommandList() {
+    static commandList := [
+        {cat: "Administrative", cmd: "HelpScreen", key: "Win + /", desc: "Display this interactive keyboard command reference panel."},
+        {cat: "Administrative", cmd: "CmdPalette", key: "Win + Ctrl + Shift + C", desc: "Display the interactive fuzzy-search Command Palette for manual trigger / dry run testing."},
+        {cat: "Administrative", cmd: "WinInfo", key: "Win + Ctrl + /", desc: "Display active window physical bounds, handle ID, class, and executable name."},
+        {cat: "Administrative", cmd: "ToggleSuspension", key: "Win + Alt + S", desc: "Suspend or resume all HotWinAHK modifier triggers instantly."},
+        {cat: "Administrative", cmd: "ReloadConfig", key: "Win + F12", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
+        {cat: "Administrative", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
+        {cat: "Administrative", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
+        {cat: "Administrative", cmd: "RestartProgram", key: "Win + .", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
+        {cat: "Administrative", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
+        
+        {cat: "System Layer", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},
+        {cat: "System Layer", cmd: "SetOpacity70", key: "Win + Shift + O", desc: "Set alpha opacity transparency level to 70% on active window frame."},
+        {cat: "System Layer", cmd: "RemoveOpacity", key: "Win + Alt + Shift + O", desc: "Restore active window opacity to full solid visibility."},
+        {cat: "System Layer", cmd: "SendToBack", key: "Win + Backspace", desc: "Push active window frame to the bottom of the active desktop stack."},
+        {cat: "System Layer", cmd: "MinimizeToTray", key: "Win + Shift + PgDn", desc: "Stow active window into an autonomous system-tray notification process."},
+        {cat: "System Layer", cmd: "PickFromTray", key: "Win + Shift + PgUp", desc: "Open stowed window tray instances via right-click contextual list."},
+        
+        {cat: "Pixel Nudges", cmd: "MoveLeft10px", key: "Win + Ctrl + Left", desc: "Shift active window left by 10 pixels coarse-scale."},
+        {cat: "Pixel Nudges", cmd: "MoveRight10px", key: "Win + Ctrl + Right", desc: "Shift active window right by 10 pixels coarse-scale."},
+        {cat: "Pixel Nudges", cmd: "MoveUp10px", key: "Win + Ctrl + Up", desc: "Shift active window up by 10 pixels coarse-scale."},
+        {cat: "Pixel Nudges", cmd: "MoveDown10px", key: "Win + Ctrl + Down", desc: "Shift active window down by 10 pixels coarse-scale."},
+        {cat: "Pixel Nudges", cmd: "MoveLeft1px", key: "Win + Shift + Left", desc: "Nudge active window left with 1 pixel fine precision."},
+        {cat: "Pixel Nudges", cmd: "MoveRight1px", key: "Win + Shift + Right", desc: "Nudge active window right with 1 pixel fine precision."},
+        {cat: "Pixel Nudges", cmd: "MoveUp1px", key: "Win + Shift + Up", desc: "Nudge active window up with 1 pixel fine precision."},
+        {cat: "Pixel Nudges", cmd: "MoveDown1px", key: "Win + Shift + Down", desc: "Nudge active window down with 1 pixel fine precision."},
+        
+        {cat: "Sizing & Margins", cmd: "ScaleExpand10px", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
+        {cat: "Sizing & Margins", cmd: "ScaleReduce10px", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
+        {cat: "Sizing & Margins", cmd: "TrimLeft", key: "Win + Alt + Left", desc: "Trim left boundary from active window margin."},
+        {cat: "Sizing & Margins", cmd: "TrimRight", key: "Win + Alt + Right", desc: "Trim right boundary from active window margin."},
+        {cat: "Sizing & Margins", cmd: "TrimTop", key: "Win + Alt + Up", desc: "Trim top boundary from active window margin."},
+        {cat: "Sizing & Margins", cmd: "TrimBottom", key: "Win + Alt + Down", desc: "Trim bottom boundary from active window margin."},
+        {cat: "Sizing & Margins", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward from active window margin."},
+        {cat: "Sizing & Margins", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward from active window margin."},
+        {cat: "Sizing & Margins", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward from active window margin."},
+        {cat: "Sizing & Margins", cmd: "AddBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward from active window margin."},
+        {cat: "Sizing & Margins", cmd: "SubtractLeft", key: "Win + Ctrl + Alt + Left", desc: "Contract left boundary margin from specific directional axis."},
+        {cat: "Sizing & Margins", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary margin from specific directional axis."},
+        {cat: "Sizing & Margins", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary margin from specific directional axis."},
+        {cat: "Sizing & Margins", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary margin from specific directional axis."},
+        
+        {cat: "Grid Matrix", cmd: "JumpGridLeft", key: "Alt + Numpad 4", desc: "Hop window position to the left virtual grid quartile partition."},
+        {cat: "Grid Matrix", cmd: "JumpGridRight", key: "Alt + Numpad 6", desc: "Hop window position to the right virtual grid quartile partition."},
+        {cat: "Grid Matrix", cmd: "JumpGridUp", key: "Alt + Numpad 8", desc: "Hop window position to the up virtual grid quartile partition."},
+        {cat: "Grid Matrix", cmd: "JumpGridDown", key: "Alt + Numpad 2", desc: "Hop window position to the down virtual grid quartile partition."},
+        {cat: "Grid Matrix", cmd: "MouseToGrid", key: "Win + RButton", desc: "Warp window beneath mouse cursor directly to closest grid block."},
+        {cat: "Grid Matrix", cmd: "SnapToGridEnlarge", key: "NumpadAdd", desc: "Grow active window boundaries to span next adjacent grid aspect cell."},
+        {cat: "Grid Matrix", cmd: "SnapToGridShrink", key: "NumpadSub", desc: "Contract active window grid spanning aspect cell size."},
+        {cat: "Grid Matrix", cmd: "MoveToGridLeft", key: "Numpad 4", desc: "Shift active window leftward between virtual grid units."},
+        {cat: "Grid Matrix", cmd: "MoveToGridRight", key: "Numpad 6", desc: "Shift active window rightward between virtual grid units."},
+        {cat: "Grid Matrix", cmd: "MoveToGridDown", key: "Numpad 2", desc: "Shift active window downward between virtual grid units."},
+        {cat: "Grid Matrix", cmd: "MoveToGridUp", key: "Numpad 8", desc: "Shift active window upward between virtual grid units."},
+        {cat: "Grid Matrix", cmd: "StretchToGridLeft", key: "Win + Numpad 4", desc: "Stretch left index to clamp onto nearest leftward grid edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridRight", key: "Win + Numpad 6", desc: "Stretch right index to clamp onto nearest rightward grid edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridUp", key: "Win + Numpad 8", desc: "Stretch top index to clamp onto nearest upward grid edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridDown", key: "Win + Numpad 2", desc: "Stretch bottom index to clamp onto nearest downward grid edge."},
+        {cat: "Grid Matrix", cmd: "PullToGridLeft", key: "Win + Alt + Numpad 4", desc: "Clamp left boundary onto nearest grid coordinate matrix."},
+        {cat: "Grid Matrix", cmd: "PullToGridRight", key: "Win + Alt + Numpad 6", desc: "Clamp right boundary onto nearest grid coordinate matrix."},
+        {cat: "Grid Matrix", cmd: "PullToGridDown", key: "Win + Alt + Numpad 2", desc: "Clamp bottom boundary onto nearest grid coordinate matrix."},
+        {cat: "Grid Matrix", cmd: "PullToGridUp", key: "Win + Alt + Numpad 8", desc: "Clamp top boundary onto nearest grid coordinate matrix."},
+        
+        {cat: "Docking & Fling", cmd: "TuckLeft", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
+        {cat: "Docking & Fling", cmd: "TuckRight", key: "Win + Ctrl + Shift + Right", desc: "Tuck window past right screen wall, exposing a 20px dock indicator bar."},
+        {cat: "Docking & Fling", cmd: "TuckUp", key: "Win + Ctrl + Shift + Up", desc: "Tuck window past top screen wall, exposing a 20px dock indicator bar."},
+        {cat: "Docking & Fling", cmd: "TuckDown", key: "Win + Ctrl + Shift + Down", desc: "Tuck window past bottom screen wall, exposing a 20px dock indicator bar."},
+        {cat: "Docking & Fling", cmd: "PeekTucked", key: "Win + Ctrl + Shift + P", desc: "Offers a menu of all tucked windows listing their titles and edge."},
+        {cat: "Docking & Fling", cmd: "Untuck", key: "Win + Ctrl + Shift + U", desc: "Offers a menu of all tucked windows to completely restore them."},
+        
+        {cat: "Window Cycling", cmd: "NextWindow", key: "Win + PgUp", desc: "Cycle focus smoothly forward across open desktop window frames."},
+        {cat: "Window Cycling", cmd: "PrevWindow", key: "Win + PgDn", desc: "Cycle focus smoothly backward across open desktop window frames."},
+        {cat: "Window Cycling", cmd: "NextClassWindow", key: "Win + Alt + PgUp", desc: "Cycle focus specifically forward between windows of identical process class."},
+        {cat: "Window Cycling", cmd: "PrevClassWindow", key: "Win + Alt + PgDn", desc: "Cycle focus specifically backward between windows of identical process class."}
+    ]
+    return commandList
+}
+
+ShowCmdPalette(targetHwnd := 0) {
+    static cmdGui := ""
+    
+    if (targetHwnd == 0) {
+        targetHwnd := DllCall("GetForegroundWindow", "ptr")
+    }
+    
+    if (cmdGui != "") {
+        try {
+            if (WinExist("ahk_id " cmdGui.Hwnd)) {
+                cmdGui.Show()
+                WinActivate("ahk_id " cmdGui.Hwnd)
+                return
+            }
+        }
+        cmdGui := ""
+    }
+    
+    cmdGui := Gui("+AlwaysOnTop -MaximizeBox -MinimizeBox +ToolWindow", "HotWinAHK - Command Palette")
+    cmdGui.BackColor := "121214"
+    cmdGui.SetFont("s10 cE0E0E6", "Segoe UI")
+    
+    cmdGui.SetFont("s16 bold c00FFCC", "Segoe UI")
+    cmdGui.Add("Text", "w940 Center x30 y15", "HotWinAHK Command Palette [MANUAL RUN]")
+    cmdGui.SetFont("s9 c8A8A93", "Segoe UI")
+    cmdGui.Add("Text", "w940 Center x30 y+4", "Filter and instantly execute any administrative, nudge, size, docking or cycle action")
+    
+    cmdGui.Add("Text", "w940 h1 Background3A3A3D x30 y60", "")
+    
+    ; Live Dynamic Filter Box Row
+    cmdGui.SetFont("s10 bold c00FFCC", "Segoe UI")
+    cmdGui.Add("Text", "w100 x30 y80 h24 +0x200", "Search Filter:")
+    cmdGui.SetFont("s11 norm cFFFFFF", "Segoe UI")
+    searchBox := cmdGui.Add("Edit", "w550 x135 y80 Background1E1E22 cFFFFFF Border r1 h26", "")
+    
+    cmdGui.SetFont("s9 c00FF55", "Segoe UI")
+    cmdGui.Add("Text", "w300 x700 y80 h24 +0x200 Right", "💡 Tab to list • Enter to trigger • ESC close")
+    
+    cmdGui.SetFont("s10 cE0E0E6", "Segoe UI")
+    cmdLV := cmdGui.Add("ListView", "x30 y115 w940 h420 Background111112 cFFFFFF +Grid -Multi -ReadOnly", ["Command Name", "Default Key combo", "Description of Action", "Category"])
+    
+    cmdLV.ModifyCol(1, 180) ; Command
+    cmdLV.ModifyCol(2, 160) ; Target key combo
+    cmdLV.ModifyCol(3, 460) ; Action Description
+    cmdLV.ModifyCol(4, 140) ; Category
+    
+    commandList := GetGlobalCommandList()
+    
+    PopulateCmdLV(searchTerm := "") {
+        cmdLV.Opt("-Redraw")
+        cmdLV.Delete()
+        
+        for row in commandList {
+            if (searchTerm != "") {
+                if (!InStr(row.cmd, searchTerm) && !InStr(row.cat, searchTerm) && !InStr(row.desc, searchTerm) && !InStr(row.key, searchTerm)) {
+                    continue
+                }
+            }
+            cmdLV.Add("", row.cmd, row.key, row.desc, row.cat)
+        }
+        
+        if (cmdLV.GetCount() > 0) {
+            cmdLV.Modify(1, "Select Focus")
+        }
+        cmdLV.Opt("+Redraw")
+    }
+    
+    PopulateCmdLV()
+    
+    searchBox.OnEvent("Change", (ctrl, *) => PopulateCmdLV(ctrl.Value))
+    
+    ; Setup default trigger button for Enter key
+    btnTrigger := cmdGui.Add("Button", "w0 h0 Hidden +Default", "Run")
+    
+    ExecuteSelected() {
+        selectedRow := cmdLV.GetNext(0, "Focused")
+        if (selectedRow == 0) {
+            selectedRow := 1
+        }
+        
+        if (cmdLV.GetCount() >= selectedRow && selectedRow > 0) {
+            rowCmd := cmdLV.GetText(selectedRow, 1)
+            
+            try cmdGui.Destroy()
+            cmdGui := ""
+            
+            try {
+                if (targetHwnd != 0 && WinExist("ahk_id " . targetHwnd)) {
+                    WinActivate("ahk_id " . targetHwnd)
+                    Sleep(60)
+                }
+            }
+            
+            ExecuteCommandRegistry(rowCmd, targetHwnd)
+        }
+    }
+    
+    btnTrigger.OnEvent("Click", (*) => ExecuteSelected())
+    cmdLV.OnEvent("DoubleClick", (*) => ExecuteSelected())
+    
+    cmdGui.OnEvent("Escape", (*) => (cmdGui.Destroy(), cmdGui := ""))
+    cmdGui.OnEvent("Close", (*) => (cmdGui.Destroy(), cmdGui := ""))
+    
+    cmdGui.Show("w1000 h560 Center")
 }
 ; #endregion
 
@@ -3078,8 +3229,6 @@ $LButton:: {
 ; =======================================================================================
 ;          NEW IMPLEMENTATIONS FOR STOWED WINDOW MANAGERS & DOT INDICATOR
 ; =======================================================================================
-
-global g_DotGui := ""
 
 MakeProgressBarStr(val, maxVal) {
     pct := (val < 0) ? 0 : (val > maxVal ? 1 : val / maxVal)

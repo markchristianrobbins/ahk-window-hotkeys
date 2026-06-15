@@ -13,6 +13,8 @@
 - ▪️[TESTING.md](TESTING.md)
 
 <!-- Ai To Maintain and work from this list -->
+[Open Notepad Safely](aip://open/c:/windows/notepad.exe)
+
 ## [x] Incoming tasks from chat
 - [x] Move untucked window to the top of the Z-order index upon edge bump
 - [x] Implement physical drag resistance (4x perpendicular and 2x parallel damping tension) when pulling nestled windows from stowed bounds
@@ -31,7 +33,7 @@
 ## [x] Errors
 - [x] lint 1: Resolved warning where `ExecuteActionWithCondition` was considered an unassigned local variable. Fixed by placing the `#Include "HotWinAHK_aux.ahk"` statement at the bottom of `HotWinAHK.ahk` after the global function definitions.
 - [x] lint 2: Resolved warning where `ShowHelpScreen` was flagged as an unassigned local variable inside case `HelpScreen`. Built a fully-featured, dark-themed interactive help dashboard in `HotWinAHK.ahk`.
-- [x] WinSetTransparent Exception: Fixed "Target window not found" error during drag initialization by invoking `dockIndicatorGui.Show("Hide")` to physically register the window with the OS manager before modifying its alpha value, wrapped in a robust try/catch guard.
+- [x] WinSetTransparent Exception: Fixed "Target window not found" error during drag initialization by invoking `dockIndicatorGui.Show("Hide")` to physically register the window with the OS manager before modifying its alpha value, wrapped in a robust try/catch guard. ✅ 2026-06-12
 
 ## [x] New Fails
 - [x] Window is not at top of z-order when it is revealed from a tucked state (Resolved via robust momentary AlwaysOnTop Z-order seizure toggle)
@@ -71,7 +73,7 @@
     - [x] offers a menu of all tucked and removes the selected from its tuck
 - [x] paint a dot at top left of active window
     - [x] green when program is not suspended, otherwise yellow
-- [ ] Add a command palette with a fuzzy picker so all the commands can by tried manually
+- [x] Add a command palette with a fuzzy picker so all the commands can by tried manually
 
 ## [x] New Fails
 - [x] when pulling a window from its tucked state do not do a resistence
@@ -80,7 +82,7 @@
     - [x] if I am dragging a popped off window around, show indicators when I am in range of having it dock to another edge should I release the window
 - [x] widen and clean up the help dialog
     - [x] do not include commands in the list that are arrows or numpad numbers
-- [ ] help doesnt show
+- [x] help doesnt show
 
 
 
