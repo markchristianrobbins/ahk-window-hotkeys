@@ -1,4 +1,4 @@
-﻿; =======================================================================================
+; =======================================================================================
 ;          AUTOMATICALLY GENERATED NATIVE SHELL HOTKEYS - DO NOT EDIT DIRECTLY
 ; =======================================================================================
 #Requires AutoHotkey v2.0
@@ -157,10 +157,18 @@ $^numpad5:: {
 }
 
 $^numpadadd:: {
-    ExecuteActionWithCondition("ScaleExpand10px", "")
+    ExecuteActionWithCondition("ScaleExpandGridPart", "")
 }
 
 $^numpadsub:: {
+    ExecuteActionWithCondition("ScaleReduceGridPart", "")
+}
+
+$!numpadadd:: {
+    ExecuteActionWithCondition("ScaleExpand10px", "")
+}
+
+$!numpadsub:: {
     ExecuteActionWithCondition("ScaleReduce10px", "")
 }
 

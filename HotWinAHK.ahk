@@ -904,7 +904,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 SafeMove(nX, nY, nW, nH, hWnd)
             }
 
-        case "SnapToGridEnlarge", "SnapToGridShrink", "MouseToGrid", "MoveToGridLeft", "MoveToGridRight", "MoveToGridUp", "MoveToGridDown", "StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown":
+        case "SnapToGridEnlarge", "SnapToGridShrink", "MouseToGrid", "MoveToGridLeft", "MoveToGridRight", "MoveToGridUp", "MoveToGridDown":
             ; 1. Base Grid Geometry Configurations
             gX := 15
             gY := 15
@@ -946,36 +946,6 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 snapH := (gridUnitsTall * pY) - 6
 
                 switch sCmd {
-                    case "PullToGridLeft":
-                        ; Pull the left edge 1 unit inward (Right)
-                        cLeft += 1
-
-                    case "PullToGridRight":
-                        ; Pull the right edge 1 unit inward (Left)
-                        cRight -= 1
-
-                    case "PullToGridUp":
-                        ; Pull the top edge 1 unit inward (Down)
-                        rTop += 1
-
-                    case "PullToGridDown":
-                        ; Pull the bottom edge 1 unit inward (Up)
-                        rBottom -= 1
-                    case "StretchToGridLeft":
-                        ; Expand left edge 1 unit outward (Left)
-                        cLeft -= 1
-
-                    case "StretchToGridRight":
-                        ; Expand right edge 1 unit outward (Right)
-                        cRight += 1
-
-                    case "StretchToGridUp":
-                        ; Expand top edge 1 unit outward (Up)
-                        rTop -= 1
-
-                    case "StretchToGridDown":
-                        ; Expand bottom edge 1 unit outward (Down)
-                        rBottom += 1
                     case "SnapToGridEnlarge":
                         ; Check if already matched to our grid footprint template within a 10px variance
                         if (Abs(X - snapX) < 10 && Abs(Y - snapY) < 10 && Abs(W - snapW) < 10 && Abs(H - snapH) < 10) {
@@ -1448,13 +1418,94 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 mWidth := mRight - mLeft
                 mHeight := mBottom - mTop
 
-                ; 2. Centering Logic equations (Monitor mid-point minus half of window dimensions)
+                ; 2. Centering Logic equations (Monitor work-surface mid-point minus half of active window dimensions)
                 nX := mLeft + Floor((mWidth - W) / 2)
                 nY := mTop + Floor((mHeight - H) / 2)
 
-                ; 3. Execute instant target warp with zero latency
+                ; 3. Centering active window precisely on screen
                 SafeMove(nX, nY, , , hWnd)
             }
+
+        case "ScaleExpandGridPart", "ScaleReduceGridPart":
+            ; 1. Base Grid Geometry Configurations
+            gX := 15
+            gY := 15
+            pX := 424
+            pY := 232
+
+            ; Find closest half-grid indices
+            iLeft := FindLineX(X, gX, pX)
+            jRight := FindRightX(X + W, gX, pX)
+            kTop := FindLineY(Y, gY, pY)
+            lBottom := FindBottomY(Y + H, gY, pY)
+
+            ; Ideal half-grid reference positions mapped from these indices
+            snapX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
+            snapY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
+            snapW := (gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)) - snapX
+            snapH := (gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)) - snapY
+
+            ; Check if already matched to our half-grid footprint within 10px variance
+            if (Abs(X - snapX) < 10 && Abs(Y - snapY) < 10 && Abs(W - snapW) < 10 && Abs(H - snapH) < 10) {
+                if (sCmd == "ScaleExpandGridPart") {
+                    iLeft := iLeft - 1
+                    jRight := jRight + 1
+                    kTop := kTop - 1
+                    lBottom := lBottom + 1
+                } else { ; ScaleReduceGridPart
+                    spanX := jRight - iLeft
+                    if (spanX > 2) {
+                        iLeft += 1
+                        jRight -= 1
+                    } else if (spanX == 2) {
+                        jRight -= 1
+                    }
+                    spanY := lBottom - kTop
+                    if (spanY > 2) {
+                        kTop += 1
+                        lBottom -= 1
+                    } else if (spanY == 2) {
+                        lBottom -= 1
+                    }
+                }
+            } else {
+                ; Off-grid: Snap to nearest half-grid position
+                if (sCmd == "ScaleExpandGridPart") {
+                    ; Snap with ceil/round to favor enlargement
+                    spanX := Max(1, Ceil((W + 6) / (pX / 2)))
+                    spanY := Max(1, Ceil((H + 6) / (pY / 2)))
+                    iLeft := Max(0, Round((X - gX) / (pX / 2)))
+                    jRight := iLeft + spanX
+                    kTop := Max(0, Round((Y - gY) / (pY / 2)))
+                    lBottom := kTop + spanY
+                } else { ; ScaleReduceGridPart
+                    ; Snap with floor/round to favor shrinkage
+                    spanX := Max(1, Floor((W + 6) / (pX / 2)))
+                    spanY := Max(1, Floor((H + 6) / (pY / 2)))
+                    iLeft := Max(0, Round((X - gX) / (pX / 2)))
+                    jRight := iLeft + spanX
+                    kTop := Max(0, Round((Y - gY) / (pY / 2)))
+                    lBottom := kTop + spanY
+                }
+            }
+
+            ; Ensure minimum of 0 for indices to avoid going off screen left/top
+            if (iLeft < 0) {
+                jRight -= iLeft  ; Maintain the width
+                iLeft := 0
+            }
+            if (kTop < 0) {
+                lBottom -= kTop  ; Maintain the height
+                kTop := 0
+            }
+
+            ; Re-translate indices into final pixel footprint
+            nX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
+            nY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
+            nW := (gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)) - nX
+            nH := (gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)) - nY
+
+            SafeMove(nX, nY, nW, nH, hWnd)
 
         case "ScaleExpand10px": SafeMove(X - g_z / 2, Y - g_z / 2, W + g_z, H + g_z, hWnd)
         case "ScaleReduce10px": SafeMove(X + g_z / 2, Y + g_z / 2, W - g_z, H - g_z, hWnd)
@@ -1462,10 +1513,141 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "TrimBottom": SafeMove(X, Y, W, H - g_z, hWnd)
         case "TrimLeft": SafeMove(X + g_z, Y, W - g_z, H, hWnd)
         case "TrimRight": SafeMove(X, Y, W - g_z, H, hWnd)
-        case "AddTop": SafeMove(X, Y - g_z, W, H + g_z, hWnd)
-        case "AddBottom": SafeMove(X, Y, W + g_z, H + g_z, hWnd)
-        case "AddLeft": SafeMove(X - g_z, Y, W + g_z, H, hWnd)
-        case "AddRight": SafeMove(X, Y, W + g_z, H, hWnd)
+        case "StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "AddTop", "AddBottom", "AddLeft", "AddRight", "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight":
+            ; 1. Base Grid Geometry Configurations (using half-grid / mid-point cells)
+            gX := 15
+            gY := 15
+            pX := 424
+            pY := 232
+
+            ; Find closest half-grid indices
+            iLeft := FindLineX(X, gX, pX)
+            jRight := FindRightX(X + W, gX, pX)
+            kTop := FindLineY(Y, gY, pY)
+            lBottom := FindBottomY(Y + H, gY, pY)
+
+            ; Ideal half-grid reference positions mapped from these indices
+            snapX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
+            snapRight := gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)
+            snapY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
+            snapBottom := gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)
+
+            switch sCmd {
+                case "StretchToGridLeft", "AddLeft":
+                    if (Abs(X - snapX) < 10) {
+                        iLeft := iLeft - 1
+                    }
+                case "StretchToGridRight", "AddRight":
+                    if (Abs((X + W) - snapRight) < 10) {
+                        jRight := jRight + 1
+                    }
+                case "StretchToGridUp", "AddTop":
+                    if (Abs(Y - snapY) < 10) {
+                        kTop := kTop - 1
+                    }
+                case "StretchToGridDown", "AddBottom":
+                    if (Abs((Y + H) - snapBottom) < 10) {
+                        lBottom := lBottom + 1
+                    }
+                case "PullToGridLeft", "SubtractLeft":
+                    if (Abs(X - snapX) < 10) {
+                        iLeft := iLeft + 1
+                    }
+                    if (iLeft >= jRight) {
+                        iLeft := jRight - 1
+                    }
+                case "PullToGridRight", "SubtractRight":
+                    if (Abs((X + W) - snapRight) < 10) {
+                        jRight := jRight - 1
+                    }
+                    if (jRight <= iLeft) {
+                        jRight := iLeft + 1
+                    }
+                case "PullToGridUp", "SubtractTop":
+                    if (Abs(Y - snapY) < 10) {
+                        kTop := kTop + 1
+                    }
+                    if (kTop >= lBottom) {
+                        kTop := lBottom - 1
+                    }
+                case "PullToGridDown", "SubtractBottom":
+                    if (Abs((Y + H) - snapBottom) < 10) {
+                        lBottom := lBottom - 1
+                    }
+                    if (lBottom <= kTop) {
+                        lBottom := kTop + 1
+                    }
+                case "SubtractTopLeft":
+                    if (Abs(Y - snapY) < 10) {
+                        kTop := kTop + 1
+                    }
+                    if (kTop >= lBottom) {
+                        kTop := lBottom - 1
+                    }
+                    if (Abs(X - snapX) < 10) {
+                        iLeft := iLeft + 1
+                    }
+                    if (iLeft >= jRight) {
+                        iLeft := jRight - 1
+                    }
+                case "SubtractTopRight":
+                    if (Abs(Y - snapY) < 10) {
+                        kTop := kTop + 1
+                    }
+                    if (kTop >= lBottom) {
+                        kTop := lBottom - 1
+                    }
+                    if (Abs((X + W) - snapRight) < 10) {
+                        jRight := jRight - 1
+                    }
+                    if (jRight <= iLeft) {
+                        jRight := iLeft + 1
+                    }
+                case "SubtractBottomLeft":
+                    if (Abs((Y + H) - snapBottom) < 10) {
+                        lBottom := lBottom - 1
+                    }
+                    if (lBottom <= kTop) {
+                        lBottom := kTop + 1
+                    }
+                    if (Abs(X - snapX) < 10) {
+                        iLeft := iLeft + 1
+                    }
+                    if (iLeft >= jRight) {
+                        iLeft := jRight - 1
+                    }
+                case "SubtractBottomRight":
+                    if (Abs((Y + H) - snapBottom) < 10) {
+                        lBottom := lBottom - 1
+                    }
+                    if (lBottom <= kTop) {
+                        lBottom := kTop + 1
+                    }
+                    if (Abs((X + W) - snapRight) < 10) {
+                        jRight := jRight - 1
+                    }
+                    if (jRight <= iLeft) {
+                        jRight := iLeft + 1
+                    }
+            }
+
+            ; Ensure minimum of 0 for indices to avoid going off screen left/top
+            if (iLeft < 0) {
+                jRight -= iLeft  ; Maintain the width
+                iLeft := 0
+            }
+            if (kTop < 0) {
+                lBottom -= kTop  ; Maintain the height
+                kTop := 0
+            }
+
+            ; Re-translate indices into final pixel footprint
+            nX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
+            nY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
+            nW := (gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)) - nX
+            nH := (gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)) - nY
+
+            SafeMove(nX, nY, nW, nH, hWnd)
 
         case "JumpGridLeft", "JumpGridRight", "JumpGridUp", "JumpGridDown":
             ; 1. Base Grid Constants
@@ -1554,45 +1736,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 SafeMove(nX, nY, nW, nH, hWnd)
             }
 
-        case "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight":
-            ; Define your standard macro pixel shift value (defaulting to 10px if g_z is missing)
-            try {
-                step := g_z
-            } catch {
-                step := 10
-            }
-
-            nX := X, nY := Y, nW := W, nH := H
-
-            switch sCmd, false {
-                case "SubtractTop":
-                    nY := Y + step, nH := H - step
-                case "SubtractBottom":
-                    nH := H - step
-                case "SubtractLeft":
-                    nX := X + step, nW := W - step
-                case "SubtractRight":
-                    nW := W - step
-
-                case "SubtractTopLeft":
-                    nX := X + step, nY := Y + step, nW := W - step, nH := H - step
-                case "SubtractTopRight":
-                    nY := Y + step, nW := W - step, nH := H - step
-                case "SubtractBottomLeft":
-                    nX := X + step, nW := W - step, nH := H - step
-                case "SubtractBottomRight":
-                    nW := W - step, nH := H - step
-            }
-
-            ; Enforce a minimum safety size threshold so the window cannot collapse into zero
-            if (nW < 100) {
-                nW := 100
-            }
-            if (nH < 100) {
-                nH := 100
-            }
-
-            SafeMove(nX, nY, nW, nH, hWnd)
+        ; Legacy Subtract commands are now handled in the unified grid block.
 
 
         case "HalfSizeLeft": SafeMove(X, Y, Floor(W / 2), H, hWnd)
@@ -2731,21 +2875,24 @@ GetGlobalCommandList() {
         {cat: "Pixel Nudges", cmd: "MoveUp1px", key: "Win + Shift + Up", desc: "Nudge active window up with 1 pixel fine precision."},
         {cat: "Pixel Nudges", cmd: "MoveDown1px", key: "Win + Shift + Down", desc: "Nudge active window down with 1 pixel fine precision."},
         
-        {cat: "Sizing & Margins", cmd: "ScaleExpand10px", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
-        {cat: "Sizing & Margins", cmd: "ScaleReduce10px", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
+        {cat: "Sizing & Margins", cmd: "ScaleExpandGridPart", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds symmetrically matching half-grid step parts."},
+        {cat: "Sizing & Margins", cmd: "ScaleReduceGridPart", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds symmetrically matching half-grid step parts."},
+        {cat: "Sizing & Margins", cmd: "ScaleExpand10px", key: "Alt + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
+        {cat: "Sizing & Margins", cmd: "ScaleReduce10px", key: "Alt + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
         {cat: "Sizing & Margins", cmd: "TrimLeft", key: "Win + Alt + Left", desc: "Trim left boundary from active window margin."},
         {cat: "Sizing & Margins", cmd: "TrimRight", key: "Win + Alt + Right", desc: "Trim right boundary from active window margin."},
         {cat: "Sizing & Margins", cmd: "TrimTop", key: "Win + Alt + Up", desc: "Trim top boundary from active window margin."},
         {cat: "Sizing & Margins", cmd: "TrimBottom", key: "Win + Alt + Down", desc: "Trim bottom boundary from active window margin."},
-        {cat: "Sizing & Margins", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward from active window margin."},
-        {cat: "Sizing & Margins", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward from active window margin."},
-        {cat: "Sizing & Margins", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward from active window margin."},
-        {cat: "Sizing & Margins", cmd: "AddBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward from active window margin."},
-        {cat: "Sizing & Margins", cmd: "SubtractLeft", key: "Win + Ctrl + Alt + Left", desc: "Contract left boundary margin from specific directional axis."},
-        {cat: "Sizing & Margins", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary margin from specific directional axis."},
-        {cat: "Sizing & Margins", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary margin from specific directional axis."},
-        {cat: "Sizing & Margins", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary margin from specific directional axis."},
+        {cat: "Sizing & Margins", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "AddBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "SubtractLeft", key: "Win + Ctrl + Alt + Left", desc: "Contract left boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "Sizing & Margins", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary inward to nearest grid or midpoint grid cell."},
         
+        {cat: "Grid Matrix", cmd: "Center", key: "Numpad5", desc: "Move active window to center of screen without sizing changes."},
         {cat: "Grid Matrix", cmd: "JumpGridLeft", key: "Alt + Numpad 4", desc: "Hop window position to the left virtual grid quartile partition."},
         {cat: "Grid Matrix", cmd: "JumpGridRight", key: "Alt + Numpad 6", desc: "Hop window position to the right virtual grid quartile partition."},
         {cat: "Grid Matrix", cmd: "JumpGridUp", key: "Alt + Numpad 8", desc: "Hop window position to the up virtual grid quartile partition."},
@@ -2757,14 +2904,14 @@ GetGlobalCommandList() {
         {cat: "Grid Matrix", cmd: "MoveToGridRight", key: "Numpad 6", desc: "Shift active window rightward between virtual grid units."},
         {cat: "Grid Matrix", cmd: "MoveToGridDown", key: "Numpad 2", desc: "Shift active window downward between virtual grid units."},
         {cat: "Grid Matrix", cmd: "MoveToGridUp", key: "Numpad 8", desc: "Shift active window upward between virtual grid units."},
-        {cat: "Grid Matrix", cmd: "StretchToGridLeft", key: "Win + Numpad 4", desc: "Stretch left index to clamp onto nearest leftward grid edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridRight", key: "Win + Numpad 6", desc: "Stretch right index to clamp onto nearest rightward grid edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridUp", key: "Win + Numpad 8", desc: "Stretch top index to clamp onto nearest upward grid edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridDown", key: "Win + Numpad 2", desc: "Stretch bottom index to clamp onto nearest downward grid edge."},
-        {cat: "Grid Matrix", cmd: "PullToGridLeft", key: "Win + Alt + Numpad 4", desc: "Clamp left boundary onto nearest grid coordinate matrix."},
-        {cat: "Grid Matrix", cmd: "PullToGridRight", key: "Win + Alt + Numpad 6", desc: "Clamp right boundary onto nearest grid coordinate matrix."},
-        {cat: "Grid Matrix", cmd: "PullToGridDown", key: "Win + Alt + Numpad 2", desc: "Clamp bottom boundary onto nearest grid coordinate matrix."},
-        {cat: "Grid Matrix", cmd: "PullToGridUp", key: "Win + Alt + Numpad 8", desc: "Clamp top boundary onto nearest grid coordinate matrix."},
+        {cat: "Grid Matrix", cmd: "StretchToGridLeft", key: "Win + Numpad 4", desc: "Stretch left boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridRight", key: "Win + Numpad 6", desc: "Stretch right boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridUp", key: "Win + Numpad 8", desc: "Stretch top boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "StretchToGridDown", key: "Win + Numpad 2", desc: "Stretch bottom boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "PullToGridLeft", key: "Win + Alt + Numpad 4", desc: "Pull left boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "PullToGridRight", key: "Win + Alt + Numpad 6", desc: "Pull right boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "PullToGridDown", key: "Win + Alt + Numpad 2", desc: "Pull bottom boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "Grid Matrix", cmd: "PullToGridUp", key: "Win + Alt + Numpad 8", desc: "Pull top boundary inward to nearest grid or midpoint grid cell edge."},
         
         {cat: "Docking & Fling", cmd: "TuckLeft", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
         {cat: "Docking & Fling", cmd: "TuckRight", key: "Win + Ctrl + Shift + Right", desc: "Tuck window past right screen wall, exposing a 20px dock indicator bar."},
@@ -3167,7 +3314,7 @@ CopyCommands() {
         "MoveLeft1px", "MoveRight1px", "MoveUp1px", "MoveDown1px", 
         "EdgeLeft", "EdgeRight", "EdgeTop", "EdgeBottom", "EdgeTopLeft", 
         "EdgeTopRight", "EdgeBottomLeft", "EdgeBottomRight", "EdgeCenter", 
-        "ScaleExpand10px", "ScaleReduce10px", "TrimTop", "TrimBottom", 
+        "ScaleExpand10px", "ScaleReduce10px", "ScaleExpandGridPart", "ScaleReduceGridPart", "TrimTop", "TrimBottom", 
         "TrimLeft", "TrimRight", "AddTop", "AddBottom", "AddLeft", "AddRight", 
         "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", 
         "MouseRelativeSize", "HalfSizeLeft", "HalfSizeRight", "HalfSizeTop", "HalfSizeBottom", 
@@ -3434,6 +3581,74 @@ Menu_Untuck_Callback(hwnd, profile, *) {
     SetTimer(ExecuteCleanBumperReArm, -100)
     
     ShowTargetToolTip("Window untucked & restored!")
+}
+
+FindLineX(coord, gX, pX) {
+    bestIdx := 0
+    minDiff := 999999
+    approx := Round((coord - gX) / (pX / 2))
+    Loop 5 {
+        testIdx := approx - 3 + A_Index
+        if (testIdx < 0)
+            continue
+        diff := Abs(coord - (gX + Floor(testIdx / 2) * pX + (Mod(testIdx, 2) == 0 ? 0 : 209)))
+        if (diff < minDiff) {
+            minDiff := diff
+            bestIdx := testIdx
+        }
+    }
+    return bestIdx
+}
+
+FindRightX(coord, gX, pX) {
+    bestIdx := 0
+    minDiff := 999999
+    approx := Round((coord + 6 - gX) / (pX / 2))
+    Loop 5 {
+        testIdx := approx - 3 + A_Index
+        if (testIdx < 0)
+            continue
+        diff := Abs(coord - (gX + Floor(testIdx / 2) * pX + (Mod(testIdx, 2) == 0 ? -6 : 209)))
+        if (diff < minDiff) {
+            minDiff := diff
+            bestIdx := testIdx
+        }
+    }
+    return bestIdx
+}
+
+FindLineY(coord, gY, pY) {
+    bestIdx := 0
+    minDiff := 999999
+    approx := Round((coord - gY) / (pY / 2))
+    Loop 5 {
+        testIdx := approx - 3 + A_Index
+        if (testIdx < 0)
+            continue
+        diff := Abs(coord - (gY + Floor(testIdx / 2) * pY + (Mod(testIdx, 2) == 0 ? 0 : 113)))
+        if (diff < minDiff) {
+            minDiff := diff
+            bestIdx := testIdx
+        }
+    }
+    return bestIdx
+}
+
+FindBottomY(coord, gY, pY) {
+    bestIdx := 0
+    minDiff := 999999
+    approx := Round((coord + 6 - gY) / (pY / 2))
+    Loop 5 {
+        testIdx := approx - 3 + A_Index
+        if (testIdx < 0)
+            continue
+        diff := Abs(coord - (gY + Floor(testIdx / 2) * pY + (Mod(testIdx, 2) == 0 ? -6 : 113)))
+        if (diff < minDiff) {
+            minDiff := diff
+            bestIdx := testIdx
+        }
+    }
+    return bestIdx
 }
 
 #Include "HotWinAHK_aux.ahk"

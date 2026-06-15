@@ -18,7 +18,7 @@ status: fail
 
 ## Commit Message
 ```text
-feat(palette): implement interactive fuzzy-search Command Palette and fix Help Screen reopening lifecycle bugs
+feat(grid): implement half-grid StretchToGrid, PullToGrid, Add, and Subtract, and redo Center logic without resizing
 ```
 
 <!-- Example AI Log Entry
@@ -31,6 +31,43 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-15T16:15:00Z]
+### 🎯 Primary Goals & Requirements
+- **StretchToGrid & PullToGrid**: Re-engineered edge-bound stretching and pulling logic to leverage the combined precision grid boundaries and mid-point paths.
+- **Add & Subtract**: Converted legacy pixel-offset resizing to align dynamically with grid or midpoint-grid lines.
+- **Center Redo**: Safeguarded the Screen Center command from altering active window dimensions, ensuring exact coordinate adjustments.
+- **Help Window Updates**: Documented the updated actions of half-grid stretching/pulling and cell-stepping operations, adding the missing `Center` reference to the diagnostic help list.
+
+### 🛠️ Completed Changes in this Session
+- **Unified Advanced Grid Math**: Linked `StretchToGrid...`, `PullToGrid...`, `Add...`, and `Subtract...` commands within a coordinated, index-based, and scale-safe case block that resolves cell boundaries and half-grid midpoint transitions.
+- **No-Resize Centering Guarantee**: Isolated width and height parameters during centered moves, maintaining absolute window metrics.
+- **Enhanced Reference HUD**: Added `Center` to the static list in `GetGlobalCommandList()`, updated Descriptions for all modified grid edge movements, and reconditioned the Help Window.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/AITASKS.md`
+- `/AILOG.md`
+
+## [2026-06-15T16:00:00Z]
+### 🎯 Primary Goals & Requirements
+- **ScaleExpandGridPart** and **ScaleReduceGridPart**: Implement symmetrical grid-relative window scaling support. These commands leverage mathematical steps mapped to cell boundaries and cell midpoints (half-cells) to cleanly grow/shrink windows on all margins.
+- **Center**: Redid the screen centering command to position the active window frame precisely in the center of the active workspace with pixel-perfect accuracy.
+- **Keybindings Update**: Map `ScaleExpandGridPart` to `Ctrl+NumpadAdd` and `ScaleReduceGridPart` to `Ctrl+NumpadSub`. Map `ScaleExpand10px` to `Alt+NumpadAdd` and `ScaleReduce10px` to `Alt+NumpadSub`.
+
+### 🛠️ Completed Changes in this Session
+- **INI Configuration Modifications**: Swapped key mappings for dynamic bindings in `HotWinAHK.ini`. Created configuration blocks for `ScaleExpandGridPart` and `ScaleReduceGridPart`.
+- **AutoHotkey Core Static Hooks**: Programmed static mapping dispatches inside `HotWinAHK_aux.ahk` for `Ctrl+NumpadAdd/Sub` and `Alt+NumpadAdd/Sub`.
+- **Symmetrical Half-Grid Tracking Math**: Added standard continuous index trackers (`FindLineX`, `FindRightX`, `FindLineY`, `FindBottomY`) to resolve snap coordinates and step-size boundaries along cell outer walls and cell midpoints.
+- **Polished Monitor Centering**: Refinced `case "Center":` inside `HotWinAHK.ahk` to center windows within the monitor's work area borders.
+- **Unified Command Reference**: Updated help rows and diagnostic array copy targets in `/HotWinAHK.ahk`.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/HotWinAHK_aux.ahk`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-15T14:45:00Z]
 ### 🎯 Primary Goals & Requirements

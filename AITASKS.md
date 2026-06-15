@@ -91,21 +91,34 @@
 
 
 
-## [ ] New Settings
+## [x] New Settings
+- [x] Configured new sections `[ScaleExpandGridPart]` and `[ScaleReduceGridPart]` in `HotWinAHK.ini`, transitioning existing 10px scaling actions to Alt layouts.
 
-## [ ] New Commands
+## [x] New Commands
+- [x] Implemented core case blocks for `ScaleExpandGridPart` and `ScaleReduceGridPart` in the commands registry.
+- [x] Redid `Center` case inside `ExecuteCommandRegistry` of `HotWinAHK.ahk` to perform mathematically precise centering within workspace bounds.
 
-## [ ] New Bindings
+## [x] New Bindings
+- [x] Bound `ScaleExpandGridPart` to `Ctrl+NumpadAdd`
+- [x] Bound `ScaleReduceGridPart` to `Ctrl+NumpadSub`
+- [x] Rebound `ScaleExpand10px` to `Alt+NumpadAdd`
+- [x] Rebound `ScaleReduce10px` to `Alt+NumpadSub`
 
-## [ ] New Features
+## [x] New Features
+- [x] Formulated an exact pixel-grid matching algorithm using indices to represent standard coordinates and midpoint columns/rows to dynamically expand and shrink windows symmetrically.
 
-## [ ] Settings
+## [x] Settings
+- [x] Swapped Alt/Ctrl assignments for 10px and GridPart scale variants in HotWinAHK.ini.
 
-## [ ] Commands
+## [x] Commands
+- [x] Implemented half-grid and normal-grid advancing and contracting for StretchToGrid, PullToGrid, Add, and Subtract.
+- [x] Redid Center command to center precise active window metrics without causing any resize changes.
 
-## [ ] Bindings
+## [x] Bindings
+- [x] Retained standard direction-oriented key combinations to triggers.
 
-## [ ] Features
+## [x] Features
+- [x] Created advanced coordinate index mapper identifying bounding limits across cells and midpoint lines.
 ---
 ## Go Back to...
 - ▪️[AGENTS.md](AGENTS.md)
