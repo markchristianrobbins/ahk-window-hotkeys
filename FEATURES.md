@@ -108,7 +108,20 @@ Natively extracts active programs' icon frames to build authentic notifications,
 
 ### Symmetrical Frame-Padding Trims
 - Group: [Proportional Grid Tiles & Sizing Utilities](#z3)
-Nudges and adjusts active layouts by adding or reducing specific edges while preserving centers.
+Nudges and adjusts active layouts by adding or reducing specific edges while preserving centers. Supports single edge trims (`TrimLeft`, `TrimRight`, `TrimTop`, `TrimBottom`) as well as `TrimAll` and coarse `GrowTop`, `GrowBottom`, `GrowLeft`, `GrowRight`, and `GrowAll` actions.
+
+### Autonomous External Window Commander (Au3)
+- Group: [Administrative Controls & Dynamic Compiler](#z1)
+Provides an external executable script `/ahk-window-cmdr.au3` written in AutoIt. It determines the primary topmost parent window ancestor directly underneath the cursor and triggers HotWinAHK commands targeting that parent window natively through standard high-speed `WM_COPYDATA` messages.
+
+### Persistent Window Home Coordinates Matrix
+- Group: [Grid Matrix](#z2)
+Enables persisting customized window dimension/coordinates into an external database `window-hotkeys-homes.ini`. 
+- **SetHome**: Persists active window bounds and links them with class name, executable lowering path, and fuzzy title criteria.
+- **ClearHome**: Removes saved configurations.
+- **GoHome**: Instantly relocates window to its home coordinates while tracking pre-homed positioning.
+- **Interactive Home Toggle**: Triggers a countdown when double-triggered while at home, offering automatic pre-homed restoration or prompt confirmation of home config zapping.
+- **Home Footprint Peeking**: Draws a translucent neon-green indicator showing saved boundaries in real-time.
 
 ### Tac-Edge Margin Docking
 - Group: [Boundary Docking & Mouse Fling Untuck](#z4)

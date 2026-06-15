@@ -18,7 +18,7 @@ status: fail
 
 ## Commit Message
 ```text
-feat(grid): implement half-grid StretchToGrid, PullToGrid, Add, and Subtract, and redo Center logic without resizing
+feat(grow-home-au3): implement grow actions, au3 commander, and persistent window homes with interactive countdowns`
 ```
 
 <!-- Example AI Log Entry
@@ -31,6 +31,26 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-15T16:30:00Z]
+### 🎯 Primary Goals & Requirements
+- **Grow Commands**: Designed and implemented new edge growing commands `GrowTop`, `GrowBottom`, `GrowLeft`, `GrowRight`, as well as symmetrical operations `GrowAll` and `TrimAll`.
+- **Au3 Commander Script**: Developed an external AutoIt script (`ahk-window-cmdr.au3`) that determines the top-level parent ancestor of the window directly under the mouse cursor and triggers specified commands via Windows IPC (`WM_COPYDATA`).
+- **Persistent Window Home**: Implemented persistent window homing layout states saved inside `window-hotkeys-homes.ini` with fuzzy window title matching criteria.
+- **Interactive Home & Peeking Flow**: Engineered smart `Home` toggle logic with a 5-second cancelable countdown restoring pre-homed position, direct configuration zapping upon consecutive triggers, and neon peeking displays.
+
+### 🛠️ Completed Changes in this Session
+- **Created AutoIt Launcher Script**: Created `/ahk-window-cmdr.au3` leveraging recursive topmost ancestor discovery and `WM_COPYDATA` messages.
+- **Embedded IPC Listener & Homing Core**: Built `ReceiveCopyData` and `SetWindowHome`/`ClearWindowHome`/`GoWindowHome`/`InteractiveHome`/`ShowHomePeek` functions inside `HotWinAHK.ahk`.
+- **Registered INI Bindings**: Injected default key configurations for new grow commands, `TrimAll`, and target home tracking within `HotWinAHK.ini`.
+- **Registered Reference Panel row definitions**: Added descriptions in `GetGlobalCommandList` and command strings to `CopyCommands` helper definitions.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/ahk-window-cmdr.au3`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-15T16:15:00Z]
 ### 🎯 Primary Goals & Requirements

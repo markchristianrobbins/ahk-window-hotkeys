@@ -1,4 +1,4 @@
-; =======================================================================================
+﻿; =======================================================================================
 ;          AUTOMATICALLY GENERATED NATIVE SHELL HOTKEYS - DO NOT EDIT DIRECTLY
 ; =======================================================================================
 #Requires AutoHotkey v2.0
@@ -43,7 +43,7 @@ $!#x:: {
     ExecuteActionWithCondition("ExitProgram", "")
 }
 
-$#.:: {
+$^#f12:: {
     try Suspend("Permit")
     ExecuteActionWithCondition("RestartProgram", "")
 }
@@ -172,19 +172,71 @@ $!numpadsub:: {
     ExecuteActionWithCondition("ScaleReduce10px", "")
 }
 
-$!#numpad8:: {
-    ExecuteActionWithCondition("TrimTop", "")
+$#numpad4:: {
+    ExecuteActionWithCondition("StretchToGridLeft", "")
+}
+
+$#numpad6:: {
+    ExecuteActionWithCondition("StretchToGridRight", "")
+}
+
+$#numpad8:: {
+    ExecuteActionWithCondition("StretchToGridUp", "")
+}
+
+$#numpad2:: {
+    ExecuteActionWithCondition("StretchToGridDown", "")
 }
 
 $!#numpad2:: {
-    ExecuteActionWithCondition("TrimBottom", "")
+    ExecuteActionWithCondition("PullToGridDown", "")
 }
 
-$!#numpad6:: {
-    ExecuteActionWithCondition("TrimLeft", "")
+$!#numpad8:: {
+    ExecuteActionWithCondition("PullToGridUp", "")
 }
 
 $!#numpad4:: {
+    ExecuteActionWithCondition("PullToGridLeft", "")
+}
+
+$!#numpad6:: {
+    ExecuteActionWithCondition("PullToGridRight", "")
+}
+
+$^+#numpad8:: {
+    ExecuteActionWithCondition("GrowTop", "")
+}
+
+$^+#numpad2:: {
+    ExecuteActionWithCondition("GrowBottom", "")
+}
+
+$^+#numpad6:: {
+    ExecuteActionWithCondition("GrowLeft", "")
+}
+
+$^+#numpad4:: {
+    ExecuteActionWithCondition("GrowRight", "")
+}
+
+$^+#numpad5:: {
+    ExecuteActionWithCondition("GrowAll", "")
+}
+
+$!+#numpad8:: {
+    ExecuteActionWithCondition("TrimTop", "")
+}
+
+$!+#numpad2:: {
+    ExecuteActionWithCondition("TrimBottom", "")
+}
+
+$!+#numpad6:: {
+    ExecuteActionWithCondition("TrimLeft", "")
+}
+
+$!+#numpad4:: {
     ExecuteActionWithCondition("TrimRight", "")
 }
 
@@ -218,6 +270,30 @@ $^!#left:: {
 
 $^!#right:: {
     ExecuteActionWithCondition("SubtractRight", "")
+}
+
+$!#numpad5:: {
+    ExecuteActionWithCondition("TrimAll", "")
+}
+
+$^#.:: {
+    ExecuteActionWithCondition("SetHome", "")
+}
+
+$^+#.:: {
+    ExecuteActionWithCondition("ClearHome", "")
+}
+
+$!#.:: {
+    ExecuteActionWithCondition("GoHome", "")
+}
+
+$#.:: {
+    ExecuteActionWithCondition("Home", "")
+}
+
+$+#.:: {
+    ExecuteActionWithCondition("HomePeek", "")
 }
 
 $^!+#left:: {
@@ -298,22 +374,6 @@ $numpad8:: {
 
 $numpad2:: {
     ExecuteActionWithCondition("MoveToGridDown", "")
-}
-
-$#numpad4:: {
-    ExecuteActionWithCondition("StretchToGridLeft", "")
-}
-
-$#numpad6:: {
-    ExecuteActionWithCondition("StretchToGridRight", "")
-}
-
-$#numpad8:: {
-    ExecuteActionWithCondition("StretchToGridUp", "")
-}
-
-$#numpad2:: {
-    ExecuteActionWithCondition("StretchToGridDown", "")
 }
 
 $^+#left:: {

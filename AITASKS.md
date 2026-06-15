@@ -113,12 +113,16 @@
 ## [x] Commands
 - [x] Implemented half-grid and normal-grid advancing and contracting for StretchToGrid, PullToGrid, Add, and Subtract.
 - [x] Redid Center command to center precise active window metrics without causing any resize changes.
+- [x] Implemented new sizing commands: TrimAll, GrowLeft, GrowRight, GrowTop, GrowBottom, and GrowAll.
+- [x] Implemented persistent Window Home commands: SetHome, ClearHome, GoHome, Home (interactive with countdown/strip triggers), and HomePeek (translucent overlay footprint draw).
 
 ## [x] Bindings
 - [x] Retained standard direction-oriented key combinations to triggers.
 
 ## [x] Features
 - [x] Created advanced coordinate index mapper identifying bounding limits across cells and midpoint lines.
+- [x] Developed robust compiled AutoIt Au3 script (ahk-window-cmdr.au3) supporting command execution on target ancestors via dynamic IPC/CopyData messages.
+- [x] Crafted a highly polished, persistent Window Home management module using fuzzy matching criteria for title-based window tracking.
 ---
 ## Go Back to...
 - ▪️[AGENTS.md](AGENTS.md)

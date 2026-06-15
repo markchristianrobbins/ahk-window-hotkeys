@@ -76,6 +76,7 @@ try {
 
 SetTimer(CheckScreenEdgeBumps, 25)
 SetTimer(UpdateActiveWindowDot, 100)
+OnMessage(0x004A, ReceiveCopyData)
 ; Execute the initializer hook immediately on script launch
 InitializeGlobalFocusBeeper()
 if !FileExist(g_sGeneratedFile) {
@@ -1513,6 +1514,17 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "TrimBottom": SafeMove(X, Y, W, H - g_z, hWnd)
         case "TrimLeft": SafeMove(X + g_z, Y, W - g_z, H, hWnd)
         case "TrimRight": SafeMove(X, Y, W - g_z, H, hWnd)
+        case "TrimAll": SafeMove(X + g_z, Y + g_z, W - 2 * g_z, H - 2 * g_z, hWnd)
+        case "GrowTop": SafeMove(X, Y - g_z, W, H + g_z, hWnd)
+        case "GrowBottom": SafeMove(X, Y, W, H + g_z, hWnd)
+        case "GrowLeft": SafeMove(X - g_z, Y, W + g_z, H, hWnd)
+        case "GrowRight": SafeMove(X, Y, W + g_z, H, hWnd)
+        case "GrowAll": SafeMove(X - g_z, Y - g_z, W + 2 * g_z, H + 2 * g_z, hWnd)
+        case "SetHome": SetWindowHome(hWnd)
+        case "ClearHome": ClearWindowHome(hWnd)
+        case "GoHome": GoWindowHome(hWnd)
+        case "Home": InteractiveHome(hWnd)
+        case "HomePeek": ShowHomePeek(hWnd)
         case "StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "AddTop", "AddBottom", "AddLeft", "AddRight", "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight":
             ; 1. Base Grid Geometry Configurations (using half-grid / mid-point cells)
             gX := 15
@@ -2883,6 +2895,12 @@ GetGlobalCommandList() {
         {cat: "Sizing & Margins", cmd: "TrimRight", key: "Win + Alt + Right", desc: "Trim right boundary from active window margin."},
         {cat: "Sizing & Margins", cmd: "TrimTop", key: "Win + Alt + Up", desc: "Trim top boundary from active window margin."},
         {cat: "Sizing & Margins", cmd: "TrimBottom", key: "Win + Alt + Down", desc: "Trim bottom boundary from active window margin."},
+        {cat: "Sizing & Margins", cmd: "TrimAll", key: "Win + Alt + Numpad 5", desc: "Symmetrically trim all 4 sides of the active window margin."},
+        {cat: "Sizing & Margins", cmd: "GrowLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward from active window margin by step width."},
+        {cat: "Sizing & Margins", cmd: "GrowRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward from active window margin by step width."},
+        {cat: "Sizing & Margins", cmd: "GrowTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward from active window margin by step width."},
+        {cat: "Sizing & Margins", cmd: "GrowBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward from active window margin by step width."},
+        {cat: "Sizing & Margins", cmd: "GrowAll", key: "Win + Alt + Shift + Numpad 5", desc: "Symmetrically grow all 4 sides of the active window margin."},
         {cat: "Sizing & Margins", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward to nearest grid or midpoint grid cell."},
         {cat: "Sizing & Margins", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward to nearest grid or midpoint grid cell."},
         {cat: "Sizing & Margins", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward to nearest grid or midpoint grid cell."},
@@ -2891,6 +2909,12 @@ GetGlobalCommandList() {
         {cat: "Sizing & Margins", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary inward to nearest grid or midpoint grid cell."},
         {cat: "Sizing & Margins", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary inward to nearest grid or midpoint grid cell."},
         {cat: "Sizing & Margins", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary inward to nearest grid or midpoint grid cell."},
+        
+        {cat: "Window Home", cmd: "SetHome", key: "Ctrl + Alt + S", desc: "Save active window class/process/fuzzy title signature to persistent home location."},
+        {cat: "Window Home", cmd: "ClearHome", key: "Ctrl + Alt + D", desc: "Delete saved home location configuration for active window."},
+        {cat: "Window Home", cmd: "GoHome", key: "Ctrl + Alt + G", desc: "Relocate window to its persistent home position."},
+        {cat: "Window Home", cmd: "Home", key: "Ctrl + Alt + H", desc: "Intelligent Home behavior: Move to home, or restore to pre-homed, or strip home config upon confirmation."},
+        {cat: "Window Home", cmd: "HomePeek", key: "Ctrl + Alt + P", desc: "Momentarily draw a transparent overlay footprint of the window's home location on screen."},
         
         {cat: "Grid Matrix", cmd: "Center", key: "Numpad5", desc: "Move active window to center of screen without sizing changes."},
         {cat: "Grid Matrix", cmd: "JumpGridLeft", key: "Alt + Numpad 4", desc: "Hop window position to the left virtual grid quartile partition."},
@@ -3315,8 +3339,10 @@ CopyCommands() {
         "EdgeLeft", "EdgeRight", "EdgeTop", "EdgeBottom", "EdgeTopLeft", 
         "EdgeTopRight", "EdgeBottomLeft", "EdgeBottomRight", "EdgeCenter", 
         "ScaleExpand10px", "ScaleReduce10px", "ScaleExpandGridPart", "ScaleReduceGridPart", "TrimTop", "TrimBottom", 
-        "TrimLeft", "TrimRight", "AddTop", "AddBottom", "AddLeft", "AddRight", 
+        "TrimLeft", "TrimRight", "TrimAll", "AddTop", "AddBottom", "AddLeft", "AddRight", 
+        "GrowLeft", "GrowRight", "GrowTop", "GrowBottom", "GrowAll",
         "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", 
+        "SetHome", "ClearHome", "GoHome", "Home", "HomePeek", 
         "MouseRelativeSize", "HalfSizeLeft", "HalfSizeRight", "HalfSizeTop", "HalfSizeBottom", 
         "DoubleSizeLeft", "DoubleSizeRight", "DoubleSizeTop", "DoubleSizeBottom", 
         "NextWindow", "PrevWindow", "NextClassWindow", "PrevClassWindow", 
@@ -3649,6 +3675,305 @@ FindBottomY(coord, gY, pY) {
         }
     }
     return bestIdx
+}
+
+; =======================================================================================
+; WM_COPYDATA / IPC MESSAGE HANDLER FOR EXTERNAL COMMAND TRIGGERING (e.g. from AutoIt)
+; =======================================================================================
+ReceiveCopyData(wParam, lParam, msg, hwnd) {
+    lpData := NumGet(lParam, A_PtrSize * 2, "UPtr")
+    if (!lpData)
+        return 1
+    cbData := NumGet(lParam, A_PtrSize, "UInt")
+    dataStr := StrGet(lpData, cbData, "UTF-8")
+    
+    parts := StrSplit(dataStr, "|")
+    if (parts.Length >= 1) {
+        cmd := Trim(parts[1])
+        targetHwnd := 0
+        if (parts.Length >= 2) {
+            targetHwnd := Integer(parts[2])
+        }
+        
+        if (cmd != "") {
+            if (targetHwnd && WinExist("ahk_id " . targetHwnd)) {
+                ExecuteCommandRegistry(cmd, targetHwnd)
+            } else {
+                ExecuteActionWithCondition(cmd, "")
+            }
+        }
+    }
+    return 1
+}
+
+; =======================================================================================
+; WINDOW HOME PERSISTENT COORDINATE STORAGE AND INTERACTIVE COMMAND ENGINE
+; =======================================================================================
+Global g_mPreHomePositions := Map()
+Global g_mHomeCountdown := Map()
+
+GetWindowHomeKey(hWnd) {
+    try {
+        sClass := WinGetClass(hWnd)
+        sExe := StrLower(WinGetProcessName(hWnd))
+        sTitle := WinGetTitle(hWnd)
+    } catch {
+        return ""
+    }
+
+    sHomeIni := A_ScriptDir "\window-hotkeys-homes.ini"
+    if (!FileExist(sHomeIni)) {
+        return ""
+    }
+
+    try {
+        iniText := FileRead(sHomeIni)
+    } catch {
+        return ""
+    }
+
+    bestKey := ""
+    bestScore := -1
+
+    inHomesSection := false
+    Loop Parse, iniText, "`n", "`r" {
+        line := Trim(A_LoopField)
+        if (line == "")
+            continue
+        if (RegExMatch(line, "i)^\[Homes\]")) {
+            inHomesSection := true
+            continue
+        } else if (RegExMatch(line, "^\[")) {
+            inHomesSection := false
+            continue
+        }
+
+        if (!inHomesSection)
+            continue
+
+        eqPos := InStr(line, "=")
+        if (!eqPos)
+            continue
+
+        fullKey := SubStr(line, 1, eqPos - 1)
+
+        iniClass := ""
+        iniExe := ""
+        iniTitle := ""
+
+        if (RegExMatch(fullKey, "i)Class:\s*([^|]*)", &matchClass)) {
+            iniClass := Trim(matchClass[1])
+        }
+        if (RegExMatch(fullKey, "i)Exe:\s*([^|]*)", &matchExe)) {
+            iniExe := StrLower(Trim(matchExe[1]))
+        }
+        if (RegExMatch(fullKey, "i)Title:\s*(.*)$", &matchTitle)) {
+            iniTitle := Trim(matchTitle[1])
+        }
+
+        if (iniClass != "" && sClass != iniClass)
+            continue
+        if (iniExe != "" && sExe != iniExe)
+            continue
+
+        if (iniTitle != "") {
+            if (!InStr(sTitle, iniTitle) && !InStr(iniTitle, sTitle)) {
+                continue
+            }
+        }
+
+        score := 0
+        if (iniClass != "") score += 1
+        if (iniExe != "") score += 2
+        if (iniTitle != "") score += 10 + StrLen(iniTitle)
+
+        if (score > bestScore) {
+            bestScore := score
+            bestKey := fullKey
+        }
+    }
+
+    return bestKey
+}
+
+GetWindowHomePos(hWnd, &outKey) {
+    outKey := GetWindowHomeKey(hWnd)
+    if (outKey == "") {
+        return ""
+    }
+    sHomeIni := A_ScriptDir "\window-hotkeys-homes.ini"
+    try {
+        return IniRead(sHomeIni, "Homes", outKey, "")
+    } catch {
+        return ""
+    }
+}
+
+SetWindowHome(hWnd) {
+    try {
+        sClass := WinGetClass(hWnd)
+        sExe := StrLower(WinGetProcessName(hWnd))
+        sTitle := WinGetTitle(hWnd)
+        WinGetPos(&X, &Y, &W, &H, hWnd)
+    } catch {
+        ShowTargetToolTip("Invalid Window Focus.")
+        return
+    }
+
+    key := "Class: " . sClass . "|Exe: " . sExe . "|Title: " . sTitle
+    val := X . "," . Y . "," . W . "," . H
+    sHomeIni := A_ScriptDir "\window-hotkeys-homes.ini"
+    
+    try {
+        if (!FileExist(sHomeIni)) {
+            FileAppend("[Homes]`r`n", sHomeIni, "UTF-8")
+        }
+        IniWrite(val, sHomeIni, "Homes", key)
+        ShowTargetToolTip("Home Saved!")
+    } catch Error as err {
+        ShowTargetToolTip("Failed to save home: " . err.Message)
+    }
+}
+
+ClearWindowHome(hWnd) {
+    key := GetWindowHomeKey(hWnd)
+    if (key == "") {
+        ShowTargetToolTip("No registered home found.")
+        return
+    }
+    sHomeIni := A_ScriptDir "\window-hotkeys-homes.ini"
+    try {
+        IniDelete(sHomeIni, "Homes", key)
+        ShowTargetToolTip("Home Cleared!")
+    } catch Error as err {
+        ShowTargetToolTip("Failed to clear home: " . err.Message)
+    }
+}
+
+GoWindowHome(hWnd) {
+    posStr := GetWindowHomePos(hWnd, &key)
+    if (posStr == "") {
+        ShowTargetToolTip("No registered home found.")
+        return
+    }
+    parts := StrSplit(posStr, ",")
+    if (parts.Length == 4) {
+        try {
+            WinGetPos(&origX, &origY, &origW, &origH, hWnd)
+            g_mPreHomePositions[hWnd] := {x: origX, y: origY, w: origW, h: origH}
+            X := Integer(parts[1])
+            Y := Integer(parts[2])
+            W := Integer(parts[3])
+            H := Integer(parts[4])
+            SafeMove(X, Y, W, H, hWnd)
+            ShowTargetToolTip("Moved to Saved Home!")
+        } catch {
+            ShowTargetToolTip("Error relocating to home.")
+        }
+    }
+}
+
+OnHomeCountdownTick(hWnd) {
+    if (!g_mHomeCountdown.Has(hWnd)) {
+        return
+    }
+    
+    info := g_mHomeCountdown[hWnd]
+    info.seconds--
+
+    if (info.seconds <= 0) {
+        g_mHomeCountdown.Delete(hWnd)
+        ToolTip()
+        
+        if (g_mPreHomePositions.Has(hWnd)) {
+            pre := g_mPreHomePositions[hWnd]
+            g_mPreHomePositions.Delete(hWnd)
+            SafeMove(pre.x, pre.y, pre.w, pre.h, hWnd)
+            ShowTargetToolTip("Returned to original position.")
+        }
+        return
+    }
+
+    ToolTip("Window is at Home!`nReturning to original position in " . info.seconds . "s...`nTrigger Home again to DELETE home config.")
+    SetTimer(() => OnHomeCountdownTick(hWnd), -1000)
+}
+
+InteractiveHome(hWnd) {
+    posStr := GetWindowHomePos(hWnd, &key)
+    if (posStr == "") {
+        ShowTargetToolTip("No registered home found.")
+        return
+    }
+    
+    ; Check if countdown is already running
+    if (g_mHomeCountdown.Has(hWnd)) {
+        g_mHomeCountdown.Delete(hWnd)
+        ToolTip()
+        
+        confirm := MsgBox("Strip this window's saved Home position permanently?", "Confirm Delete Home", "YesNo IconQ +AlwaysOnTop")
+        if (confirm == "Yes") {
+            ClearWindowHome(hWnd)
+        } else {
+            ShowTargetToolTip("Action cancelled.")
+        }
+        return
+    }
+
+    parts := StrSplit(posStr, ",")
+    if (parts.Length != 4)
+        return
+
+    hX := Integer(parts[1]), hY := Integer(parts[2]), hW := Integer(parts[3]), hH := Integer(parts[4])
+    
+    try {
+        WinGetPos(&X, &Y, &W, &H, hWnd)
+        isAtHome := (Abs(X - hX) < 10 && Abs(Y - hY) < 10 && Abs(W - hW) < 10 && Abs(H - hH) < 10)
+    } catch {
+        isAtHome := false
+    }
+
+    if (isAtHome) {
+        g_mHomeCountdown[hWnd] := {seconds: 5}
+        ToolTip("Window is at Home!`nReturning to original position in 5s...`nTrigger Home again to DELETE home config.")
+        SetTimer(() => OnHomeCountdownTick(hWnd), -1000)
+    } else {
+        ; Save current position first
+        try {
+            WinGetPos(&origX, &origY, &origW, &origH, hWnd)
+            g_mPreHomePositions[hWnd] := {x: origX, y: origY, w: origW, h: origH}
+            SafeMove(hX, hY, hW, hH, hWnd)
+            ShowTargetToolTip("Moved to Home Position!")
+        } catch {
+            ShowTargetToolTip("Error relocating to home.")
+        }
+    }
+}
+
+ShowHomePeek(hWnd) {
+    posStr := GetWindowHomePos(hWnd, &key)
+    if (posStr == "") {
+        ShowTargetToolTip("No registered home found to peek.")
+        return
+    }
+    
+    parts := StrSplit(posStr, ",")
+    if (parts.Length != 4)
+        return
+
+    hX := Integer(parts[1])
+    hY := Integer(parts[2])
+    hW := Integer(parts[3])
+    hH := Integer(parts[4])
+
+    try {
+        peekGui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20 +Owner")
+        peekGui.BackColor := "00FFAA"
+        WinSetTransparent(90, peekGui)
+        peekGui.Show("X" . hX . " Y" . hY . " W" . hW . " H" . hH . " NoActivate")
+        SetTimer(() => (peekGui.Destroy()), -1200)
+    } catch {
+        ; Silent fail
+    }
 }
 
 #Include "HotWinAHK_aux.ahk"
