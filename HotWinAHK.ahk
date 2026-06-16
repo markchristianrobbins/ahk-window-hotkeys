@@ -684,7 +684,7 @@ CompileIniToStaticHotkeys() {
                     sPrefix := ""
                 }
                 ScriptBuffer .= sPrefix sAHKStroke ":: {`n"
-                if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || InStr(sCmd, "TuckedPeek") || sCmd == "Untuck" || sCmd == "CmdPalette" || sCmd == "KeyDiagnostics" || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "WindowPicker" || sCmd == "Desk3d") {
+                if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || InStr(sCmd, "TuckedPeek") || sCmd == "Untuck" || sCmd == "CmdPalette" || sCmd == "KeyDiagnostics" || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "WindowPicker" || sCmd == "Desk3d" || InStr(sCmd, "WindowHistory") || InStr(sCmd, "Swap") || sCmd == "Gridify") {
                     ScriptBuffer .= '    try Suspend("Permit")`n'
                 }
                 ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
@@ -702,7 +702,7 @@ CompileIniToStaticHotkeys() {
                         sPrefix := ""
                     }
                     ScriptBuffer .= sPrefix counterpartStroke ":: {`n"
-                    if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || InStr(sCmd, "TuckedPeek") || sCmd == "Untuck" || sCmd == "CmdPalette" || sCmd == "KeyDiagnostics" || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "WindowPicker" || sCmd == "Desk3d") {
+                    if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || InStr(sCmd, "TuckedPeek") || sCmd == "Untuck" || sCmd == "CmdPalette" || sCmd == "KeyDiagnostics" || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "WindowPicker" || sCmd == "Desk3d" || InStr(sCmd, "WindowHistory") || InStr(sCmd, "Swap") || sCmd == "Gridify") {
                         ScriptBuffer .= '    try Suspend("Permit")`n'
                     }
                     ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
@@ -775,7 +775,7 @@ LoadHotkeysAtRuntime() {
 ; #region  _engine 
 IsMetaCommand(sCmd) {
     ; Add your untuck commands to the meta-command bypass list
-    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "CopyCommandsHelp") || InStr(sCmd, "CopyCommandsAlpha") || InStr(sCmd, "CopyBindingsAlpha") || InStr(sCmd, "CopyBindingsLocation") || InStr(sCmd, "SysMenu") || InStr(sCmd, "TuckedPeek") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette") || InStr(sCmd, "KeyDiagnostics") || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "RestoreAllMaximized" || sCmd == "MaximizeAllRestored" || sCmd == "MaximizeAllMinimized" || sCmd == "SwapMaximizedRestored" || sCmd == "SwapMinimizedRestored" || sCmd == "MinimizeAll" || sCmd == "MinimizeAllRestored" || sCmd == "MinimizeAllMaximized" || sCmd == "WindowPicker" || sCmd == "Desk3d") {
+    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "CopyCommandsHelp") || InStr(sCmd, "CopyCommandsAlpha") || InStr(sCmd, "CopyBindingsAlpha") || InStr(sCmd, "CopyBindingsLocation") || InStr(sCmd, "SysMenu") || InStr(sCmd, "TuckedPeek") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette") || InStr(sCmd, "KeyDiagnostics") || sCmd == "KeyQuery" || sCmd == "Settings" || sCmd == "RestoreAllMaximized" || sCmd == "MaximizeAllRestored" || sCmd == "MaximizeAllMinimized" || sCmd == "SwapMaximizedRestored" || sCmd == "SwapMinimizedRestored" || sCmd == "MinimizeAll" || sCmd == "MinimizeAllRestored" || sCmd == "MinimizeAllMaximized" || sCmd == "WindowPicker" || sCmd == "Desk3d" || InStr(sCmd, "WindowHistory") || InStr(sCmd, "Swap") || sCmd == "Gridify") {
         return true
     }
 
@@ -935,6 +935,36 @@ ExecuteCommandRegistry(sCmd, hWnd) {
 
         case "Desk3d":
             StartDesk3D()
+
+        case "WindowHistoryPrev":
+            GotoHistoryPosition(hWnd, -1)
+
+        case "WindowHistoryNext":
+            GotoHistoryPosition(hWnd, 1)
+
+        case "WindowHistoryPick":
+            Menu_PickHistory(hWnd)
+
+        case "Swap":
+            SwapWindows(hWnd, "All")
+
+        case "SwapSize":
+            SwapWindows(hWnd, "Size")
+
+        case "SwapPosition":
+            SwapWindows(hWnd, "Position")
+
+        case "SwapPick":
+            StartSwapPick("All")
+
+        case "SwapPickSize":
+            StartSwapPick("Size")
+
+        case "SwapPickPosition":
+            StartSwapPick("Position")
+
+        case "Gridify":
+            ShowGridifyMenu(hWnd)
 
         case "UntuckLeft":
             UntuckDimension("Left")
@@ -2880,6 +2910,10 @@ SafeMove(nX, nY, nW := -1, nH := -1, targetHwnd := "") {
 
     static s_DiagnosticOutputHistory := ""
 
+    if (targetHwnd != "" && WinExist("ahk_id " . targetHwnd)) {
+        RecordWindowHistory(targetHwnd)
+    }
+
     ; Fetch metadata of the target window frame container before any code runs
     targetTitle := "UNKNOWN"
     targetClass := "UNKNOWN"
@@ -3519,6 +3553,16 @@ GetGlobalCommandList() {
         {cat: "FOCUS", cmd: "FocusDeepestWindow", key: "Win + Ctrl + Backspace", desc: "Activate the deepest window in the Z-order list."},
         {cat: "FOCUS", cmd: "WindowPicker", key: "Custom", desc: "Fuzzy-search and filter active GUI windows, instantly focusing selected window."},
         {cat: "FOCUS", cmd: "Desk3d", key: "Custom", desc: "Enable 3D workspace parallax rotation mode, shifting restored windows based on multi-layered depth."},
+        {cat: "FOCUS", cmd: "WindowHistoryPrev", key: "Custom", desc: "Go to the active window's previous position and state in history."},
+        {cat: "FOCUS", cmd: "WindowHistoryNext", key: "Custom", desc: "Go to the active window's next position and state in history."},
+        {cat: "FOCUS", cmd: "WindowHistoryPick", key: "Custom", desc: "Open a menu of past recorded positions and states to pick and apply."},
+        {cat: "MOVE", cmd: "Swap", key: "Custom", desc: "Swap current active window position and size with the window under mouse cursor."},
+        {cat: "MOVE", cmd: "SwapSize", key: "Custom", desc: "Swap current active window size with the window under mouse cursor."},
+        {cat: "MOVE", cmd: "SwapPosition", key: "Custom", desc: "Swap current active window position with the window under mouse cursor."},
+        {cat: "MOVE", cmd: "SwapPick", key: "Custom", desc: "Interactive swap: hover and press Space on the first window, then the second window, to swap size and position."},
+        {cat: "MOVE", cmd: "SwapPickSize", key: "Custom", desc: "Interactive swap: hover and press Space on the first window, then the second window, to swap size only."},
+        {cat: "MOVE", cmd: "SwapPickPosition", key: "Custom", desc: "Interactive swap: hover and press Space on the first window, then the second window, to swap position only."},
+        {cat: "MOVE", cmd: "Gridify", key: "Custom", desc: "Show a nested columns-then-rows menu to instant position the window on custom grid bounds."},
 
         ; == TUCK ==
         {cat: "TUCK", cmd: "TuckLeft", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
@@ -6136,13 +6180,23 @@ ShowWindowPicker() {
     pickerGui.BackColor := "1E1E24"
     pickerGui.SetFont("cFFFFFF")
     
-    pickerGui.Add("Text", "x15 y10 w470", "Type to fuzzy filter windows. Press Enter/Click to activate, Esc to close.")
+    pickerGui.Add("Text", "x15 y10 w470", "Type to fuzzy filter windows. Click a button or press Enter for the first result.")
     
     searchEdit := pickerGui.Add("Edit", "x15 y30 w470 h25 Background2A2A35 cFFFFFF vSearch")
-    winListview := pickerGui.Add("ListView", "x15 y65 w470 h280 Background2A2A35 cFFFFFF Grid NoSortHdr +Report -Multi", ["Window Title", "Process Name", "HWND"])
-    winListview.ModifyCol(1, 280)
-    winListview.ModifyCol(2, 110)
-    winListview.ModifyCol(3, 80)
+    
+    ; Create 8 styled buttons
+    buttonsList := []
+    buttonsData := [] ; Stores {hwnd: hwnd}
+    
+    Loop 8 {
+        i := A_Index
+        yPos := 65 + (i - 1) * 35
+        btn := pickerGui.Add("Button", "x15 y" . yPos . " w470 h30 Left s9 Bold cFFFFFF", "")
+        btn.Visible := false
+        btn.OnEvent("Click", ButtonClicked.Bind(i))
+        buttonsList.Push(btn)
+        buttonsData.Push({hwnd: 0})
+    }
     
     winData := []
     allWins := WinGetList()
@@ -6170,12 +6224,22 @@ ShowWindowPicker() {
         }
     }
     
+    ButtonClicked(btnIdx, *) {
+        hwndTarget := buttonsData[btnIdx].hwnd
+        if (hwndTarget && WinExist("ahk_id " . hwndTarget)) {
+            pickerGui.Destroy()
+            WinActivate("ahk_id " . hwndTarget)
+        }
+    }
+    
     UpdateList(searchText) {
-        winListview.Delete()
         normalizedSearch := StrLower(searchText)
+        
+        ; Find all matches first
+        matchedItems := []
         for idx, item in winData {
             if (normalizedSearch == "") {
-                winListview.Add(, item.title, item.exe, "0x" . Format("{:X}", item.hwnd))
+                matchedItems.Push(item)
             } else {
                 titleL := StrLower(item.title)
                 exeL := StrLower(item.exe)
@@ -6191,33 +6255,41 @@ ShowWindowPicker() {
                     }
                 }
                 if (match) {
-                    winListview.Add(, item.title, item.exe, "0x" . Format("{:X}", item.hwnd))
+                    matchedItems.Push(item)
                 }
             }
         }
-        if (winListview.GetCount() > 0) {
-            winListview.Modify(1, "Select Focus")
+        
+        ; Now update the 8 buttons
+        Loop 8 {
+            i := A_Index
+            if (i <= matchedItems.Length) {
+                item := matchedItems[i]
+                buttonsData[i].hwnd := item.hwnd
+                
+                ; Format title cleanly: limit title length to avoid spoiling layout
+                dispTitle := item.title
+                if (StrLen(dispTitle) > 55) {
+                    dispTitle := SubStr(dispTitle, 1, 52) . "..."
+                }
+                
+                btnText := " [" . i . "]   " . dispTitle . "   (" . item.exe . ")"
+                buttonsList[i].Text := btnText
+                buttonsList[i].Visible := true
+                buttonsList[i].Enabled := true
+            } else {
+                buttonsData[i].hwnd := 0
+                buttonsList[i].Visible := false
+                buttonsList[i].Enabled := false
+            }
         }
     }
     
     searchEdit.OnEvent("Change", (ctrl, *) => UpdateList(ctrl.Value))
-    
-    ActivateSelection(*) {
-        row := winListview.GetNext(0, "Focused")
-        if (row > 0) {
-            hText := winListview.GetText(row, 3)
-            selectedHwnd := Number(hText)
-            pickerGui.Destroy()
-            if (WinExist("ahk_id " . selectedHwnd)) {
-                WinActivate("ahk_id " . selectedHwnd)
-            }
-        }
-    }
-    
-    winListview.OnEvent("DoubleClick", (*) => ActivateSelection())
     pickerGui.OnEvent("Escape", (*) => pickerGui.Destroy())
     
-    pickerGui.Add("Button", "x0 y0 w0 h0 Default", "").OnEvent("Click", (*) => ActivateSelection())
+    ; Add default hidden button to activate the 1st match on Enter keypress
+    pickerGui.Add("Button", "x0 y0 w0 h0 Default", "").OnEvent("Click", (*) => ButtonClicked(1))
     
     UpdateList("")
     pickerGui.Show("w500 h360")
@@ -6280,7 +6352,8 @@ StartDesk3D() {
                 depthIdx: idx
             })
             
-            try WinSetTransparent(76, "ahk_id " . h)
+            ; Windows become 40% transparent during mode (value: 153 opacity)
+            try WinSetTransparent(153, "ahk_id " . h)
             idx++
         }
     }
@@ -6295,7 +6368,7 @@ StartDesk3D() {
     MouseGetPos(&g_DeskStartMouseX, &g_DeskStartMouseY)
     
     SetTimer(TrackDesk3D, 15)
-    ShowTargetToolTip("Desk3D Mode Active. Move mouse to rotate windows. [Esc] to exit.")
+    ShowTargetToolTip("Desk3D Mode Active. Move mouse to rotate windows. Hold Ctrl to magnify. [Esc] to exit.")
 }
 
 TrackDesk3D() {
@@ -6311,12 +6384,15 @@ TrackDesk3D() {
     deltaX := mX - g_DeskStartMouseX
     deltaY := mY - g_DeskStartMouseY
     
+    ; Holding Ctrl magnifies the movement of windows (factor 3.0)
+    magFactor := GetKeyState("Ctrl", "P") ? 3.0 : 1.0
+    
     for item in g_Desk3dWindows {
         if (!WinExist("ahk_id " . item.hwnd)) {
             continue
         }
         
-        weight := Max(0.05, 1.2 - (item.depthIdx - 1) * 0.15)
+        weight := Max(0.05, 1.2 - (item.depthIdx - 1) * 0.15) * magFactor
         shiftX := -deltaX * weight
         shiftY := -deltaY * weight
         
@@ -6346,6 +6422,368 @@ EndDesk3D() {
     }
     g_Desk3dWindows := []
     ShowTargetToolTip("Desk3D Mode Disabled.")
+}
+
+RecordWindowHistory(hwnd) {
+    if (!WinExist("ahk_id " . hwnd))
+        return
+    try {
+        WinGetPos(&cx, &cy, &cw, &ch, hwnd)
+        minMax := WinGetMinMax(hwnd)
+        exeName := WinGetProcessName(hwnd)
+        title := WinGetTitle(hwnd)
+        
+        global g_WindowHistory, g_WindowHistoryIndex
+        if (!g_WindowHistory) {
+            g_WindowHistory := Map()
+            g_WindowHistoryIndex := Map()
+        }
+        
+        if (!g_WindowHistory.Has(hwnd)) {
+            g_WindowHistory[hwnd] := []
+            g_WindowHistoryIndex[hwnd] := 0
+        }
+        
+        histList := g_WindowHistory[hwnd]
+        
+        isDup := false
+        if (histList.Length > 0) {
+            lastItem := histList[histList.Length]
+            if (lastItem.x == cx && lastItem.y == cy && lastItem.w == cw && lastItem.h == ch && lastItem.minMax == minMax) {
+                isDup := true
+            }
+        }
+        
+        if (!isDup) {
+            histList.Push({x: cx, y: cy, w: cw, h: ch, minMax: minMax, time: A_Now})
+            g_WindowHistoryIndex[hwnd] := histList.Length
+            
+            iniPath := A_ScriptDir . "\HotWinAHK_history.ini"
+            cleanExe := RegExReplace(exeName, "i)[^a-z0-9]", "_")
+            
+            countStr := IniRead(iniPath, cleanExe, "Count", "0")
+            countVal := Number(countStr) + 1
+            
+            IniWrite(cx . "," . cy . "," . cw . "," . ch . "," . minMax . "," . A_Now . "," . title, iniPath, cleanExe, "Entry_" . countVal)
+            IniWrite(countVal, iniPath, cleanExe, "Count")
+        }
+    }
+}
+
+GotoHistoryPosition(hwnd, dir) {
+    global g_WindowHistory, g_WindowHistoryIndex
+    if (!g_WindowHistory) {
+        g_WindowHistory := Map()
+        g_WindowHistoryIndex := Map()
+    }
+    
+    if (!WinExist("ahk_id " . hwnd))
+        return
+        
+    RecordWindowHistory(hwnd)
+    
+    if (!g_WindowHistory.Has(hwnd)) {
+        ShowTargetToolTip("No history for this window.")
+        return
+    }
+    
+    histList := g_WindowHistory[hwnd]
+    idx := g_WindowHistoryIndex[hwnd]
+    
+    newIdx := idx + dir
+    if (newIdx < 1 || newIdx > histList.Length) {
+        ShowTargetToolTip("End of history (" . idx . "/" . histList.Length . ")")
+        return
+    }
+    
+    g_WindowHistoryIndex[hwnd] := newIdx
+    item := histList[newIdx]
+    
+    try {
+        if (item.minMax == -1) {
+            WinMinimize("ahk_id " . hwnd)
+        } else if (item.minMax == 1) {
+            WinMaximize("ahk_id " . hwnd)
+        } else {
+            WinRestore("ahk_id " . hwnd)
+            SafeMove(item.x, item.y, item.w, item.h, hwnd)
+        }
+        ShowTargetToolTip("History (" . newIdx . "/" . histList.Length . "): " . item.x . ", " . item.y)
+    }
+}
+
+Menu_PickHistory(hwnd) {
+    if (!WinExist("ahk_id " . hwnd))
+        return
+        
+    try {
+        exeName := WinGetProcessName(hwnd)
+        title := WinGetTitle(hwnd)
+        cleanExe := RegExReplace(exeName, "i)[^a-z0-9]", "_")
+        iniPath := A_ScriptDir . "\HotWinAHK_history.ini"
+        
+        countStr := IniRead(iniPath, cleanExe, "Count", "0")
+        countVal := Number(countStr)
+        
+        if (countVal == 0) {
+            ShowTargetToolTip("No history saved in INI for " . exeName)
+            return
+        }
+        
+        mMenu := Menu()
+        startIdx := Max(1, countVal - 20)
+        
+        Loop {
+            idx := countVal - A_Index + 1 ; reverse
+            if (idx < startIdx)
+                break
+                
+            entryStr := IniRead(iniPath, cleanExe, "Entry_" . idx, "")
+            if (entryStr == "")
+                continue
+                
+            parts := StrSplit(entryStr, ",")
+            if (parts.Length >= 5) {
+                cx := parts[1]
+                cy := parts[2]
+                cw := parts[3]
+                ch := parts[4]
+                minMax := parts[5]
+                timeStr := parts.Length >= 6 ? parts[6] : ""
+                wTitle := parts.Length >= 7 ? parts[7] : title
+                
+                dispTime := ""
+                if (timeStr != "" && StrLen(timeStr) >= 14) {
+                    dispTime := SubStr(timeStr, 9, 2) . ":" . SubStr(timeStr, 11, 2) . " "
+                }
+                
+                menuLabel := dispTime . " " . cx . "x" . cy . " (" . cw . "x" . ch . ") " . SubStr(wTitle, 1, 30)
+                mMenu.Add(menuLabel, Menu_ApplyHistory_Callback.Bind(hwnd, cx, cy, cw, ch, minMax))
+            }
+        }
+        
+        mMenu.Show()
+    }
+}
+
+Menu_ApplyHistory_Callback(hwnd, cx, cy, cw, ch, minMax, *) {
+    if (WinExist("ahk_id " . hwnd)) {
+        try {
+            if (minMax == -1) {
+                WinMinimize("ahk_id " . hwnd)
+            } else if (minMax == 1) {
+                WinMaximize("ahk_id " . hwnd)
+            } else {
+                WinRestore("ahk_id " . hwnd)
+                SafeMove(cx, cy, cw, ch, hwnd)
+            }
+            ShowTargetToolTip("Restored to " . cx . ", " . cy)
+        }
+    }
+}
+
+SwapWindows(hwndActive, mode) {
+    if (!hwndActive || !WinExist("ahk_id " . hwndActive)) {
+        ShowTargetToolTip("Swap: No active window.")
+        return
+    }
+    
+    hwndUnder := MouseGetWindowHWND()
+    if (!hwndUnder || !WinExist("ahk_id " . hwndUnder)) {
+        ShowTargetToolTip("Swap: No window under mouse cursor.")
+        return
+    }
+    
+    if (hwndActive == hwndUnder) {
+        ShowTargetToolTip("Swap: Active window and window under mouse are identical.")
+        return
+    }
+    
+    RecordWindowHistory(hwndActive)
+    RecordWindowHistory(hwndUnder)
+    
+    try {
+        WinGetPos(&x1, &y1, &w1, &h1, hwndActive)
+        WinGetPos(&x2, &y2, &w2, &h2, hwndUnder)
+        
+        if (mode == "All") {
+            SafeMove(x2, y2, w2, h2, hwndActive)
+            SafeMove(x1, y1, w1, h1, hwndUnder)
+            ShowTargetToolTip("Swapped positions and sizes.")
+        } else if (mode == "Size") {
+            SafeMove(x1, y1, w2, h2, hwndActive)
+            SafeMove(x2, y2, w1, h1, hwndUnder)
+            ShowTargetToolTip("Swapped window sizes.")
+        } else if (mode == "Position") {
+            SafeMove(x2, y2, w1, h1, hwndActive)
+            SafeMove(x1, y1, w2, h2, hwndUnder)
+            ShowTargetToolTip("Swapped window positions.")
+        }
+    } catch {
+        ShowTargetToolTip("Swap: Target window is locked or not responding.")
+    }
+}
+
+StartSwapPick(mode) {
+    ShowTargetToolTip("SwapPick: Hover over the FIRST window and press Space to select. [Esc] to cancel.")
+    
+    hwnd1 := 0
+    hwnd2 := 0
+    
+    Loop {
+        if (!GetKeyState("Space", "P")) {
+            Sleep(30)
+            if (GetKeyState("Esc", "P")) {
+                ShowTargetToolTip("SwapPick Cancelled.")
+                return
+            }
+            continue
+        }
+        
+        hwnd1 := MouseGetWindowHWND()
+        if (hwnd1) {
+            wTitle := WinGetTitle(hwnd1)
+            ShowTargetToolTip("Selected Window 1: " . SubStr(wTitle, 1, 20) . "`nRelease Space to continue...")
+            while (GetKeyState("Space", "P")) {
+                Sleep(20)
+            }
+            break
+        }
+        Sleep(20)
+    }
+    
+    ShowTargetToolTip("SwapPick: Hover over the SECOND window and press Space to select. [Esc] to cancel.")
+    
+    Loop {
+        if (!GetKeyState("Space", "P")) {
+            Sleep(30)
+            if (GetKeyState("Esc", "P")) {
+                ShowTargetToolTip("SwapPick Cancelled.")
+                return
+            }
+            continue
+        }
+        
+        hwnd2 := MouseGetWindowHWND()
+        if (hwnd2) {
+            if (hwnd2 == hwnd1) {
+                ShowTargetToolTip("Second window is the same as the first! Hover over a different window.")
+                while (GetKeyState("Space", "P")) {
+                    Sleep(20)
+                }
+                continue
+            }
+            
+            wTitle := WinGetTitle(hwnd2)
+            ShowTargetToolTip("Selected Window 2: " . SubStr(wTitle, 1, 20))
+            while (GetKeyState("Space", "P")) {
+                Sleep(20)
+            }
+            break
+        }
+        Sleep(20)
+    }
+    
+    if (hwnd1 && hwnd2 && WinExist("ahk_id " . hwnd1) && WinExist("ahk_id " . hwnd2)) {
+        RecordWindowHistory(hwnd1)
+        RecordWindowHistory(hwnd2)
+        
+        WinGetPos(&x1, &y1, &w1, &h1, hwnd1)
+        WinGetPos(&x2, &y2, &w2, &h2, hwnd2)
+        
+        if (mode == "All") {
+            SafeMove(x2, y2, w2, h2, hwnd1)
+            SafeMove(x1, y1, w1, h1, hwnd2)
+            ShowTargetToolTip("Swapped positions and sizes.")
+        } else if (mode == "Size") {
+            SafeMove(x1, y1, w2, h2, hwnd1)
+            SafeMove(x2, y2, w1, h1, hwnd2)
+            ShowTargetToolTip("Swapped window sizes.")
+        } else if (mode == "Position") {
+            SafeMove(x2, y2, w1, h1, hwnd1)
+            SafeMove(x1, y1, w2, h2, hwnd2)
+            ShowTargetToolTip("Swapped window positions.")
+        }
+    } else {
+        ShowTargetToolTip("SwapPick Failed: Windows no longer exist.")
+    }
+}
+
+ShowGridifyMenu(hWnd) {
+    if (!hWnd || !WinExist("ahk_id " . hWnd))
+        return
+        
+    try {
+        WinGetPos(&X, &Y, &W, &H, hWnd)
+        hMon := DllCall("MonitorFromWindow", "ptr", hWnd, "uint", 2, "ptr")
+        MI := Buffer(40)
+        NumPut("uint", 40, MI, 0)
+        
+        if (!DllCall("GetMonitorInfo", "ptr", hMon, "ptr", MI))
+            return
+            
+        mLeft := NumGet(MI, 20, "int")
+        mTop := NumGet(MI, 24, "int")
+        mRight := NumGet(MI, 28, "int")
+        mBottom := NumGet(MI, 32, "int")
+        
+        gX := 15
+        gY := 15
+        pX := 424
+        pY := 232
+        
+        mainMenu := Menu()
+        
+        Loop 9 {
+            c := A_Index
+            subMenu := Menu()
+            
+            Loop 9 {
+                r := A_Index
+                label := r . " Row" . (r > 1 ? "s" : "") . "  (" . (c * pX - 6) . "x" . (r * pY - 6) . ")"
+                subMenu.Add(label, ApplyGridify.Bind(hWnd, c, r, mLeft, mTop, mRight, mBottom, gX, gY, pX, pY, X, Y))
+            }
+            
+            mainMenu.Add(c . " Column" . (c > 1 ? "s" : ""), subMenu)
+        }
+        
+        mainMenu.Show()
+    }
+}
+
+ApplyGridify(hWnd, c, r, mLeft, mTop, mRight, mBottom, gX, gY, pX, pY, X, Y, *) {
+    if (!WinExist("ahk_id " . hWnd))
+        return
+        
+    RecordWindowHistory(hWnd)
+    
+    maxCols := Floor((mRight - mLeft - gX) / pX)
+    maxRows := Floor((mBottom - mTop - gY) / pY)
+    
+    cLeft := Round((X - mLeft - gX) / pX)
+    rTop := Round((Y - mTop - gY) / pY)
+    
+    if (cLeft + c > maxCols) {
+        cLeft := maxCols - c
+    }
+    if (cLeft < 0) {
+        cLeft := 0
+    }
+    
+    if (rTop + r > maxRows) {
+        rTop := maxRows - r
+    }
+    if (rTop < 0) {
+        rTop := 0
+    }
+    
+    nW := (c * pX) - 6
+    nH := (r * pY) - 6
+    nX := mLeft + gX + (cLeft * pX)
+    nY := mTop + gY + (rTop * pY)
+    
+    SafeMove(nX, nY, nW, nH, hWnd)
+    ShowTargetToolTip("Gridified: " . c . "x" . r)
 }
 
 #HotIf g_Desk3dActive
