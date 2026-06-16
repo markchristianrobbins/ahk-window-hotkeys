@@ -121,6 +121,40 @@ $^#f4:: {
     ExecuteActionWithCondition("DragWindow", "")
 }
 
+$^!#r:: {
+    ExecuteActionWithCondition("RestoreAllMaximized", "")
+}
+
+$^!#m:: {
+    ExecuteActionWithCondition("MaximizeAllRestored", "")
+}
+
+$^!+#m:: {
+    ExecuteActionWithCondition("MaximizeAllMinimized", "")
+}
+
+$^!#s:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapMaximizedRestored", "")
+}
+
+$^!+#s:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapMinimizedRestored", "")
+}
+
+$^!#q:: {
+    ExecuteActionWithCondition("MinimizeAll", "")
+}
+
+$^!+#d:: {
+    ExecuteActionWithCondition("MinimizeAllRestored", "")
+}
+
+$^!#z:: {
+    ExecuteActionWithCondition("MinimizeAllMaximized", "")
+}
+
 $^#.:: {
     ExecuteActionWithCondition("SetHome", "")
 }
@@ -167,6 +201,31 @@ $!#pgup:: {
 
 $^#backspace:: {
     ExecuteActionWithCondition("FocusDeepestWindow", "")
+}
+
+$^#tab:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("WindowPicker", "")
+}
+
+$^#3:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("Desk3d", "")
+}
+
+$^#pgup:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("WindowHistoryPrev", "")
+}
+
+$^#pgdn:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("WindowHistoryNext", "")
+}
+
+$^#p:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("WindowHistoryPick", "")
 }
 
 $numpad5:: {
@@ -279,6 +338,70 @@ $+numpad5:: {
 
 $+numpadclear:: {
     ExecuteActionWithCondition("EdgeCenter", "")
+}
+
+$^+numpad4:: {
+    ExecuteActionWithCondition("EdgeInLeft", "")
+}
+
+$^+numpadleft:: {
+    ExecuteActionWithCondition("EdgeInLeft", "")
+}
+
+$^+numpad6:: {
+    ExecuteActionWithCondition("EdgeInRight", "")
+}
+
+$^+numpadright:: {
+    ExecuteActionWithCondition("EdgeInRight", "")
+}
+
+$^+numpad8:: {
+    ExecuteActionWithCondition("EdgeInTop", "")
+}
+
+$^+numpadup:: {
+    ExecuteActionWithCondition("EdgeInTop", "")
+}
+
+$^+numpad2:: {
+    ExecuteActionWithCondition("EdgeInBottom", "")
+}
+
+$^+numpaddown:: {
+    ExecuteActionWithCondition("EdgeInBottom", "")
+}
+
+$^+numpad7:: {
+    ExecuteActionWithCondition("EdgeInTopLeft", "")
+}
+
+$^+numpadhome:: {
+    ExecuteActionWithCondition("EdgeInTopLeft", "")
+}
+
+$^+numpad9:: {
+    ExecuteActionWithCondition("EdgeInTopRight", "")
+}
+
+$^+numpadpgup:: {
+    ExecuteActionWithCondition("EdgeInTopRight", "")
+}
+
+$^+numpad1:: {
+    ExecuteActionWithCondition("EdgeInBottomLeft", "")
+}
+
+$^+numpadend:: {
+    ExecuteActionWithCondition("EdgeInBottomLeft", "")
+}
+
+$^+numpad3:: {
+    ExecuteActionWithCondition("EdgeInBottomRight", "")
+}
+
+$^+numpadpgdn:: {
+    ExecuteActionWithCondition("EdgeInBottomRight", "")
 }
 
 $numpad4:: {
@@ -407,6 +530,41 @@ $^numpad3:: {
 
 $^numpadpgdn:: {
     ExecuteActionWithCondition("JumpGridBottomRight", "")
+}
+
+$!#w:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("Swap", "")
+}
+
+$!#q:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapSize", "")
+}
+
+$!#p:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapPosition", "")
+}
+
+$!#space:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapPick", "")
+}
+
+$!+#space:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapPickSize", "")
+}
+
+$^!#space:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SwapPickPosition", "")
+}
+
+$^#g:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("Gridify", "")
 }
 
 #rbutton:: {
@@ -713,6 +871,38 @@ $^!#numpadpgdn:: {
     ExecuteActionWithCondition("SubtractBottomRight", "")
 }
 
+$^!+#left:: {
+    ExecuteActionWithCondition("HalfSizeLeft", "")
+}
+
+$^!+#right:: {
+    ExecuteActionWithCondition("HalfSizeRight", "")
+}
+
+$^!+#up:: {
+    ExecuteActionWithCondition("HalfSizeTop", "")
+}
+
+$^!+#down:: {
+    ExecuteActionWithCondition("HalfSizeBottom", "")
+}
+
+$!+#left:: {
+    ExecuteActionWithCondition("DoubleSizeLeft", "")
+}
+
+$!+#right:: {
+    ExecuteActionWithCondition("DoubleSizeRight", "")
+}
+
+$!+#up:: {
+    ExecuteActionWithCondition("DoubleSizeTop", "")
+}
+
+$!+#down:: {
+    ExecuteActionWithCondition("DoubleSizeBottom", "")
+}
+
 $#numpad4:: {
     ExecuteActionWithCondition("StretchToGridLeft", "")
 }
@@ -944,6 +1134,43 @@ $^!#up:: {
 
 $^!#down:: {
     ExecuteActionWithCondition("UntuckBottom", "")
+}
+
+$^+#d:: {
+    ExecuteActionWithCondition("TuckPeekRight", "")
+}
+
+$^+#w:: {
+    ExecuteActionWithCondition("TuckPeekTop", "")
+}
+
+$^+#x:: {
+    ExecuteActionWithCondition("TuckPeekBottom", "")
+}
+
+$!#a:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("TuckedPeekAll", "")
+}
+
+$!#l:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("TuckedPeekLeft", "")
+}
+
+$!#r:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("TuckedPeekRight", "")
+}
+
+$!#t:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("TuckedPeekTop", "")
+}
+
+$!#b:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("TuckedPeekBottom", "")
 }
 
 $+#backspace:: {

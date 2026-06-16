@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-feat(ini,docs): implement recursively nested folding region structure for config matrix and synchronize all system documentation
+refactor(ini,core): unify INI config matrix formatting, remove blank lines, add region comments, and bind unbound commands
 ```
 
 <!-- Example AI Log Entry
@@ -31,6 +31,24 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-16T15:46:00Z]
+### 🎯 Primary Goals & Requirements
+- **Unified Config Matrix Formatting**: Reorganize `HotWinAHK.ini` to enforce no blank/empty lines across categories, subcategories, settings, or regional boundaries.
+- **Group Explanations & Descriptions**: Inject expressive category and subcategory comments directly beneath region marks to clearly declare the purpose of each command segment.
+- **Define Custom Default Keybinds**: Sift through all historically unbound commands (containing blank bindings) and assign newly invented, non-conflicting hotkey mappings to ensure they are instantly accessible and functional.
+- **Synchronize Matrix Engine Checks**: Ensure that the automatic `.ini` maintenance script (`EnsureAllCommandsInIni` inside `HotWinAHK.ahk`) perfectly aligns with these design requirements, preventing the accidental generation of blank lines or unhelpful comments, and retaining descriptive layouts safely.
+
+### 🛠️ Completed Changes in this Session
+- **Updated Matrix Engine**: Refactored `EnsureAllCommandsInIni` inside `HotWinAHK.ahk` to load structured subregion description definitions (`desc`), printing them beneath region tags, fully omitting empty newline loops during assembly, and cleaning custom headers of blank line clusters.
+- **Polished Configurations INI Matrix**: Overwrote `HotWinAHK.ini` to match the exact spacing properties, printing high-contrast, fully detailed region documentation tags with newly invented keybind assignments for Bulk, Focus, EdgeIn, Swap, HalfDouble, and Tuck sub-families.
+- **Tracked Completed Objectives**: Documented the formatting milestone under `AITASKS.md`.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-16T15:25:00Z]
 ### 🎯 Primary Goals & Requirements

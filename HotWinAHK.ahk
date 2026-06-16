@@ -575,6 +575,9 @@ EnsureAllCommandsInIni() {
     
     Loop Parse, iniText, "`n", "`r" {
         line := Trim(A_LoopField)
+        if (InStr(line, "#region") || InStr(line, "#endregion")) {
+            continue
+        }
         if (RegExMatch(line, "^\[([^\]]+)\]$", &match)) {
             hasHitSection := true
             if (currSectionMain != "") {
@@ -602,92 +605,98 @@ EnsureAllCommandsInIni() {
     }
     
     ; If the top headerComments are empty, provide a clean default header
-    if (Trim(headerComments, "`r`n`t ") == "") {
+    if (Trim(headerComments, "`r`n`t ") == "" || InStr(headerComments, "WINDOW NUDGER")) {
         headerComments := "; =======================================================================================`r`n"
         headerComments .= ";                        WINDOW NUDGER CONFIGURATION MATRIX`r`n"
         headerComments .= "; =======================================================================================`r`n"
-        headerComments .= "; SYNTAX RULES:`r`n"
-        headerComments .= ";   [CommandName]        -> Active command (Runs when keys match).`r`n"
-        headerComments .= ";   [-CommandName]       -> Disabled command (Ignored completely by the engine).`r`n"
-        headerComments .= ";   keys1=Combo|Filter   -> First hotkey assignment with optional conditional filter.`r`n"
-        headerComments .= ";   keys2=Combo          -> Second hotkey alternative assignment for the SAME command.`r`n`r`n"
+        headerComments .= "; SYNTAX: [CommandName] (Active) or [-CommandName] (Disabled)`r`n"
+        headerComments .= "; keys1=Combo|Filter  (Optional filter like wintitleis=Chrome)`r`n"
     } else {
-        headerComments := Trim(headerComments, "`r`n") . "`r`n`r`n"
+        cleanedHeader := ""
+        Loop Parse, headerComments, "`n", "`r" {
+            line := Trim(A_LoopField)
+            if (line != "") {
+                cleanedHeader .= line . "`r`n"
+            }
+        }
+        headerComments := cleanedHeader
     }
-    
-    ; Nested folder hierarchy structure
     iniStructure := [
         {
             cat: "SYSTEM",
             name: "System",
+            desc: "Administrative utilities, telemetry dashboards, configuration hot-reloading, and debug tools.",
             subs: [
-                { name: "Utilities", cmds: ["HelpScreen", "CmdPalette", "WinInfo", "PeekUnderMouse", "SysMenu"] },
-                { name: "Clipboard", cmds: ["CopyCommands", "CopyBindings", "CopyCommandsHelp", "CopyCommandsAlpha", "CopyBindingsAlpha", "CopyBindingsLocation"] },
-                { name: "Engine", cmds: ["ToggleSuspension", "ReloadConfig", "EditConfig", "ExitProgram", "RestartProgram", "KeyDiagnostics", "KeyQuery", "Settings"] }
+                { name: "Utilities", desc: "Diagnostic overlay displays, command palettes, and custom context menus.", cmds: ["HelpScreen", "CmdPalette", "WinInfo", "PeekUnderMouse", "SysMenu"] },
+                { name: "Clipboard", desc: "Fast extraction of system shortcuts, active layout bounds, and command help definitions.", cmds: ["CopyCommands", "CopyBindings", "CopyCommandsHelp", "CopyCommandsAlpha", "CopyBindingsAlpha", "CopyBindingsLocation"] },
+                { name: "Engine", desc: "Processes controlling suspension toggles, configuration updates, and preference properties.", cmds: ["ToggleSuspension", "ReloadConfig", "EditConfig", "ExitProgram", "RestartProgram", "KeyDiagnostics", "KeyQuery", "Settings"] }
             ]
         },
         {
             cat: "WINDOW",
             name: "Window",
+            desc: "Coordinate placement, boundary states, attribute overrides, and bulk actions on application windows.",
             subs: [
-                { name: "Attributes", cmds: ["AlwaysOnTop", "SetOpacity70", "RemoveOpacity", "SendToBack"] },
-                { name: "Tray", cmds: ["MinimizeToTray", "PickFromTray"] },
-                { name: "Interactive", cmds: ["DragWindow"] },
-                { name: "Bulk", cmds: ["RestoreAllMaximized", "MaximizeAllRestored", "MaximizeAllMinimized", "SwapMaximizedRestored", "SwapMinimizedRestored", "MinimizeAll", "MinimizeAllRestored", "MinimizeAllMaximized"] }
+                { name: "Attributes", desc: "Attributes including level toggles, frame transparency values, and layout stacking.", cmds: ["AlwaysOnTop", "SetOpacity70", "RemoveOpacity", "SendToBack"] },
+                { name: "Tray", desc: "State stowing and recovery interfaces driving custom system notification tasks.", cmds: ["MinimizeToTray", "PickFromTray"] },
+                { name: "Interactive", desc: "Direct user-interactive bounds manipulation features.", cmds: ["DragWindow"] },
+                { name: "Bulk", desc: "Symmetrical state actions applied across multiple target window containers simultaneously.", cmds: ["RestoreAllMaximized", "MaximizeAllRestored", "MaximizeAllMinimized", "SwapMaximizedRestored", "SwapMinimizedRestored", "MinimizeAll", "MinimizeAllRestored", "MinimizeAllMaximized"] }
             ]
         },
         {
             cat: "HOME",
             name: "Home",
+            desc: "Target locking, layout footprints, and remote window alignment restorations.",
             subs: [
-                { name: "Targeting", cmds: ["SetHome", "ClearHome", "GoHome", "Home", "HomePeek"] }
+                { name: "Targeting", desc: "Coord tracking and snapping windows to configured reference layouts.", cmds: ["SetHome", "ClearHome", "GoHome", "Home", "HomePeek"] }
             ]
         },
         {
             cat: "FOCUS",
             name: "Focus",
+            desc: "Z-order stack traversal, fuzzy search pickers, layout history steps, and volumetric spaces.",
             subs: [
-                { name: "Cycling", cmds: ["NextWindow", "PrevWindow", "NextClassWindow", "PrevClassWindow"] },
-                { name: "Advanced", cmds: ["FocusDeepestWindow", "WindowPicker", "Desk3d", "WindowHistoryPrev", "WindowHistoryNext", "WindowHistoryPick"] }
+                { name: "Cycling", desc: "Moving layout focus sequentially across open application processes.", cmds: ["NextWindow", "PrevWindow", "NextClassWindow", "PrevClassWindow"] },
+                { name: "Advanced", desc: "Fuzzy title filters, depth layers, and history layout state controllers.", cmds: ["FocusDeepestWindow", "WindowPicker", "Desk3d", "WindowHistoryPrev", "WindowHistoryNext", "WindowHistoryPick"] }
             ]
         },
         {
             cat: "MOVE",
             name: "Move",
+            desc: "Precision coordinate moves, physical alignment snaps, partition shifts, and layout swaps.",
             subs: [
-                { name: "Precision", cmds: ["Center", "MoveTadLeft", "MoveTadRight", "MoveTadUp", "MoveTadDown", "MovepxLeft", "MovepxRight", "MovepxUp", "MovepxDown"] },
-                { name: "Align", cmds: ["EdgeLeft", "EdgeRight", "EdgeTop", "EdgeBottom", "EdgeTopLeft", "EdgeTopRight", "EdgeBottomLeft", "EdgeBottomRight", "EdgeCenter", "EdgeInLeft", "EdgeInRight", "EdgeInTop", "EdgeInBottom", "EdgeInTopLeft", "EdgeInTopRight", "EdgeInBottomLeft", "EdgeInBottomRight"] },
-                { name: "MoveToGrid", cmds: ["MoveToGridLeft", "MoveToGridRight", "MoveToGridUp", "MoveToGridDown", "MoveToGridTopLeft", "MoveToGridTopRight", "MoveToGridBottomLeft", "MoveToGridBottomRight"] },
-                { name: "JumpGrid", cmds: ["JumpGridLeft", "JumpGridRight", "JumpGridUp", "JumpGridDown", "JumpGridTopLeft", "JumpGridTopRight", "JumpGridBottomLeft", "JumpGridBottomRight"] },
-                { name: "Interactive", cmds: ["Swap", "SwapSize", "SwapPosition", "SwapPick", "SwapPickSize", "SwapPickPosition", "Gridify"] }
+                { name: "Precision", desc: "Moves windows by small offsets (10px, 1px) or aligns centers.", cmds: ["Center", "MoveTadLeft", "MoveTadRight", "MoveTadUp", "MoveTadDown", "MovepxLeft", "MovepxRight", "MovepxUp", "MovepxDown"] },
+                { name: "Align", desc: "Snaps windows directly along physical monitor bounds or grid sectors.", cmds: ["EdgeLeft", "EdgeRight", "EdgeTop", "EdgeBottom", "EdgeTopLeft", "EdgeTopRight", "EdgeBottomLeft", "EdgeBottomRight", "EdgeCenter", "EdgeInLeft", "EdgeInRight", "EdgeInTop", "EdgeInBottom", "EdgeInTopLeft", "EdgeInTopRight", "EdgeInBottomLeft", "EdgeInBottomRight"] },
+                { name: "MoveToGrid", desc: "Slices monitor monitors into fractions and centers windows on selected parts.", cmds: ["MoveToGridLeft", "MoveToGridRight", "MoveToGridUp", "MoveToGridDown", "MoveToGridTopLeft", "MoveToGridTopRight", "MoveToGridBottomLeft", "MoveToGridBottomRight"] },
+                { name: "JumpGrid", desc: "Shifts windows along layout partitions relative to current cells.", cmds: ["JumpGridLeft", "JumpGridRight", "JumpGridUp", "JumpGridDown", "JumpGridTopLeft", "JumpGridTopRight", "JumpGridBottomLeft", "JumpGridBottomRight"] },
+                { name: "Interactive", desc: "Boundary exchange swaps, hover-relative selections, and menu grid placement.", cmds: ["Swap", "SwapSize", "SwapPosition", "SwapPick", "SwapPickSize", "SwapPickPosition", "Gridify"] }
             ]
         },
         {
             cat: "SIZE",
             name: "Size",
+            desc: "Ratios adjustments, frame trimming, border additions, grid snaps, and grid stretches.",
             subs: [
-                { name: "GridBinding", cmds: ["MouseToGrid", "MouseRelativeSize", "SnapToGridEnlarge", "SnapToGridShrink", "ScaleExpand10px", "ScaleReduce10px", "ScaleExpandGridPart", "ScaleReduceGridPart"] },
-                { name: "Trim", cmds: ["TrimTop", "TrimBottom", "TrimLeft", "TrimRight", "TrimAll", "TrimTopLeft", "TrimTopRight", "TrimBottomLeft", "TrimBottomRight"] },
-                { name: "Grow", cmds: ["AddTop", "AddBottom", "AddLeft", "AddRight", "AddTopLeft", "AddTopRight", "AddBottomLeft", "AddBottomRight", "GrowLeft", "GrowRight", "GrowTop", "GrowBottom", "GrowAll", "GrowTopLeft", "GrowTopRight", "GrowBottomLeft", "GrowBottomRight"] },
-                { name: "Shrink", cmds: ["SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight"] },
-                { name: "HalfDouble", cmds: ["HalfSizeLeft", "HalfSizeRight", "HalfSizeTop", "HalfSizeBottom", "DoubleSizeLeft", "DoubleSizeRight", "DoubleSizeTop", "DoubleSizeBottom"] },
-                { name: "StretchGrid", cmds: ["StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "StretchToGridTopLeft", "StretchToGridTopRight", "StretchToGridBottomLeft", "StretchToGridBottomRight"] },
-                { name: "PullGrid", cmds: ["PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "PullToGridTopLeft", "PullToGridTopRight", "PullToGridBottomLeft", "PullToGridBottomRight"] },
-                { name: "StretchScreenEdge", cmds: ["StretchLeft", "StretchRight", "StretchTop", "StretchBottom", "StretchTopLeft", "StretchTopRight", "StretchBottomLeft", "StretchBottomRight"] }
+                { name: "GridBinding", desc: "Direct mouse sizing, padding overrides, and scale factors.", cmds: ["MouseToGrid", "MouseRelativeSize", "SnapToGridEnlarge", "SnapToGridShrink", "ScaleExpand10px", "ScaleReduce10px", "ScaleExpandGridPart", "ScaleReduceGridPart"] },
+                { name: "Trim", desc: "Symmetry border trims matching target grid proportions.", cmds: ["TrimTop", "TrimBottom", "TrimLeft", "TrimRight", "TrimAll", "TrimTopLeft", "TrimTopRight", "TrimBottomLeft", "TrimBottomRight"] },
+                { name: "Grow", desc: "Symmetry border expansions enlarging target sizes.", cmds: ["AddTop", "AddBottom", "AddLeft", "AddRight", "AddTopLeft", "AddTopRight", "AddBottomLeft", "AddBottomRight", "GrowLeft", "GrowRight", "GrowTop", "GrowBottom", "GrowAll", "GrowTopLeft", "GrowTopRight", "GrowBottomLeft", "GrowBottomRight"] },
+                { name: "Shrink", desc: "Symmetry border contractions shrinking target dimensions.", cmds: ["SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight"] },
+                { name: "HalfDouble", desc: "Fast dimension updates scaling window size by 0.5x or 2.0x.", cmds: ["HalfSizeLeft", "HalfSizeRight", "HalfSizeTop", "HalfSizeBottom", "DoubleSizeLeft", "DoubleSizeRight", "DoubleSizeTop", "DoubleSizeBottom"] },
+                { name: "StretchGrid", desc: "Stretches target borders onto custom screen segments.", cmds: ["StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "StretchToGridTopLeft", "StretchToGridTopRight", "StretchToGridBottomLeft", "StretchToGridBottomRight"] },
+                { name: "PullGrid", desc: "Pulls target margins onto predicted grid lines.", cmds: ["PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "PullToGridTopLeft", "PullToGridTopRight", "PullToGridBottomLeft", "PullToGridBottomRight"] },
+                { name: "StretchScreenEdge", desc: "Expands window borders outward onto screen limits.", cmds: ["StretchLeft", "StretchRight", "StretchTop", "StretchBottom", "StretchTopLeft", "StretchTopRight", "StretchBottomLeft", "StretchBottomRight"] }
             ]
         },
         {
             cat: "TUCK",
             name: "Tuck",
+            desc: "Marginal docking, off-screen hiding, tactile peek actions, and pop-up picker menus.",
             subs: [
-                { name: "Actions", cmds: ["TuckLeft", "TuckRight", "TuckUp", "TuckDown", "BumpEdgeUntuck", "BumpEdgeUntuckActivate", "PeekTucked", "Untuck", "UntuckLeft", "UntuckRight", "UntuckTop", "UntuckBottom", "TuckPeekLeft", "TuckPeekRight", "TuckPeekTop", "TuckPeekBottom", "TuckedPeekAll", "TuckedPeekLeft", "TuckedPeekRight", "TuckedPeekTop", "TuckedPeekBottom"] }
+                { name: "Actions", desc: "Folds containers under screen edges keeping small peek boundaries visible.", cmds: ["TuckLeft", "TuckRight", "TuckUp", "TuckDown", "BumpEdgeUntuck", "BumpEdgeUntuckActivate", "PeekTucked", "Untuck", "UntuckLeft", "UntuckRight", "UntuckTop", "UntuckBottom", "TuckPeekLeft", "TuckPeekRight", "TuckPeekTop", "TuckPeekBottom", "TuckedPeekAll", "TuckedPeekLeft", "TuckedPeekRight", "TuckedPeekTop", "TuckedPeekBottom"] }
             ]
         }
     ]
-    
     localRows := GetGlobalCommandList()
-    
-    ; Keep track of all curated commands to verify if they are in the master list
     curatedSet := Map()
     for outerCat in iniStructure {
         for subCat in outerCat.subs {
@@ -696,8 +705,6 @@ EnsureAllCommandsInIni() {
             }
         }
     }
-    
-    ; Auto-categorize any unmapped commands from localRows into the correct category
     for row in localRows {
         if (InStr(row.cmd, " ")) {
             continue
@@ -709,7 +716,7 @@ EnsureAllCommandsInIni() {
                     if (outerCat.subs.Length > 0) {
                         outerCat.subs[outerCat.subs.Length].cmds.Push(row.cmd)
                     } else {
-                        outerCat.subs.Push({ name: "Other", cmds: [row.cmd] })
+                        outerCat.subs.Push({ name: "Other", desc: "Uncategorized preferences and custom actions.", cmds: [row.cmd] })
                     }
                     curatedSet[cmdLower] := true
                     break
@@ -717,25 +724,27 @@ EnsureAllCommandsInIni() {
             }
         }
     }
-    
     writtenCommands := Map()
     newIniText := headerComments
-    
     for outerCat in iniStructure {
         newIniText .= ";   #region " . outerCat.name . "`r`n"
+        if (outerCat.HasOwnProp("desc")) {
+            newIniText .= ";   " . outerCat.desc . "`r`n"
+        }
         for subCat in outerCat.subs {
-            newIniText .= "    `;   #region " . subCat.name . "`r`n"
+            newIniText .= "    ;   #region " . subCat.name . "`r`n"
+            if (subCat.HasOwnProp("desc")) {
+                newIniText .= "    ;   " . subCat.desc . "`r`n"
+            }
             for cmdName in subCat.cmds {
                 cleanCmd := StrLower(cmdName)
                 if (writtenCommands.Has(cleanCmd)) {
                     continue
                 }
                 writtenCommands[cleanCmd] := true
-                
                 if (sectionsMap.Has(cleanCmd)) {
                     secData := sectionsMap[cleanCmd]
                     sectionsMap.Delete(cleanCmd)
-                    
                     newIniText .= "        " . secData.orig . "`r`n"
                     Loop Parse, secData.keys, "`n", "`r" {
                         line := Trim(A_LoopField)
@@ -745,7 +754,6 @@ EnsureAllCommandsInIni() {
                         newIniText .= "            " . line . "`r`n"
                     }
                 } else {
-                    ; Completely missing command! Find description/default key
                     rowDesc := ""
                     rowKey := ""
                     for row in localRows {
@@ -756,25 +764,24 @@ EnsureAllCommandsInIni() {
                         }
                     }
                     if (rowDesc != "") {
-                        newIniText .= "            `; " . rowDesc . "`r`n"
+                        newIniText .= "            ; " . rowDesc . "`r`n"
                     }
                     newIniText .= "        [-" . cmdName . "]`r`n"
                     defaultBinding := rowKey
                     if (defaultBinding == "Custom" || defaultBinding == "Edge Bump" || defaultBinding == "Edge Click/Drag" || defaultBinding == "Auto Indicator") {
                         defaultBinding := ""
                     }
-                    newIniText .= "            `;keys1=" . defaultBinding . "`r`n"
+                    newIniText .= "            ;keys1=" . defaultBinding . "`r`n"
                 }
             }
-            newIniText .= "    `; #endregion " . subCat.name . "`r`n"
+            newIniText .= "    ; #endregion " . subCat.name . "`r`n"
         }
-        newIniText .= "; #endregion " . outerCat.name . "`r`n`r`n"
+        newIniText .= "; #endregion " . outerCat.name . "`r`n"
     }
-    
-    ; If any sections (like [Settings]) are remaining, they are custom configurations we must append safely
     if (sectionsMap.Count > 0) {
         newIniText .= ";   #region Preferences`r`n"
-        newIniText .= "    `;   #region Settings`r`n"
+        newIniText .= ";   User preferences, custom defaults, and localized setup settings.`r`n"
+        newIniText .= "    ;   #region Settings`r`n"
         for key, value in sectionsMap {
             newIniText .= "        " . value.orig . "`r`n"
             Loop Parse, value.keys, "`n", "`r" {
@@ -784,13 +791,10 @@ EnsureAllCommandsInIni() {
                 }
                 newIniText .= "            " . line . "`r`n"
             }
-            newIniText .= "`r`n"
         }
-        newIniText .= "    `; #endregion Settings`r`n"
+        newIniText .= "    ; #endregion Settings`r`n"
         newIniText .= "; #endregion Preferences`r`n"
     }
-    
-    ; Only write back to disk if it actually changed to avoid disk wear / triggering loop reloads
     if (Trim(newIniText) != Trim(iniText)) {
         FileDelete(g_sIniFile)
         FileAppend(newIniText, g_sIniFile, "UTF-8")

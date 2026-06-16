@@ -16,6 +16,7 @@
 [Open Notepad Safely](aip://open/c:/windows/notepad.exe)
 
 ## [x] Incoming tasks from chat
+- [x] Refactored HotWinAHK.ini formatting (no blank lines, updated matrix header, descriptive region comments for each command family, and newly invented active key bindings for historically unbound commands)
 - [x] Recursively structured folding region config matrix for HotWinAHK.ini and synchronized descriptive documentation
 - [x] Dark theme for popup menus (SysMenu, tray, etc.) using undocumented ordinals 135 and 136 in uxtheme
 - [x] Fixed closure bug in SysMenu so items execute their target commands correctly
