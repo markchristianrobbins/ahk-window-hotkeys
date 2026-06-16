@@ -167,11 +167,27 @@ Extends the tucked window listing with dynamic, parameter-driven filtering by sp
 
 ### Fuzzy-Searchable GUI Window Picker
 - Group: [Administrative Controls & Dynamic Compiler](#z1)
-Spawns a highly-optimized AlwaysOnTop dark GUI dialog allowing users to live-filter all active desktop applications by typing partial titles or process names (e.g. typing "chrome" or "md"). Rows feature window titles, executable binaries, and HWND identifiers. Double-clicking a row or hitting Enter instantly destroys the menu and activates/refocuses the selected frame.
+Overhauled to use a premium, dark-themed, vertical stack of 8 styled, hover-responsive and keyboard-navigable buttons replacing the old tabular grid ListView. Users can click, type to dynamically filter via live partial input, hit Enter to focus, or press hotkey number markers to select instantly.
 
 ### Immersive 3D Parallax Rotation Mode (Desk3D)
 - Group: [Administrative Controls & Dynamic Compiler](#z1)
-Triggering Desk3D activates an immersive parallax desktop view. Every active, non-tucked window is assigned a depth layer and set to a soft transparent `76` opacity. Moving the mouse across the screen translates the window coordinates symmetrically using high-frequency proportional depth weights (closer windows travel more; deeper windows resist drift). All original grids and transparency bounds are cleanly restored upon hitting Escape or re-triggering the command.
+Triggering Desk3D activates an immersive parallax desktop view. Every active, non-tucked window is assigned a depth layer and set to a transparent opacity state of 153 (40% transparent). Moving the mouse across the screen translates the window coordinates symmetrically using high-frequency weight layers (increased by an initial baseline multiplier of 1.75). Pressing Ctrl amplifies rotations by 3.0x, holding Shift freezes motion completely, and hitting Escape cleanly restores default bounds.
+
+### Durable Window Position & State History (Undo/Redo)
+- Group: [Screen Snapping & Monitor Positioning Matrix](#z2)
+Chronologically tracks active window geometry layouts, dimensions, state flags, title patterns, program binaries, and timestamp variables in a persistent `HotWinAHK_history.ini` database. Reclaims previous or future configurations synchronously via layout Undo/Redo commands or selective restaurations of up to 20 past configurations per process via a popup context-picker.
+
+### Interactive Window Swapping & Hover-Targeting
+- Group: [Screen Snapping & Monitor Positioning Matrix](#z2)
+Provides immediate spatial swaps (`Swap`, `SwapSize`, `SwapPosition`) of position and/or dimension metrics of the active foreground container with whatever window sits directly beneath the mouse pointer. Features a hands-free dual-stage cursor-hover picking utility (`SwapPick`, `SwapPickSize`, `SwapPickPosition`) executing remotely on click.
+
+### Columns-Then-Rows Gridify Nesting Menus
+- Group: [Proportional Grid Tiles & Sizing Utilities](#z3)
+Integrates a multi-tier columns-then-rows nested context layout system. Allows selecting grid sections up to 9x9, instantly centering, aligning, and scaling the active target window onto the selected monitor segments.
+
+### Nested Region-Based Configuration Matrix Hierarchy
+- Group: [Administrative Controls & Dynamic Compiler](#z1)
+Upgrades the automatic config-matrix updating engine to structure `HotWinAHK.ini` recursively using standard IDE-folding region boundaries (e.g. `;   #region Move`, `    ;   #region MoveToGrid`, `; #endregion Move`), maintaining absolute clean structures while dynamically patching missing keys or retaining custom overrides.
 
 ---
 ## Go Back to...

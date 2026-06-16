@@ -615,93 +615,179 @@ EnsureAllCommandsInIni() {
         headerComments := Trim(headerComments, "`r`n") . "`r`n`r`n"
     }
     
-    catHeaders := Map(
-        "SYSTEM", "1. ADMINISTRATIVE & SYSTEM CONTROLS",
-        "FOCUS",  "2. FOCUS & WINDOW CONTROLS",
-        "WINDOW", "2. FOCUS & WINDOW CONTROLS",
-        "HOME",   "3. PERSISTENT WINDOW HOMES",
-        "MOVE",   "4. MOVEMENTS & SNAPPING",
-        "SIZE",   "5. SIZING & STRETCHING",
-        "TUCK",   "6. TUCK & PEEK FEATURES"
-    )
-    
-    categoriesOrder := ["SYSTEM", "WINDOW", "FOCUS", "HOME", "MOVE", "SIZE", "TUCK"]
-    
-    writtenHeaders := Map()
-    writtenCommands := Map()
-    newIniText := headerComments
+    ; Nested folder hierarchy structure
+    iniStructure := [
+        {
+            cat: "SYSTEM",
+            name: "System",
+            subs: [
+                { name: "Utilities", cmds: ["HelpScreen", "CmdPalette", "WinInfo", "PeekUnderMouse", "SysMenu"] },
+                { name: "Clipboard", cmds: ["CopyCommands", "CopyBindings", "CopyCommandsHelp", "CopyCommandsAlpha", "CopyBindingsAlpha", "CopyBindingsLocation"] },
+                { name: "Engine", cmds: ["ToggleSuspension", "ReloadConfig", "EditConfig", "ExitProgram", "RestartProgram", "KeyDiagnostics", "KeyQuery", "Settings"] }
+            ]
+        },
+        {
+            cat: "WINDOW",
+            name: "Window",
+            subs: [
+                { name: "Attributes", cmds: ["AlwaysOnTop", "SetOpacity70", "RemoveOpacity", "SendToBack"] },
+                { name: "Tray", cmds: ["MinimizeToTray", "PickFromTray"] },
+                { name: "Interactive", cmds: ["DragWindow"] },
+                { name: "Bulk", cmds: ["RestoreAllMaximized", "MaximizeAllRestored", "MaximizeAllMinimized", "SwapMaximizedRestored", "SwapMinimizedRestored", "MinimizeAll", "MinimizeAllRestored", "MinimizeAllMaximized"] }
+            ]
+        },
+        {
+            cat: "HOME",
+            name: "Home",
+            subs: [
+                { name: "Targeting", cmds: ["SetHome", "ClearHome", "GoHome", "Home", "HomePeek"] }
+            ]
+        },
+        {
+            cat: "FOCUS",
+            name: "Focus",
+            subs: [
+                { name: "Cycling", cmds: ["NextWindow", "PrevWindow", "NextClassWindow", "PrevClassWindow"] },
+                { name: "Advanced", cmds: ["FocusDeepestWindow", "WindowPicker", "Desk3d", "WindowHistoryPrev", "WindowHistoryNext", "WindowHistoryPick"] }
+            ]
+        },
+        {
+            cat: "MOVE",
+            name: "Move",
+            subs: [
+                { name: "Precision", cmds: ["Center", "MoveTadLeft", "MoveTadRight", "MoveTadUp", "MoveTadDown", "MovepxLeft", "MovepxRight", "MovepxUp", "MovepxDown"] },
+                { name: "Align", cmds: ["EdgeLeft", "EdgeRight", "EdgeTop", "EdgeBottom", "EdgeTopLeft", "EdgeTopRight", "EdgeBottomLeft", "EdgeBottomRight", "EdgeCenter", "EdgeInLeft", "EdgeInRight", "EdgeInTop", "EdgeInBottom", "EdgeInTopLeft", "EdgeInTopRight", "EdgeInBottomLeft", "EdgeInBottomRight"] },
+                { name: "MoveToGrid", cmds: ["MoveToGridLeft", "MoveToGridRight", "MoveToGridUp", "MoveToGridDown", "MoveToGridTopLeft", "MoveToGridTopRight", "MoveToGridBottomLeft", "MoveToGridBottomRight"] },
+                { name: "JumpGrid", cmds: ["JumpGridLeft", "JumpGridRight", "JumpGridUp", "JumpGridDown", "JumpGridTopLeft", "JumpGridTopRight", "JumpGridBottomLeft", "JumpGridBottomRight"] },
+                { name: "Interactive", cmds: ["Swap", "SwapSize", "SwapPosition", "SwapPick", "SwapPickSize", "SwapPickPosition", "Gridify"] }
+            ]
+        },
+        {
+            cat: "SIZE",
+            name: "Size",
+            subs: [
+                { name: "GridBinding", cmds: ["MouseToGrid", "MouseRelativeSize", "SnapToGridEnlarge", "SnapToGridShrink", "ScaleExpand10px", "ScaleReduce10px", "ScaleExpandGridPart", "ScaleReduceGridPart"] },
+                { name: "Trim", cmds: ["TrimTop", "TrimBottom", "TrimLeft", "TrimRight", "TrimAll", "TrimTopLeft", "TrimTopRight", "TrimBottomLeft", "TrimBottomRight"] },
+                { name: "Grow", cmds: ["AddTop", "AddBottom", "AddLeft", "AddRight", "AddTopLeft", "AddTopRight", "AddBottomLeft", "AddBottomRight", "GrowLeft", "GrowRight", "GrowTop", "GrowBottom", "GrowAll", "GrowTopLeft", "GrowTopRight", "GrowBottomLeft", "GrowBottomRight"] },
+                { name: "Shrink", cmds: ["SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight"] },
+                { name: "HalfDouble", cmds: ["HalfSizeLeft", "HalfSizeRight", "HalfSizeTop", "HalfSizeBottom", "DoubleSizeLeft", "DoubleSizeRight", "DoubleSizeTop", "DoubleSizeBottom"] },
+                { name: "StretchGrid", cmds: ["StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "StretchToGridTopLeft", "StretchToGridTopRight", "StretchToGridBottomLeft", "StretchToGridBottomRight"] },
+                { name: "PullGrid", cmds: ["PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "PullToGridTopLeft", "PullToGridTopRight", "PullToGridBottomLeft", "PullToGridBottomRight"] },
+                { name: "StretchScreenEdge", cmds: ["StretchLeft", "StretchRight", "StretchTop", "StretchBottom", "StretchTopLeft", "StretchTopRight", "StretchBottomLeft", "StretchBottomRight"] }
+            ]
+        },
+        {
+            cat: "TUCK",
+            name: "Tuck",
+            subs: [
+                { name: "Actions", cmds: ["TuckLeft", "TuckRight", "TuckUp", "TuckDown", "BumpEdgeUntuck", "BumpEdgeUntuckActivate", "PeekTucked", "Untuck", "UntuckLeft", "UntuckRight", "UntuckTop", "UntuckBottom", "TuckPeekLeft", "TuckPeekRight", "TuckPeekTop", "TuckPeekBottom", "TuckedPeekAll", "TuckedPeekLeft", "TuckedPeekRight", "TuckedPeekTop", "TuckedPeekBottom"] }
+            ]
+        }
+    ]
     
     localRows := GetGlobalCommandList()
     
-    for cat in categoriesOrder {
-        headerText := catHeaders[cat]
-        
-        ; Find all commands for this category in the master list
-        catRows := []
-        for row in localRows {
-            if (row.cat == cat) {
-                catRows.Push(row)
-            }
-        }
-        
-        if (catRows.Length == 0) {
-            continue
-        }
-        
-        ; Write category header if not already written
-        if (!writtenHeaders.Has(headerText)) {
-            newIniText .= "; =======================================================================================`r`n"
-            newIniText .= "; " . headerText . "`r`n"
-            newIniText .= "; =======================================================================================`r`n`r`n"
-            writtenHeaders[headerText] := true
-        }
-        
-        for row in catRows {
-            if (InStr(row.cmd, " ")) {
-                continue
-            }
-            if (writtenCommands.Has(StrLower(row.cmd))) {
-                continue
-            }
-            writtenCommands[StrLower(row.cmd)] := true
-            
-            cleanCmd := StrLower(row.cmd)
-            if (sectionsMap.Has(cleanCmd)) {
-                secData := sectionsMap[cleanCmd]
-                sectionsMap.Delete(cleanCmd)
-                
-                newIniText .= secData.orig . "`r`n"
-                cleanedKeys := Trim(secData.keys, "`r`n`t ")
-                if (cleanedKeys != "") {
-                    newIniText .= cleanedKeys . "`r`n"
-                }
-                newIniText .= "`r`n"
-            } else {
-                ; Completely missing command!
-                newIniText .= "; " . row.desc . "`r`n"
-                newIniText .= "[-" . row.cmd . "]`r`n"
-                defaultBinding := row.key
-                if (defaultBinding == "Custom" || defaultBinding == "Edge Bump" || defaultBinding == "Edge Click/Drag" || defaultBinding == "Auto Indicator") {
-                    defaultBinding := ""
-                }
-                newIniText .= ";keys1=" . defaultBinding . "`r`n`r`n"
+    ; Keep track of all curated commands to verify if they are in the master list
+    curatedSet := Map()
+    for outerCat in iniStructure {
+        for subCat in outerCat.subs {
+            for cmdName in subCat.cmds {
+                curatedSet[StrLower(cmdName)] := true
             }
         }
     }
     
-    ; If any sections are remaining, they are custom configurations we must append safely
+    ; Auto-categorize any unmapped commands from localRows into the correct category
+    for row in localRows {
+        if (InStr(row.cmd, " ")) {
+            continue
+        }
+        cmdLower := StrLower(row.cmd)
+        if (!curatedSet.Has(cmdLower)) {
+            for outerCat in iniStructure {
+                if (outerCat.cat == row.cat) {
+                    if (outerCat.subs.Length > 0) {
+                        outerCat.subs[outerCat.subs.Length].cmds.Push(row.cmd)
+                    } else {
+                        outerCat.subs.Push({ name: "Other", cmds: [row.cmd] })
+                    }
+                    curatedSet[cmdLower] := true
+                    break
+                }
+            }
+        }
+    }
+    
+    writtenCommands := Map()
+    newIniText := headerComments
+    
+    for outerCat in iniStructure {
+        newIniText .= ";   #region " . outerCat.name . "`r`n"
+        for subCat in outerCat.subs {
+            newIniText .= "    ;   #region " . subCat.name . "`r`n"
+            for cmdName in subCat.cmds {
+                cleanCmd := StrLower(cmdName)
+                if (writtenCommands.Has(cleanCmd)) {
+                    continue
+                }
+                writtenCommands[cleanCmd] := true
+                
+                if (sectionsMap.Has(cleanCmd)) {
+                    secData := sectionsMap[cleanCmd]
+                    sectionsMap.Delete(cleanCmd)
+                    
+                    newIniText .= "        " . secData.orig . "`r`n"
+                    Loop Parse, secData.keys, "`n", "`r" {
+                        line := Trim(A_LoopField)
+                        if (line == "") {
+                            continue
+                        }
+                        newIniText .= "            " . line . "`r`n"
+                    }
+                } else {
+                    ; Completely missing command! Find description/default key
+                    rowDesc := ""
+                    rowKey := ""
+                    for row in localRows {
+                        if (StrLower(row.cmd) == cleanCmd) {
+                            rowDesc := row.desc
+                            rowKey := row.key
+                            break
+                        }
+                    }
+                    if (rowDesc != "") {
+                        newIniText .= "            ; " . rowDesc . "`r`n"
+                    }
+                    newIniText .= "        [-" . cmdName . "]`r`n"
+                    defaultBinding := rowKey
+                    if (defaultBinding == "Custom" || defaultBinding == "Edge Bump" || defaultBinding == "Edge Click/Drag" || defaultBinding == "Auto Indicator") {
+                        defaultBinding := ""
+                    }
+                    newIniText .= "            ;keys1=" . defaultBinding . "`r`n"
+                }
+            }
+            newIniText .= "    ; #endregion " . subCat.name . "`r`n"
+        }
+        newIniText .= "; #endregion " . outerCat.name . "`r`n`r`n"
+    }
+    
+    ; If any sections (like [Settings]) are remaining, they are custom configurations we must append safely
     if (sectionsMap.Count > 0) {
-        newIniText .= "; =======================================================================================`r`n"
-        newIniText .= "; 7. CUSTOM USER CONFIGURATIONS & PREFERENCES`r`n"
-        newIniText .= "; =======================================================================================`r`n`r`n"
+        newIniText .= ";   #region Preferences`r`n"
+        newIniText .= "    ;   #region Settings`r`n"
         for key, value in sectionsMap {
-            newIniText .= value.orig . "`r`n"
-            cleanedKeys := Trim(value.keys, "`r`n`t ")
-            if (cleanedKeys != "") {
-                newIniText .= cleanedKeys . "`r`n"
+            newIniText .= "        " . value.orig . "`r`n"
+            Loop Parse, value.keys, "`n", "`r" {
+                line := Trim(A_LoopField)
+                if (line == "") {
+                    continue
+                }
+                newIniText .= "            " . line . "`r`n"
             }
             newIniText .= "`r`n"
         }
+        newIniText .= "    ; #endregion Settings`r`n"
+        newIniText .= "; #endregion Preferences`r`n"
     }
     
     ; Only write back to disk if it actually changed to avoid disk wear / triggering loop reloads

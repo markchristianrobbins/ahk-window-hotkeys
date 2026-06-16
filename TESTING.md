@@ -85,6 +85,23 @@ where items are
     - **Instructions**: Strike Minimize to Tray shortcut (`Win+Shift+PgDn`) on NotePad.
     - **Expected Results**: Notepad frame vanishes from window view. A standalone subprocess tray icon (represented by NotePad's native application icon asset) registers in system workspace tray area displaying customized mouse-over tooltips (driven by `HotWinAHK_tray.ahk`).
 
+## 💎 Advanced Interactive Workspace Features
+- [ ] Overhauled Button-based WindowPicker Navigation
+    - **Instructions**: Open WindowPicker, type search filters.
+    - **Expected Results**: Dark themed GUI pop-up lists up to 8 matched rows. Navigates smoothly via mouse-hover, arrow keys, or hitting specific numeric indices, launching focus to target on Enter or click.
+- [ ] Persistent Position States & Chronological History (Undo/Redo)
+    - **Instructions**: Change active window layout positions, and strike Layout Undo/Redo commands, or open the historical menu context launcher (`WindowHistoryPick`).
+    - **Expected Results**: Restores previous spatial alignments. Menu offers matching list entries representing up to 20 window tracks.
+- [ ] Hover-relative Window Swapping Operations
+    - **Instructions**: Align a background window next to the active foreground container. Strike `Swap`.
+    - **Expected Results**: Foreground container exchanges bounds and coordinates with whichever background window is directly underneath the mouse pointer.
+- [ ] Multi-tier Column-then-Row Gridify Snaps
+    - **Instructions**: Focus a window container and trigger the nested `Gridify` menu.
+    - **Expected Results**: Native AHK drop-down menu unfolds. Selecting columns and rows splits screens natively up to 9x9 and snaps target bounds cleanly.
+- [ ] Immersive Desk3D Parallax Rotation Magnification & Hold
+    - **Instructions**: Trigger `Desk3D`. Move the mouse cursor dynamically. Press Ctrl, or Shift, or Esc.
+    - **Expected Results**: Active restored windows fade to 153 layout opacity and move symmetrically on mouse displacement. Ctrl speeds rotation up by 3.x. Shift halts movement instantly. Esc drops mode and recovers absolute window coordinates cleanly.
+
 
 ---
 ## Go Back to...

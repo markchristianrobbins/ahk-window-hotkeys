@@ -52,10 +52,14 @@ The application's crown jewel is its mathematical screen-edge docking and mouse-
 - **Hysteresis Pop-off Threshold**: If the resisted drag direction displacement exceeds 120 absolute screen pixels ($\text{pullDistance} > 120\text{px}$), the docking structural anchor snaps. The window is removed from the stowed registry maps, plays an audio pitch, and is restored as a free-floating window.
 - **Ctrl-Hold Dock-Seeking Indicator Overlay**: Holding the `Ctrl` key during a stowed window drag disables physical resistance and enters a Dock-Seeking Mode. The engine calculates the closest screen margin of the mouse's active monitor layout, instantiates a click-through translucent cyan GUI indicator overlay bar (60px thickness) aligned to that edge, and immediately snaps and docks the stowed window to the selected monitor margin upon left-clicked mouse release.
 - **Overlapping Z-Order Translucency Scanner**: Engages upon DragWindow execution to query the native window stack recursively. Discovers all visible frames resting above the target drag handles and lowers their transparency level to a soft `50` alpha weight while holding the target moving object at `200` transparency. On release, the cached original opacities of all elevated windows are instantly written back.
-- **Desk3D Proportional Parallax Workspace**: Maps active open desktop frames to integer depth layers. On mouse coordinate changes, it registers the displacement vector from starting center points ($\Delta X_{\text{mouse}}, \Delta Y_{\text{mouse}}$), shifting coords according to reciprocal depth step functions:
-  $$\text{shiftX} = -\Delta X_{\text{mouse}} \times \max\left(0.05, 1.2 - (\text{layerIndex} - 1) \times 0.15\right)$$
-  $$\text{shiftY} = -\Delta Y_{\text{mouse}} \times \max\left(0.05, 1.2 - (\text{layerIndex} - 1) \times 0.15\right)$$
-  This designs a high-fidelity 3D workspace where foreground window assets slide fluidly over background assets, cleanly resettable on Esc.
+- **Desk3D Proportional Parallax Workspace**: Maps active open desktop frames to integer depth layers. Active windows fade to 153 layout opacity (40% transparent). On mouse coordinate changes, it registers the displacement vector from starting center points ($\Delta X_{\text{mouse}}, \Delta Y_{\text{mouse}}$), shifting coords according to reciprocal depth step functions baseline-magnified by 1.75x, and further modified by mechanical state values (3.0x scaling coefficient if holding Ctrl down, and 0x lock-stop if holding Shift down):
+  $$\text{shiftX} = -\Delta X_{\text{mouse}} \times \max\left(0.05, 1.2 - (\text{layerIndex} - 1) \times 0.15\right) \times 1.75 \times \text{magFactor}$$
+  $$\text{shiftY} = -\Delta Y_{\text{mouse}} \times \max\left(0.05, 1.2 - (\text{layerIndex} - 1) \times 0.15\right) \times 1.75 \times \text{magFactor}$$
+  This creates a beautiful 3D workspace where foreground windows glide realistically over background windows, completely resettable with Escape.
+- **Durable State History (Undo/Redo)**: Records window positions, sizes, min/max status, titles, processes, and timestamp markers to file sections inside `HotWinAHK_history.ini` per application before `SafeMove()` layout updates run. Facilitates instant layout Undo/Redo commands traversing the undo stack, or selective target restorations of up to 20 past configurations per process via a pop-up context-picker.
+- **Active Window Swapping Mechanics**: Performs physical interchange swaps (`Swap`, `SwapSize`, `SwapPosition`) of position and/or size dimensions of the active foreground window container with whichever window frame rests directly below the mouse cursor by utilizing low-level DLL/Win32 APIs. Engages a continuous cursor tracking state machine for hands-free pick-swapping (`SwapPick`, `SwapPickSize`, `SwapPickPosition`) where a user clicks any window to trigger the swap.
+- **Columns-Then-Rows Gridify Nesting Menus**: Launches nested AHK-native Popup Menus displaying a grid matrix up to 9x9. Slices the active monitor dimensions symmetrically, centering, wrapping, and aligning the active window exactly into selected column and row slots.
+- **Recursive Nested Region-Based INI Compiler**: Upgrades the automatic `.ini` matrix compilation engine to format `HotWinAHK.ini` recursively inside folding blocks of regions using standard IDE syntax (`;   #region <Category>`, `; #endregion <Category>`). It extracts active settings from the old matrix, creates backup points, translates keyboard modifier chains, and writes default templates for missing keys without corrupting custom user-configured keybindings.
 
 ## 🛰️ 4. Commands, Keybindings & Context Flags
 Every action from simple moves to grid mapping is indexed inside the INI command table:
@@ -89,7 +93,7 @@ Every action from simple moves to grid mapping is indexed inside the INI command
 - **RestartProgram**: Instantly reload configuration parameters and reboot the active execution engine.
 - **Active Window Dot**: Draws a persistent telemetry status dot at the active window's top-left margin of the target layout.
 
-#### 🪟 WINDOW (Attributes & Trays)
+#### 🪟 WINDOW (Attributes, Trays & Bulk)
 - **AlwaysOnTop**: Toggle Always-On-Top focus pinning attribute on active window frame.
 - **SetOpacity70**: Set alpha opacity transparency level to 70% on active window frame.
 - **RemoveOpacity**: Restore active window opacity to full solid visibility.
@@ -97,6 +101,14 @@ Every action from simple moves to grid mapping is indexed inside the INI command
 - **MinimizeToTray**: Stow active window into an autonomous system-tray notification process.
 - **PickFromTray**: Open stowed window tray instances via right-click contextual list.
 - **DragWindow**: Shift focus to translucent DragWindow movement mode to position via directional mouse coordinates.
+- **RestoreAllMaximized**: Restore all maximized windows to normal restored states.
+- **MaximizeAllRestored**: Maximize all currently restored windows.
+- **MaximizeAllMinimized**: Maximize all currently minimized windows.
+- **SwapMaximizedRestored**: Swap states between maximized and restored windows.
+- **SwapMinimizedRestored**: Swap states between minimized and restored windows.
+- **MinimizeAll**: Minimize all active application frames.
+- **MinimizeAllRestored**: Minimize all currently restored windows.
+- **MinimizeAllMaximized**: Minimize all currently maximized windows.
 
 #### 🏠 HOME (Window Persistence)
 - **SetHome**: Save active window class/process/fuzzy title signature to persistent home location.
@@ -105,14 +117,24 @@ Every action from simple moves to grid mapping is indexed inside the INI command
 - **Home**: Intelligent Home behavior (Move to home, or restore to pre-homed, or strip home config upon confirmation).
 - **HomePeek**: Momentarily draw a transparent overlay footprint of the window's home location on screen.
 
-#### 🎯 FOCUS (Z-Order Management)
+#### 🎯 FOCUS (Z-Order, History & Swaps)
 - **NextWindow**: Cycle focus smoothly forward across open desktop window frames.
 - **PrevWindow**: Cycle focus smoothly backward across open desktop window frames.
-- **NextClassWindow**: Cycle focus specifically forward between windows of identical process class.
-- **PrevClassWindow**: Cycle focus specifically backward between windows of identical process class.
+- **NextClassWindow**: Cycle focus specifically forward between windows of identical process class path.
+- **PrevClassWindow**: Cycle focus specifically backward between windows of identical process class path.
 - **FocusDeepestWindow**: Activate the deepest window in the Z-order list.
-- **WindowPicker**: Launch the interactive Window Selection GUI supporting fuzzy filter search by title or executable file name.
+- **WindowPicker**: Launch the interactive Window Selection GUI supporting fuzzy filter search by title or executable file name using styled vertical list buttons.
 - **Desk3d**: Enter the mathematical 3D parallax workspace mode, rotating window layouts symmetrically using layered distance weights.
+- **WindowHistoryPrev**: Restore the previous layout configuration in history.
+- **WindowHistoryNext**: Restore the next layout configuration in history.
+- **WindowHistoryPick**: Display a dark context-rich pop-up history menu holding up to 20 past alignments of the active process.
+- **Swap**: Swap the active window's position and dimensions with the window underneath the mouse pointer.
+- **SwapSize**: Swap the active window's size with the window underneath the mouse pointer.
+- **SwapPosition**: Swap the active window's position coordinates with the window underneath the mouse pointer.
+- **SwapPick**: Enter dual-stage pick mode to select a target window by hover-clicking to swap both coordinates and dimensions.
+- **SwapPickSize**: Enter dual-stage pick mode to swap dimensions with a selected window.
+- **SwapPickPosition**: Enter dual-stage pick mode to swap position coordinates with a selected window.
+- **Gridify**: Opens a rapid Columns-Then-Rows nested layout placement menu mapping cells up to 9x9.
 
 #### 🫥 TUCK (Docker & Auto-Hide)
 - **TuckLeft**: Tuck window past left screen wall, exposing a 20px dock indicator bar.
