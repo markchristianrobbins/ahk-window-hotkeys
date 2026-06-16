@@ -78,6 +78,11 @@ $^#f12:: {
     ExecuteActionWithCondition("RestartProgram", "")
 }
 
+$^+#k:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("KeyDiagnostics", "")
+}
+
 $^#.:: {
     ExecuteActionWithCondition("SetHome", "")
 }

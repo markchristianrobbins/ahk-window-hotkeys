@@ -213,16 +213,21 @@ AudibleFocusListenerCallback(hWinEventHook, event, hwnd, idObject, idChild, dwEv
 }
 SetProcessDarkMode() {
     try {
-        ; PreferredAppMode values: 0 = Default, 1 = AllowDark, 2 = ForceDark, 3 = ForceLight, 4 = Max
-        DllCall("uxtheme\SetPreferredAppMode", "int", 2) ; ForceDark
-        DllCall("uxtheme\FlushMenuThemes")
-    } catch {
-        try {
-            DllCall("uxtheme\AllowDarkModeForApp", "int", 1)
-            DllCall("uxtheme\FlushMenuThemes")
-        } catch {
-            ; ignore
+        hUxtheme := DllCall("LoadLibrary", "str", "uxtheme.dll", "ptr")
+        if (hUxtheme) {
+            ; Ordinal 135 is SetPreferredAppMode (ForceDark = 2)
+            pSetPreferredAppMode := DllCall("GetProcAddress", "ptr", hUxtheme, "ptr", 135, "ptr")
+            if (pSetPreferredAppMode) {
+                DllCall(pSetPreferredAppMode, "int", 2)
+            }
+            ; Ordinal 136 is FlushMenuThemes
+            pFlushMenuThemes := DllCall("GetProcAddress", "ptr", hUxtheme, "ptr", 136, "ptr")
+            if (pFlushMenuThemes) {
+                DllCall(pFlushMenuThemes)
+            }
         }
+    } catch {
+        ; ignore
     }
 }
 PlayStartupSound() {
@@ -551,7 +556,7 @@ CompileIniToStaticHotkeys() {
                 sPrefix := ""
             }
             ScriptBuffer .= sPrefix sAHKStroke ":: {`n"
-            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || sCmd == "PeekTucked" || sCmd == "Untuck" || sCmd == "CmdPalette") {
+            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "CopyCommandsAlpha" || sCmd == "CopyBindingsAlpha" || sCmd == "CopyBindingsLocation" || sCmd == "SysMenu" || sCmd == "PeekTucked" || sCmd == "Untuck" || sCmd == "CmdPalette" || sCmd == "KeyDiagnostics") {
                 ScriptBuffer .= '    try Suspend("Permit")`n'
             }
             ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
@@ -622,7 +627,7 @@ LoadHotkeysAtRuntime() {
 ; #region  _engine 
 IsMetaCommand(sCmd) {
     ; Add your untuck commands to the meta-command bypass list
-    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "CopyCommandsHelp") || InStr(sCmd, "CopyCommandsAlpha") || InStr(sCmd, "CopyBindingsAlpha") || InStr(sCmd, "CopyBindingsLocation") || InStr(sCmd, "SysMenu") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette")) {
+    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "CopyCommandsHelp") || InStr(sCmd, "CopyCommandsAlpha") || InStr(sCmd, "CopyBindingsAlpha") || InStr(sCmd, "CopyBindingsLocation") || InStr(sCmd, "SysMenu") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette") || InStr(sCmd, "KeyDiagnostics")) {
         return true
     }
 
@@ -716,6 +721,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "CopyCommandsAlpha": CopyCommandsAlpha()
         case "CopyBindingsAlpha": CopyBindingsAlpha()
         case "CopyBindingsLocation": CopyBindingsLocation()
+        case "KeyDiagnostics": StartKeyDiagnostics()
         case "SysMenu": SysMenu()
     }
 
@@ -2628,12 +2634,22 @@ SafeMove(nX, nY, nW := -1, nH := -1, targetHwnd := "") {
     realW := Number(nW)
     realH := Number(nH)
 
-    ; HARDENED PROFILE BACKUP RESCUE LAYER
+    ; HARDENED PROFILE BACKUP RESCUE LAYER WITH DIMENSION PRESERVATION
     if (realW <= 0 || realH <= 0 || realW == -1 || realH == -1) {
-        if (g_TuckedWindows.Has(targetHwnd)) {
-            profile := g_TuckedWindows[targetHwnd]
-            realW := Number(profile.w)
-            realH := Number(profile.h)
+        try {
+            WinGetPos(, , &currW, &currH, targetHwnd)
+            if (realW <= 0 || realW == -1) {
+                realW := Number(currW)
+            }
+            if (realH <= 0 || realH == -1) {
+                realH := Number(currH)
+            }
+        } catch {
+            if (g_TuckedWindows.Has(targetHwnd)) {
+                profile := g_TuckedWindows[targetHwnd]
+                realW := Number(profile.w)
+                realH := Number(profile.h)
+            }
         }
     }
 
@@ -3180,6 +3196,7 @@ GetGlobalCommandList() {
         {cat: "SYSTEM", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
         {cat: "SYSTEM", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
         {cat: "SYSTEM", cmd: "RestartProgram", key: "Win + Ctrl + F12", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
+        {cat: "SYSTEM", cmd: "KeyDiagnostics", key: "Win + Ctrl + Shift + K", desc: "Verify and test physical modifier combos on keypad and arrow keys."},
         {cat: "SYSTEM", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
 
         ; == WINDOW ==
@@ -4115,6 +4132,171 @@ ReduceBindingsArray(bindingsArray) {
     }
     
     return reduced
+}
+
+StartKeyDiagnostics() {
+    testItems := [
+        ; --- Numpad5 tests ---
+        { name: "Numpad5", key: "Numpad5", label: "Numpad5", ctrl: false, alt: false, shift: false, win: false },
+        { name: "Shift + Numpad5", key: "Numpad5", label: "Shift + Numpad5", ctrl: false, alt: false, shift: true, win: false },
+        { name: "Ctrl + Numpad5", key: "Numpad5", label: "Ctrl + Numpad5", ctrl: true, alt: false, shift: false, win: false },
+        { name: "Alt + Numpad5", key: "Numpad5", label: "Alt + Numpad5", ctrl: false, alt: true, shift: false, win: false },
+        { name: "Win + Numpad5", key: "Numpad5", label: "Win + Numpad5", ctrl: false, alt: false, shift: false, win: true },
+        { name: "Win + Alt + Numpad5", key: "Numpad5", label: "Win + Alt + Numpad5", ctrl: false, alt: true, shift: false, win: true },
+        { name: "Win + Shift + Numpad5", key: "Numpad5", label: "Win + Shift + Numpad5", ctrl: false, alt: false, shift: true, win: true },
+        { name: "Win + Ctrl + Numpad5", key: "Numpad5", label: "Win + Ctrl + Numpad5", ctrl: true, alt: false, shift: false, win: true },
+        { name: "Win + Ctrl + Shift + Numpad5", key: "Numpad5", label: "Win + Ctrl + Shift + Numpad5", ctrl: true, alt: false, shift: true, win: true },
+        { name: "Win + Ctrl + Alt + Numpad5", key: "Numpad5", label: "Win + Ctrl + Alt + Numpad5", ctrl: true, alt: true, shift: false, win: true },
+
+        ; --- Left arrow tests ---
+        { name: "Left", key: "Left", label: "Left Arrow", ctrl: false, alt: false, shift: false, win: false },
+        { name: "Shift + Left", key: "Left", label: "Shift + Left Arrow", ctrl: false, alt: false, shift: true, win: false },
+        { name: "Ctrl + Left", key: "Left", label: "Ctrl + Left Arrow", ctrl: true, alt: false, shift: false, win: false },
+        { name: "Alt + Left", key: "Left", label: "Alt + Left Arrow", ctrl: false, alt: true, shift: false, win: false },
+        { name: "Win + Left", key: "Left", label: "Win + Left Arrow", ctrl: false, alt: false, shift: false, win: true },
+        { name: "Win + Alt + Left", key: "Left", label: "Win + Alt + Left Arrow", ctrl: false, alt: true, shift: false, win: true },
+        { name: "Win + Shift + Left", key: "Left", label: "Win + Shift + Left Arrow", ctrl: false, alt: false, shift: true, win: true },
+        { name: "Win + Ctrl + Left", key: "Left", label: "Win + Ctrl + Left Arrow", ctrl: true, alt: false, shift: false, win: true },
+        { name: "Win + Ctrl + Shift + Left", key: "Left", label: "Win + Ctrl + Shift + Left Arrow", ctrl: true, alt: false, shift: true, win: true },
+        { name: "Win + Ctrl + Alt + Left", key: "Left", label: "Win + Ctrl + Alt + Left Arrow", ctrl: true, alt: true, shift: false, win: true }
+    ]
+
+    ; Store previous suspend state
+    oldSuspend := g_bSuspended
+
+    ; Suspend the physical hotkeys temporarily while testing so they don't fire actions!
+    Suspend(true)
+    global g_bSuspended := true
+
+    ; Create a gorgeous polished dark-themed diagnostic GUI
+    diagGui := Gui("+AlwaysOnTop -MaximizeBox -MinimizeBox +ToolWindow", "🤖 HotWinAHK - Key Diagnostics")
+    diagGui.BackColor := "121214"
+    diagGui.SetFont("s10 cE0E0E6", "Segoe UI")
+
+    diagGui.SetFont("s14 bold c4476ff")
+    diagGui.Add("Text", "x20 y20 w460 Center", "🤖 Key Diagnostics Testing Menu")
+    
+    diagGui.SetFont("s10 c88888D")
+    diagGui.Add("Text", "x20 y52 w460 Center", "Testing keyboard hooks & physical modifiers compatibility")
+
+    ; Separator
+    diagGui.Add("Text", "x20 y75 w460 h2 BackgroundTrans Center c33333A", "__________________________________________________________________")
+
+    diagGui.SetFont("s10 c88888D")
+    diagGui.Add("Text", "x20 y105 w460 Center", "PLEASE PRESS THE FOLLOWING KEY:")
+
+    diagGui.SetFont("s18 bold cFFCC00")
+    diagGui_KeyText := diagGui.Add("Text", "x20 y130 w460 Center", "Starting test...")
+
+    diagGui.SetFont("s11 bold cFF4444")
+    diagGui_TimerText := diagGui.Add("Text", "x20 y175 w460 Center", "Time Remaining: 5s")
+
+    diagGui.SetFont("s9 c88888D")
+    diagGui.Add("Text", "x20 y212 w460 Center", "[Press ESC key to Abort Diagnostics Sequence]")
+
+    diagGui.Show("w500 h250 Center")
+
+    failedKeys := []
+    isAborted := false
+
+    for idx, item in testItems {
+        if (isAborted) {
+            break
+        }
+
+        ; Display the target combination
+        diagGui_KeyText.Text := item.name
+        
+        timeoutMs := 5000
+        startTime := A_TickCount
+        passed := false
+
+        while (A_TickCount - startTime < timeoutMs) {
+            elapsed := A_TickCount - startTime
+            remainingTime := Ceil((timeoutMs - elapsed) / 1000)
+            diagGui_TimerText.Text := "Time Remaining: " . (remainingTime <= 0 ? 0 : remainingTime) . "s"
+
+            ; Small sleep / input hook check loop to update UI and process keypresses
+            ih := InputHook("L1 T0.1")
+            ih.KeyOpt("{All}", "E")
+            ih.KeyOpt("{LCtrl}{RCtrl}{LShift}{RShift}{LAlt}{RAlt}{LWin}{RWin}", "-E") ; do not trigger on modifier alone
+            ih.Start()
+            ih.Wait()
+
+            if (ih.EndReason == "EndKey") {
+                pressedKey := ih.EndKey
+                
+                if (StrLower(pressedKey) == "escape") {
+                    isAborted := true
+                    break
+                }
+
+                ; Query physical modifier keys
+                mCtrl  := GetKeyState("Ctrl", "P")
+                mAlt   := GetKeyState("Alt", "P")
+                mShift := GetKeyState("Shift", "P")
+                mWin   := (GetKeyState("LWin", "P") || GetKeyState("RWin", "P"))
+
+                ctrlMatch  := (mCtrl == item.ctrl)
+                altMatch   := (mAlt == item.alt)
+                shiftMatch := (mShift == item.shift)
+                winMatch   := (mWin == item.win)
+                keyMatch   := (StrLower(pressedKey) == StrLower(item.key) || (StrLower(item.key) == "numpad5" && StrLower(pressedKey) == "numpadclear"))
+
+                if (ctrlMatch && altMatch && shiftMatch && winMatch && keyMatch) {
+                    passed := true
+                    break
+                }
+            }
+        }
+
+        if (isAborted) {
+            break
+        }
+
+        if (passed) {
+            ; Success! Show passed feedback and beep
+            try {
+                diagGui_TimerText.SetFont("c00FF55")
+                diagGui_TimerText.Text := "PASSED!"
+            }
+            SoundBeep(1800, 40)
+            Sleep(250)
+            try {
+                diagGui_TimerText.SetFont("cFF4444")
+            }
+        } else {
+            ; Failure! Show fail tooltip and record failure
+            failedKeys.Push(item.name)
+            SoundBeep(350, 150)
+            ShowTargetToolTip("FAILED: " . item.name, -1500)
+            Sleep(200)
+        }
+    }
+
+    diagGui.Destroy()
+
+    ; Restore suspend state
+    Suspend(oldSuspend)
+    global g_bSuspended := oldSuspend
+
+    if (isAborted) {
+        ShowTargetToolTip("Diagnostics Aborted by User!", -2000)
+        return
+    }
+
+    ; Formulate clipboard text
+    if (failedKeys.Length > 0) {
+        clipText := "=== HotWinAHK Key Diagnostics Failed Keys ===`r`n`r`n"
+        for k in failedKeys {
+            clipText .= k . "`r`n"
+        }
+        A_Clipboard := clipText
+        ShowTargetToolTip("Diagnostics Complete!`r`n" . failedKeys.Length . " key(s) failed. List copied to clipboard!", -4000)
+    } else {
+        A_Clipboard := "All keys passed!"
+        ShowTargetToolTip("🤖 All keys passed diagnostics flawlessly!`r`nList copied to clipboard.", -4000)
+    }
 }
 
 SysMenu() {

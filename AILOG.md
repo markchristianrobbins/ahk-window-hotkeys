@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-feat(ux): implement process-wide dark mode menus, fix SysMenu closures, compress copied keybindings using smart NumpadX and Arrow re-writers, rename Move10px/Move1px to MoveTad/Movepx, silence focus change beeps, and add rich feedback sounds and robot tipping
+feat(diag): implement interactive KeyDiagnostics command, fix SafeMove dimension preservation on centering and pixel shifting, and resolve Win32 dark popup menus via hidden uxtheme ordinals
 ```
 
 <!-- Example AI Log Entry
@@ -31,6 +31,29 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-16T12:20:00Z]
+### 🎯 Primary Goals & Requirements
+- **Win32 Popup Menus Dark Theme**: Resolve the white background bug on native context and tray menus by fully integratinghidden Win32 ordinals.
+- **Dimension Preservation in SafeMove**: Repair the sizing corruption where centering or pixel-shifting moves resized active window containers to default 800x600 boundaries.
+- **Interactive Key Diagnostics Engine**: Build a fully interactive GUI-driven diagnostic command to test modifications across keypad (numpad) and arrow key configurations, providing automated feedback and copying failures to clipboard.
+
+### 🛠️ Completed Changes in this Session
+- **Resolved Dark Context Menus**: Refactored `SetProcessDarkMode` to load `uxtheme.dll` explicitly and call undocumented ordinals 135 (`SetPreferredAppMode` with ForceDark option 2) and 136 (`FlushMenuThemes`) to seamlessly darken standard context menus.
+- **Fixed Dimension-Shifting in SafeMove**: Modified `SafeMove()` to query the active container's bounds (`WinGetPos`) when dimensions are omitted (`-1`), preventing the window from reverting to grid defaults during centering, MoveTad, or Movepx operations.
+- **Coded KeyDiagnostics Module**: Programmed the `StartKeyDiagnostics()` feature with high-fidelity GUI countdown elements, custom tactile confirm/warning tones, Escape key-aborts, NumLock-agnostic keypad captures, and automated clipboard aggregation logs. Fixed a compiler local variable warning by replacing `Ceiling` with standard `Ceil`, and fixed a runtime property error by replacing `.Reason` with the standard AHK v2 `.EndReason` attribute of the `InputHook` object.
+- **Synchronized Commands Catalog and Maps**: Registered `KeyDiagnostics` (`Win+Ctrl+Shift+K`) in `commandList`, `ExecuteCommandRegistry()`, compile permits, and categorized configurations in `HotWinAHK.ini` and `MANUAL.md`.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/MANUAL.md`
+- `/AILOG.md`
+- `/AITASKS.md`
+
+### 🔮 Future Suggestions & Next Steps
+- **Sound Feedback Custom Tuning**: Give users options within `HotWinAHK.ini` to adjust major tone frequencies or volume levels.
+- **Continuous Focus Logging**: Log precise foreground window handles and classes to a debug file during diagnostics to pinpoint conflicting software.
 
 ## [2026-06-16T12:00:00Z]
 ### 🎯 Primary Goals & Requirements

@@ -16,7 +16,7 @@
 [Open Notepad Safely](aip://open/c:/windows/notepad.exe)
 
 ## [x] Incoming tasks from chat
-- [x] Dark theme for popup menus (SysMenu, tray, etc.)
+- [x] Dark theme for popup menus (SysMenu, tray, etc.) using undocumented ordinals 135 and 136 in uxtheme
 - [x] Fixed closure bug in SysMenu so items execute their target commands correctly
 - [x] Group and reduce keybinding copies (Numpad -> [MoveToGridX] -> NumpadX, Arrow keys -> [UntuckX] -> Win+Ctrl+Alt+Arrows)
 - [x] Renamed MoveDown10px -> MoveTadDown, etc. and MoveDown1px -> MovepxDown, etc.
@@ -25,10 +25,14 @@
 - [x] Added beautiful Startup arpeggio sound and big command sounds (reload/suspension toggle)
 - [x] Added tiny clicky feedback sound and quick on-screen robot tipping tooltips when window commands are executed
 - [x] Configured robot emoji tooltips and overlay icons for brand visibility
+- [x] Fixed dimension preservation in `SafeMove()` so Center, MoveTad, and Movepx commands do not resize windows to 800x600 grid defaults
+- [x] Created interactive `KeyDiagnostics` command testing physical keypad & arrow modifier keys with 5s timeouts and clipboard reporting
 
 ## [x] Errors
 - [x] lint 1: Resolved warning where `ExecuteActionWithCondition` was considered an unassigned local variable. Fixed by placing the `#Include "HotWinAHK_aux.ahk"` statement at the bottom of `HotWinAHK.ahk` after the global function definitions.
 - [x] lint 2: Resolved warning where `ShowHelpScreen` was flagged as an unassigned local variable inside case `HelpScreen`. Built a fully-featured, dark-themed interactive help dashboard in `HotWinAHK.ahk`.
+- [x] Ceiling local variable warning: Resolved diagnostic sequence warning where `Ceiling` was flagged as an unassigned local variable by replacing it with the correct built-in `Ceil` function in `HotWinAHK.ahk`.
+- [x] InputHook Property Error: Fixed runtime compiling crash where `.Reason` was accessed on an `InputHook` instance by replacing it with the standard AHK v2 property name `.EndReason`.
 - [x] WinSetTransparent Exception: Fixed "Target window not found" error during drag initialization by invoking `dockIndicatorGui.Show("Hide")` to physically register the window with the OS manager before modifying its alpha value, wrapped in a robust try/catch guard. ✅ 2026-06-12
 
 ## [x] New Fails

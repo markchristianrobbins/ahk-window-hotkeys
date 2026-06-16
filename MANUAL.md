@@ -74,6 +74,7 @@ Every action from simple moves to grid mapping is indexed inside the INI command
 - **CopyBindingsAlpha**: Copy active keybindings map sorted alphabetically by command name to the system clipboard.
 - **CopyBindingsLocation**: Copy active keybindings map grouped by keyboard hardware location to the system clipboard.
 - **SysMenu**: Display a popup context menu of all system commands to quickly select and run.
+- **KeyDiagnostics**: Run an interactive testing loop to verify that modifiers and special keys (numpads, arrows) are accurately heard by the engine's physical keyboard hook, copying failed entries to clipboard.
 - **ToggleSuspension**: Suspend or resume all HotWinAHK modifier triggers and mouse gestures instantly.
 - **ReloadConfig**: Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically.
 - **EditConfig**: Open HotWinAHK.ini configurations in system default text editor.
