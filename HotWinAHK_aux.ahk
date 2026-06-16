@@ -8,11 +8,6 @@ $#/:: {
     ExecuteActionWithCondition("HelpScreen", "")
 }
 
-$!#/:: {
-    try Suspend("Permit")
-    ExecuteActionWithCondition("SysMenu", "")
-}
-
 $^+#c:: {
     try Suspend("Permit")
     ExecuteActionWithCondition("CmdPalette", "")
@@ -28,9 +23,9 @@ $^#c:: {
     ExecuteActionWithCondition("CopyCommands", "")
 }
 
-$^+#a:: {
+$!#c:: {
     try Suspend("Permit")
-    ExecuteActionWithCondition("CopyCommandsAlpha", "")
+    ExecuteActionWithCondition("CopyBindings", "")
 }
 
 $^+#h:: {
@@ -38,9 +33,9 @@ $^+#h:: {
     ExecuteActionWithCondition("CopyCommandsHelp", "")
 }
 
-$!#c:: {
+$^+#a:: {
     try Suspend("Permit")
-    ExecuteActionWithCondition("CopyBindings", "")
+    ExecuteActionWithCondition("CopyCommandsAlpha", "")
 }
 
 $^+#b:: {
@@ -51,6 +46,11 @@ $^+#b:: {
 $^+#l:: {
     try Suspend("Permit")
     ExecuteActionWithCondition("CopyBindingsLocation", "")
+}
+
+$^+#s:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("SysMenu", "")
 }
 
 $!#s:: {
@@ -93,26 +93,6 @@ $^+#i:: {
     ExecuteActionWithCondition("Settings", "")
 }
 
-$^#.:: {
-    ExecuteActionWithCondition("SetHome", "")
-}
-
-$^+#.:: {
-    ExecuteActionWithCondition("ClearHome", "")
-}
-
-$!#.:: {
-    ExecuteActionWithCondition("GoHome", "")
-}
-
-$#.:: {
-    ExecuteActionWithCondition("Home", "")
-}
-
-$+#.:: {
-    ExecuteActionWithCondition("HomePeek", "")
-}
-
 $^#t:: {
     ExecuteActionWithCondition("AlwaysOnTop", "")
 }
@@ -129,12 +109,16 @@ $#backspace:: {
     ExecuteActionWithCondition("SendToBack", "")
 }
 
-$+#backspace:: {
-    ExecuteActionWithCondition("FocusLastActiveWindow", "")
+$+#pgdn:: {
+    ExecuteActionWithCondition("MinimizeToTray", "")
 }
 
-$^#backspace:: {
-    ExecuteActionWithCondition("FocusDeepestWindow", "")
+$+#pgup:: {
+    ExecuteActionWithCondition("PickFromTray", "")
+}
+
+$^#f4:: {
+    ExecuteActionWithCondition("DragWindow", "")
 }
 
 $#pgdn:: {
@@ -161,21 +145,8 @@ $!#pgup:: {
     ExecuteActionWithCondition("PrevClassWindow", "")
 }
 
-$+#pgdn:: {
-    ExecuteActionWithCondition("MinimizeToTray", "")
-}
-
-$+#pgup:: {
-    ExecuteActionWithCondition("PickFromTray", "")
-}
-
-$^#f4:: {
-    ExecuteActionWithCondition("DragWindow", "")
-}
-
-$#f3:: {
-    try Suspend("Permit")
-    ExecuteActionWithCondition("WindowPicker", "")
+$^#backspace:: {
+    ExecuteActionWithCondition("FocusDeepestWindow", "")
 }
 
 $#;:: {
@@ -183,12 +154,32 @@ $#;:: {
     ExecuteActionWithCondition("Desk3d", "")
 }
 
-#rbutton:: {
-    ExecuteActionWithCondition("MouseToGrid", "")
+$^#.:: {
+    ExecuteActionWithCondition("SetHome", "")
 }
 
-#lbutton:: {
-    ExecuteActionWithCondition("MouseRelativeSize", "")
+$^+#.:: {
+    ExecuteActionWithCondition("ClearHome", "")
+}
+
+$!#.:: {
+    ExecuteActionWithCondition("GoHome", "")
+}
+
+$#.:: {
+    ExecuteActionWithCondition("Home", "")
+}
+
+$+#.:: {
+    ExecuteActionWithCondition("HomePeek", "")
+}
+
+$numpad5:: {
+    ExecuteActionWithCondition("Center", "")
+}
+
+$numpadclear:: {
+    ExecuteActionWithCondition("Center", "")
 }
 
 $!#left:: {
@@ -295,12 +286,68 @@ $+numpadclear:: {
     ExecuteActionWithCondition("EdgeCenter", "")
 }
 
-$numpad5:: {
-    ExecuteActionWithCondition("Center", "")
+$^numpad4:: {
+    ExecuteActionWithCondition("JumpGridLeft", "")
 }
 
-$numpadclear:: {
-    ExecuteActionWithCondition("Center", "")
+$^numpadleft:: {
+    ExecuteActionWithCondition("JumpGridLeft", "")
+}
+
+$^numpad6:: {
+    ExecuteActionWithCondition("JumpGridRight", "")
+}
+
+$^numpadright:: {
+    ExecuteActionWithCondition("JumpGridRight", "")
+}
+
+$^numpad8:: {
+    ExecuteActionWithCondition("JumpGridUp", "")
+}
+
+$^numpadup:: {
+    ExecuteActionWithCondition("JumpGridUp", "")
+}
+
+$^numpad2:: {
+    ExecuteActionWithCondition("JumpGridDown", "")
+}
+
+$^numpaddown:: {
+    ExecuteActionWithCondition("JumpGridDown", "")
+}
+
+$^numpad7:: {
+    ExecuteActionWithCondition("JumpGridTopLeft", "")
+}
+
+$^numpadhome:: {
+    ExecuteActionWithCondition("JumpGridTopLeft", "")
+}
+
+$^numpad9:: {
+    ExecuteActionWithCondition("JumpGridTopRight", "")
+}
+
+$^numpadpgup:: {
+    ExecuteActionWithCondition("JumpGridTopRight", "")
+}
+
+$^numpad1:: {
+    ExecuteActionWithCondition("JumpGridBottomLeft", "")
+}
+
+$^numpadend:: {
+    ExecuteActionWithCondition("JumpGridBottomLeft", "")
+}
+
+$^numpad3:: {
+    ExecuteActionWithCondition("JumpGridBottomRight", "")
+}
+
+$^numpadpgdn:: {
+    ExecuteActionWithCondition("JumpGridBottomRight", "")
 }
 
 $numpad4:: {
@@ -367,76 +414,20 @@ $numpadpgdn:: {
     ExecuteActionWithCondition("MoveToGridBottomRight", "")
 }
 
-$^numpad4:: {
-    ExecuteActionWithCondition("JumpGridLeft", "")
+#rbutton:: {
+    ExecuteActionWithCondition("MouseToGrid", "")
 }
 
-$^numpadleft:: {
-    ExecuteActionWithCondition("JumpGridLeft", "")
+#lbutton:: {
+    ExecuteActionWithCondition("MouseRelativeSize", "")
 }
 
-$^numpad6:: {
-    ExecuteActionWithCondition("JumpGridRight", "")
+$numpadadd:: {
+    ExecuteActionWithCondition("SnapToGridEnlarge", "")
 }
 
-$^numpadright:: {
-    ExecuteActionWithCondition("JumpGridRight", "")
-}
-
-$^numpad8:: {
-    ExecuteActionWithCondition("JumpGridUp", "")
-}
-
-$^numpadup:: {
-    ExecuteActionWithCondition("JumpGridUp", "")
-}
-
-$^numpad2:: {
-    ExecuteActionWithCondition("JumpGridDown", "")
-}
-
-$^numpaddown:: {
-    ExecuteActionWithCondition("JumpGridDown", "")
-}
-
-$^numpad7:: {
-    ExecuteActionWithCondition("JumpGridTopLeft", "")
-}
-
-$^numpadhome:: {
-    ExecuteActionWithCondition("JumpGridTopLeft", "")
-}
-
-$^numpad9:: {
-    ExecuteActionWithCondition("JumpGridTopRight", "")
-}
-
-$^numpadpgup:: {
-    ExecuteActionWithCondition("JumpGridTopRight", "")
-}
-
-$^numpad1:: {
-    ExecuteActionWithCondition("JumpGridBottomLeft", "")
-}
-
-$^numpadend:: {
-    ExecuteActionWithCondition("JumpGridBottomLeft", "")
-}
-
-$^numpad3:: {
-    ExecuteActionWithCondition("JumpGridBottomRight", "")
-}
-
-$^numpadpgdn:: {
-    ExecuteActionWithCondition("JumpGridBottomRight", "")
-}
-
-$^numpadadd:: {
-    ExecuteActionWithCondition("ScaleExpandGridPart", "")
-}
-
-$^numpadsub:: {
-    ExecuteActionWithCondition("ScaleReduceGridPart", "")
+$numpadsub:: {
+    ExecuteActionWithCondition("SnapToGridShrink", "")
 }
 
 $!numpadadd:: {
@@ -447,268 +438,12 @@ $!numpadsub:: {
     ExecuteActionWithCondition("ScaleReduce10px", "")
 }
 
-$^+#numpad4:: {
-    ExecuteActionWithCondition("StretchLeft", "")
+$^numpadadd:: {
+    ExecuteActionWithCondition("ScaleExpandGridPart", "")
 }
 
-$^+#numpadleft:: {
-    ExecuteActionWithCondition("StretchLeft", "")
-}
-
-$^+#numpad6:: {
-    ExecuteActionWithCondition("StretchRight", "")
-}
-
-$^+#numpadright:: {
-    ExecuteActionWithCondition("StretchRight", "")
-}
-
-$^+#numpad8:: {
-    ExecuteActionWithCondition("StretchTop", "")
-}
-
-$^+#numpadup:: {
-    ExecuteActionWithCondition("StretchTop", "")
-}
-
-$^+#numpad2:: {
-    ExecuteActionWithCondition("StretchBottom", "")
-}
-
-$^+#numpaddown:: {
-    ExecuteActionWithCondition("StretchBottom", "")
-}
-
-$^+#numpad7:: {
-    ExecuteActionWithCondition("StretchTopLeft", "")
-}
-
-$^+#numpadhome:: {
-    ExecuteActionWithCondition("StretchTopLeft", "")
-}
-
-$^+#numpad9:: {
-    ExecuteActionWithCondition("StretchTopRight", "")
-}
-
-$^+#numpadpgup:: {
-    ExecuteActionWithCondition("StretchTopRight", "")
-}
-
-$^+#numpad1:: {
-    ExecuteActionWithCondition("StretchBottomLeft", "")
-}
-
-$^+#numpadend:: {
-    ExecuteActionWithCondition("StretchBottomLeft", "")
-}
-
-$^+#numpad3:: {
-    ExecuteActionWithCondition("StretchBottomRight", "")
-}
-
-$^+#numpadpgdn:: {
-    ExecuteActionWithCondition("StretchBottomRight", "")
-}
-
-$#numpad4:: {
-    ExecuteActionWithCondition("StretchToGridLeft", "")
-}
-
-$#numpadleft:: {
-    ExecuteActionWithCondition("StretchToGridLeft", "")
-}
-
-$#numpad6:: {
-    ExecuteActionWithCondition("StretchToGridRight", "")
-}
-
-$#numpadright:: {
-    ExecuteActionWithCondition("StretchToGridRight", "")
-}
-
-$#numpad8:: {
-    ExecuteActionWithCondition("StretchToGridUp", "")
-}
-
-$#numpadup:: {
-    ExecuteActionWithCondition("StretchToGridUp", "")
-}
-
-$#numpad2:: {
-    ExecuteActionWithCondition("StretchToGridDown", "")
-}
-
-$#numpaddown:: {
-    ExecuteActionWithCondition("StretchToGridDown", "")
-}
-
-$#numpad7:: {
-    ExecuteActionWithCondition("StretchToGridTopLeft", "")
-}
-
-$#numpadhome:: {
-    ExecuteActionWithCondition("StretchToGridTopLeft", "")
-}
-
-$#numpad9:: {
-    ExecuteActionWithCondition("StretchToGridTopRight", "")
-}
-
-$#numpadpgup:: {
-    ExecuteActionWithCondition("StretchToGridTopRight", "")
-}
-
-$#numpad1:: {
-    ExecuteActionWithCondition("StretchToGridBottomLeft", "")
-}
-
-$#numpadend:: {
-    ExecuteActionWithCondition("StretchToGridBottomLeft", "")
-}
-
-$#numpad3:: {
-    ExecuteActionWithCondition("StretchToGridBottomRight", "")
-}
-
-$#numpadpgdn:: {
-    ExecuteActionWithCondition("StretchToGridBottomRight", "")
-}
-
-$!#numpad2:: {
-    ExecuteActionWithCondition("PullToGridDown", "")
-}
-
-$!#numpaddown:: {
-    ExecuteActionWithCondition("PullToGridDown", "")
-}
-
-$!#numpad8:: {
-    ExecuteActionWithCondition("PullToGridUp", "")
-}
-
-$!#numpadup:: {
-    ExecuteActionWithCondition("PullToGridUp", "")
-}
-
-$!#numpad4:: {
-    ExecuteActionWithCondition("PullToGridLeft", "")
-}
-
-$!#numpadleft:: {
-    ExecuteActionWithCondition("PullToGridLeft", "")
-}
-
-$!#numpad6:: {
-    ExecuteActionWithCondition("PullToGridRight", "")
-}
-
-$!#numpadright:: {
-    ExecuteActionWithCondition("PullToGridRight", "")
-}
-
-$!#numpad7:: {
-    ExecuteActionWithCondition("PullToGridTopLeft", "")
-}
-
-$!#numpadhome:: {
-    ExecuteActionWithCondition("PullToGridTopLeft", "")
-}
-
-$!#numpad9:: {
-    ExecuteActionWithCondition("PullToGridTopRight", "")
-}
-
-$!#numpadpgup:: {
-    ExecuteActionWithCondition("PullToGridTopRight", "")
-}
-
-$!#numpad1:: {
-    ExecuteActionWithCondition("PullToGridBottomLeft", "")
-}
-
-$!#numpadend:: {
-    ExecuteActionWithCondition("PullToGridBottomLeft", "")
-}
-
-$!#numpad3:: {
-    ExecuteActionWithCondition("PullToGridBottomRight", "")
-}
-
-$!#numpadpgdn:: {
-    ExecuteActionWithCondition("PullToGridBottomRight", "")
-}
-
-$^#numpad8:: {
-    ExecuteActionWithCondition("GrowTop", "")
-}
-
-$^#numpadup:: {
-    ExecuteActionWithCondition("GrowTop", "")
-}
-
-$^#numpad2:: {
-    ExecuteActionWithCondition("GrowBottom", "")
-}
-
-$^#numpaddown:: {
-    ExecuteActionWithCondition("GrowBottom", "")
-}
-
-$^#numpad6:: {
-    ExecuteActionWithCondition("GrowLeft", "")
-}
-
-$^#numpadright:: {
-    ExecuteActionWithCondition("GrowLeft", "")
-}
-
-$^#numpad4:: {
-    ExecuteActionWithCondition("GrowRight", "")
-}
-
-$^#numpadleft:: {
-    ExecuteActionWithCondition("GrowRight", "")
-}
-
-$^#numpad7:: {
-    ExecuteActionWithCondition("GrowTopLeft", "")
-}
-
-$^#numpadhome:: {
-    ExecuteActionWithCondition("GrowTopLeft", "")
-}
-
-$^#numpad9:: {
-    ExecuteActionWithCondition("GrowTopRight", "")
-}
-
-$^#numpadpgup:: {
-    ExecuteActionWithCondition("GrowTopRight", "")
-}
-
-$^#numpad1:: {
-    ExecuteActionWithCondition("GrowBottomLeft", "")
-}
-
-$^#numpadend:: {
-    ExecuteActionWithCondition("GrowBottomLeft", "")
-}
-
-$^#numpad3:: {
-    ExecuteActionWithCondition("GrowBottomRight", "")
-}
-
-$^#numpadpgdn:: {
-    ExecuteActionWithCondition("GrowBottomRight", "")
-}
-
-$^#numpad5:: {
-    ExecuteActionWithCondition("GrowAll", "")
-}
-
-$^#numpadclear:: {
-    ExecuteActionWithCondition("GrowAll", "")
+$^numpadsub:: {
+    ExecuteActionWithCondition("ScaleReduceGridPart", "")
 }
 
 $+#numpad8:: {
@@ -743,6 +478,14 @@ $+#numpadleft:: {
     ExecuteActionWithCondition("TrimRight", "")
 }
 
+$+#numpad5:: {
+    ExecuteActionWithCondition("TrimAll", "")
+}
+
+$+#numpadclear:: {
+    ExecuteActionWithCondition("TrimAll", "")
+}
+
 $+#numpad7:: {
     ExecuteActionWithCondition("TrimTopLeft", "")
 }
@@ -773,14 +516,6 @@ $+#numpad3:: {
 
 $+#numpadpgdn:: {
     ExecuteActionWithCondition("TrimBottomRight", "")
-}
-
-$+#numpad5:: {
-    ExecuteActionWithCondition("TrimAll", "")
-}
-
-$+#numpadclear:: {
-    ExecuteActionWithCondition("TrimAll", "")
 }
 
 $!+#numpad8:: {
@@ -847,6 +582,78 @@ $!+#numpadpgdn:: {
     ExecuteActionWithCondition("AddBottomRight", "")
 }
 
+$^#numpad6:: {
+    ExecuteActionWithCondition("GrowLeft", "")
+}
+
+$^#numpadright:: {
+    ExecuteActionWithCondition("GrowLeft", "")
+}
+
+$^#numpad4:: {
+    ExecuteActionWithCondition("GrowRight", "")
+}
+
+$^#numpadleft:: {
+    ExecuteActionWithCondition("GrowRight", "")
+}
+
+$^#numpad8:: {
+    ExecuteActionWithCondition("GrowTop", "")
+}
+
+$^#numpadup:: {
+    ExecuteActionWithCondition("GrowTop", "")
+}
+
+$^#numpad2:: {
+    ExecuteActionWithCondition("GrowBottom", "")
+}
+
+$^#numpaddown:: {
+    ExecuteActionWithCondition("GrowBottom", "")
+}
+
+$^#numpad5:: {
+    ExecuteActionWithCondition("GrowAll", "")
+}
+
+$^#numpadclear:: {
+    ExecuteActionWithCondition("GrowAll", "")
+}
+
+$^#numpad7:: {
+    ExecuteActionWithCondition("GrowTopLeft", "")
+}
+
+$^#numpadhome:: {
+    ExecuteActionWithCondition("GrowTopLeft", "")
+}
+
+$^#numpad9:: {
+    ExecuteActionWithCondition("GrowTopRight", "")
+}
+
+$^#numpadpgup:: {
+    ExecuteActionWithCondition("GrowTopRight", "")
+}
+
+$^#numpad1:: {
+    ExecuteActionWithCondition("GrowBottomLeft", "")
+}
+
+$^#numpadend:: {
+    ExecuteActionWithCondition("GrowBottomLeft", "")
+}
+
+$^#numpad3:: {
+    ExecuteActionWithCondition("GrowBottomRight", "")
+}
+
+$^#numpadpgdn:: {
+    ExecuteActionWithCondition("GrowBottomRight", "")
+}
+
 $^!#numpad8:: {
     ExecuteActionWithCondition("SubtractTop", "")
 }
@@ -911,12 +718,196 @@ $^!#numpadpgdn:: {
     ExecuteActionWithCondition("SubtractBottomRight", "")
 }
 
-$numpadadd:: {
-    ExecuteActionWithCondition("SnapToGridEnlarge", "")
+$#numpad4:: {
+    ExecuteActionWithCondition("StretchToGridLeft", "")
 }
 
-$numpadsub:: {
-    ExecuteActionWithCondition("SnapToGridShrink", "")
+$#numpadleft:: {
+    ExecuteActionWithCondition("StretchToGridLeft", "")
+}
+
+$#numpad6:: {
+    ExecuteActionWithCondition("StretchToGridRight", "")
+}
+
+$#numpadright:: {
+    ExecuteActionWithCondition("StretchToGridRight", "")
+}
+
+$#numpad8:: {
+    ExecuteActionWithCondition("StretchToGridUp", "")
+}
+
+$#numpadup:: {
+    ExecuteActionWithCondition("StretchToGridUp", "")
+}
+
+$#numpad2:: {
+    ExecuteActionWithCondition("StretchToGridDown", "")
+}
+
+$#numpaddown:: {
+    ExecuteActionWithCondition("StretchToGridDown", "")
+}
+
+$#numpad7:: {
+    ExecuteActionWithCondition("StretchToGridTopLeft", "")
+}
+
+$#numpadhome:: {
+    ExecuteActionWithCondition("StretchToGridTopLeft", "")
+}
+
+$#numpad9:: {
+    ExecuteActionWithCondition("StretchToGridTopRight", "")
+}
+
+$#numpadpgup:: {
+    ExecuteActionWithCondition("StretchToGridTopRight", "")
+}
+
+$#numpad1:: {
+    ExecuteActionWithCondition("StretchToGridBottomLeft", "")
+}
+
+$#numpadend:: {
+    ExecuteActionWithCondition("StretchToGridBottomLeft", "")
+}
+
+$#numpad3:: {
+    ExecuteActionWithCondition("StretchToGridBottomRight", "")
+}
+
+$#numpadpgdn:: {
+    ExecuteActionWithCondition("StretchToGridBottomRight", "")
+}
+
+$!#numpad4:: {
+    ExecuteActionWithCondition("PullToGridLeft", "")
+}
+
+$!#numpadleft:: {
+    ExecuteActionWithCondition("PullToGridLeft", "")
+}
+
+$!#numpad6:: {
+    ExecuteActionWithCondition("PullToGridRight", "")
+}
+
+$!#numpadright:: {
+    ExecuteActionWithCondition("PullToGridRight", "")
+}
+
+$!#numpad8:: {
+    ExecuteActionWithCondition("PullToGridUp", "")
+}
+
+$!#numpadup:: {
+    ExecuteActionWithCondition("PullToGridUp", "")
+}
+
+$!#numpad2:: {
+    ExecuteActionWithCondition("PullToGridDown", "")
+}
+
+$!#numpaddown:: {
+    ExecuteActionWithCondition("PullToGridDown", "")
+}
+
+$!#numpad7:: {
+    ExecuteActionWithCondition("PullToGridTopLeft", "")
+}
+
+$!#numpadhome:: {
+    ExecuteActionWithCondition("PullToGridTopLeft", "")
+}
+
+$!#numpad9:: {
+    ExecuteActionWithCondition("PullToGridTopRight", "")
+}
+
+$!#numpadpgup:: {
+    ExecuteActionWithCondition("PullToGridTopRight", "")
+}
+
+$!#numpad1:: {
+    ExecuteActionWithCondition("PullToGridBottomLeft", "")
+}
+
+$!#numpadend:: {
+    ExecuteActionWithCondition("PullToGridBottomLeft", "")
+}
+
+$!#numpad3:: {
+    ExecuteActionWithCondition("PullToGridBottomRight", "")
+}
+
+$!#numpadpgdn:: {
+    ExecuteActionWithCondition("PullToGridBottomRight", "")
+}
+
+$^+#numpad4:: {
+    ExecuteActionWithCondition("StretchLeft", "")
+}
+
+$^+#numpadleft:: {
+    ExecuteActionWithCondition("StretchLeft", "")
+}
+
+$^+#numpad6:: {
+    ExecuteActionWithCondition("StretchRight", "")
+}
+
+$^+#numpadright:: {
+    ExecuteActionWithCondition("StretchRight", "")
+}
+
+$^+#numpad8:: {
+    ExecuteActionWithCondition("StretchTop", "")
+}
+
+$^+#numpadup:: {
+    ExecuteActionWithCondition("StretchTop", "")
+}
+
+$^+#numpad2:: {
+    ExecuteActionWithCondition("StretchBottom", "")
+}
+
+$^+#numpaddown:: {
+    ExecuteActionWithCondition("StretchBottom", "")
+}
+
+$^+#numpad7:: {
+    ExecuteActionWithCondition("StretchTopLeft", "")
+}
+
+$^+#numpadhome:: {
+    ExecuteActionWithCondition("StretchTopLeft", "")
+}
+
+$^+#numpad9:: {
+    ExecuteActionWithCondition("StretchTopRight", "")
+}
+
+$^+#numpadpgup:: {
+    ExecuteActionWithCondition("StretchTopRight", "")
+}
+
+$^+#numpad1:: {
+    ExecuteActionWithCondition("StretchBottomLeft", "")
+}
+
+$^+#numpadend:: {
+    ExecuteActionWithCondition("StretchBottomLeft", "")
+}
+
+$^+#numpad3:: {
+    ExecuteActionWithCondition("StretchBottomRight", "")
+}
+
+$^+#numpadpgdn:: {
+    ExecuteActionWithCondition("StretchBottomRight", "")
 }
 
 $^+#left:: {
@@ -935,6 +926,15 @@ $^+#down:: {
     ExecuteActionWithCondition("TuckDown", "")
 }
 
+$^+#p:: {
+    ExecuteActionWithCondition("PeekTucked", "")
+}
+
+$^+#u:: {
+    try Suspend("Permit")
+    ExecuteActionWithCondition("Untuck", "")
+}
+
 $^!#left:: {
     ExecuteActionWithCondition("UntuckLeft", "")
 }
@@ -951,12 +951,7 @@ $^!#down:: {
     ExecuteActionWithCondition("UntuckBottom", "")
 }
 
-$^+#p:: {
-    ExecuteActionWithCondition("PeekTucked", "")
-}
-
-$^+#u:: {
-    try Suspend("Permit")
-    ExecuteActionWithCondition("Untuck", "")
+$+#backspace:: {
+    ExecuteActionWithCondition("FocusLastActiveWindow", "")
 }
 

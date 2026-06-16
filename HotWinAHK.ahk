@@ -556,8 +556,164 @@ NormalizeHotKeyToNumpad9Display(strokeString) {
     }
     return outStr
 }
+EnsureAllCommandsInIni() {
+    global g_sIniFile
+    if !FileExist(g_sIniFile) {
+        return
+    }
+    
+    iniText := FileRead(g_sIniFile)
+    
+    ; Map of lowercase command name -> { orig: "[SectionName]", keys: "keys1=...\r\n" }
+    sectionsMap := Map()
+    
+    currSectionMain := ""
+    currSectionRaw := ""
+    currSectionKeys := ""
+    headerComments := ""
+    hasHitSection := false
+    
+    Loop Parse, iniText, "`n", "`r" {
+        line := Trim(A_LoopField)
+        if (RegExMatch(line, "^\[([^\]]+)\]$", &match)) {
+            hasHitSection := true
+            if (currSectionMain != "") {
+                sectionsMap[StrLower(currSectionMain)] := { orig: currSectionRaw, keys: currSectionKeys }
+            }
+            currSectionRaw := "[" . match[1] . "]"
+            currSecName := match[1]
+            if (SubStr(currSecName, 1, 1) == "-") {
+                currSecName := SubStr(currSecName, 2)
+            }
+            currSectionMain := Trim(currSecName)
+            currSectionKeys := ""
+        } else {
+            if (!hasHitSection) {
+                headerComments .= A_LoopField . "`r`n"
+            } else {
+                if (currSectionMain != "") {
+                    currSectionKeys .= A_LoopField . "`r`n"
+                }
+            }
+        }
+    }
+    if (currSectionMain != "") {
+        sectionsMap[StrLower(currSectionMain)] := { orig: currSectionRaw, keys: currSectionKeys }
+    }
+    
+    ; If the top headerComments are empty, provide a clean default header
+    if (Trim(headerComments, "`r`n`t ") == "") {
+        headerComments := "; =======================================================================================`r`n"
+        headerComments .= ";                        WINDOW NUDGER CONFIGURATION MATRIX`r`n"
+        headerComments .= "; =======================================================================================`r`n"
+        headerComments .= "; SYNTAX RULES:`r`n"
+        headerComments .= ";   [CommandName]        -> Active command (Runs when keys match).`r`n"
+        headerComments .= ";   [-CommandName]       -> Disabled command (Ignored completely by the engine).`r`n"
+        headerComments .= ";   keys1=Combo|Filter   -> First hotkey assignment with optional conditional filter.`r`n"
+        headerComments .= ";   keys2=Combo          -> Second hotkey alternative assignment for the SAME command.`r`n`r`n"
+    } else {
+        headerComments := Trim(headerComments, "`r`n") . "`r`n`r`n"
+    }
+    
+    catHeaders := Map(
+        "SYSTEM", "1. ADMINISTRATIVE & SYSTEM CONTROLS",
+        "FOCUS",  "2. FOCUS & WINDOW CONTROLS",
+        "WINDOW", "2. FOCUS & WINDOW CONTROLS",
+        "HOME",   "3. PERSISTENT WINDOW HOMES",
+        "MOVE",   "4. MOVEMENTS & SNAPPING",
+        "SIZE",   "5. SIZING & STRETCHING",
+        "TUCK",   "6. TUCK & PEEK FEATURES"
+    )
+    
+    categoriesOrder := ["SYSTEM", "WINDOW", "FOCUS", "HOME", "MOVE", "SIZE", "TUCK"]
+    
+    writtenHeaders := Map()
+    writtenCommands := Map()
+    newIniText := headerComments
+    
+    localRows := GetGlobalCommandList()
+    
+    for cat in categoriesOrder {
+        headerText := catHeaders[cat]
+        
+        ; Find all commands for this category in the master list
+        catRows := []
+        for row in localRows {
+            if (row.cat == cat) {
+                catRows.Push(row)
+            }
+        }
+        
+        if (catRows.Length == 0) {
+            continue
+        }
+        
+        ; Write category header if not already written
+        if (!writtenHeaders.Has(headerText)) {
+            newIniText .= "; =======================================================================================`r`n"
+            newIniText .= "; " . headerText . "`r`n"
+            newIniText .= "; =======================================================================================`r`n`r`n"
+            writtenHeaders[headerText] := true
+        }
+        
+        for row in catRows {
+            if (InStr(row.cmd, " ")) {
+                continue
+            }
+            if (writtenCommands.Has(StrLower(row.cmd))) {
+                continue
+            }
+            writtenCommands[StrLower(row.cmd)] := true
+            
+            cleanCmd := StrLower(row.cmd)
+            if (sectionsMap.Has(cleanCmd)) {
+                secData := sectionsMap[cleanCmd]
+                sectionsMap.Delete(cleanCmd)
+                
+                newIniText .= secData.orig . "`r`n"
+                cleanedKeys := Trim(secData.keys, "`r`n`t ")
+                if (cleanedKeys != "") {
+                    newIniText .= cleanedKeys . "`r`n"
+                }
+                newIniText .= "`r`n"
+            } else {
+                ; Completely missing command!
+                newIniText .= "; " . row.desc . "`r`n"
+                newIniText .= "[-" . row.cmd . "]`r`n"
+                defaultBinding := row.key
+                if (defaultBinding == "Custom" || defaultBinding == "Edge Bump" || defaultBinding == "Edge Click/Drag" || defaultBinding == "Auto Indicator") {
+                    defaultBinding := ""
+                }
+                newIniText .= ";keys1=" . defaultBinding . "`r`n`r`n"
+            }
+        }
+    }
+    
+    ; If any sections are remaining, they are custom configurations we must append safely
+    if (sectionsMap.Count > 0) {
+        newIniText .= "; =======================================================================================`r`n"
+        newIniText .= "; 7. CUSTOM USER CONFIGURATIONS & PREFERENCES`r`n"
+        newIniText .= "; =======================================================================================`r`n`r`n"
+        for key, value in sectionsMap {
+            newIniText .= value.orig . "`r`n"
+            cleanedKeys := Trim(value.keys, "`r`n`t ")
+            if (cleanedKeys != "") {
+                newIniText .= cleanedKeys . "`r`n"
+            }
+            newIniText .= "`r`n"
+        }
+    }
+    
+    ; Only write back to disk if it actually changed to avoid disk wear / triggering loop reloads
+    if (Trim(newIniText) != Trim(iniText)) {
+        FileDelete(g_sIniFile)
+        FileAppend(newIniText, g_sIniFile, "UTF-8")
+    }
+}
 CompileIniToStaticHotkeys() {
     global g_sIniFile, g_sGeneratedFile
+
+    EnsureAllCommandsInIni()
 
     if !FileExist(g_sIniFile) {
         return
@@ -6191,7 +6347,8 @@ ShowWindowPicker() {
     Loop 8 {
         i := A_Index
         yPos := 65 + (i - 1) * 35
-        btn := pickerGui.Add("Button", "x15 y" . yPos . " w470 h30 Left s9 Bold cFFFFFF", "")
+        pickerGui.SetFont("s9 Bold cFFFFFF")
+        btn := pickerGui.Add("Button", "x15 y" . yPos . " w470 h30 Left", "")
         btn.Visible := false
         btn.OnEvent("Click", ButtonClicked.Bind(i))
         buttonsList.Push(btn)
@@ -6368,7 +6525,7 @@ StartDesk3D() {
     MouseGetPos(&g_DeskStartMouseX, &g_DeskStartMouseY)
     
     SetTimer(TrackDesk3D, 15)
-    ShowTargetToolTip("Desk3D Mode Active. Move mouse to rotate windows. Hold Ctrl to magnify. [Esc] to exit.")
+    ShowTargetToolTip("Desk3D Mode Active. Move mouse to rotate. Hold Ctrl to magnify, Shift to freeze. [Esc] to exit.")
 }
 
 TrackDesk3D() {
@@ -6384,6 +6541,12 @@ TrackDesk3D() {
     deltaX := mX - g_DeskStartMouseX
     deltaY := mY - g_DeskStartMouseY
     
+    ; Holding Shift stops the windows from movement due to the mode and the mouse
+    if (GetKeyState("Shift", "P")) {
+        deltaX := 0
+        deltaY := 0
+    }
+    
     ; Holding Ctrl magnifies the movement of windows (factor 3.0)
     magFactor := GetKeyState("Ctrl", "P") ? 3.0 : 1.0
     
@@ -6392,7 +6555,8 @@ TrackDesk3D() {
             continue
         }
         
-        weight := Max(0.05, 1.2 - (item.depthIdx - 1) * 0.15) * magFactor
+        ; Initial magnification increased by 1.75
+        weight := Max(0.05, 1.2 - (item.depthIdx - 1) * 0.15) * magFactor * 1.75
         shiftX := -deltaX * weight
         shiftY := -deltaY * weight
         
