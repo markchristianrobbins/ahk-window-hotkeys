@@ -60,6 +60,86 @@ Every action from simple moves to grid mapping is indexed inside the INI command
   - `winclassis=text` / `winclasshas=text` (targeted to matching application classes)
   - `winexeis=text` (direct executable restriction filters)
 
+### 📋 Categorized Action Commands Reference
+
+#### ⚙️ SYSTEM (Orchestration & Tools)
+- **HelpScreen**: Display the interactive keyboard command reference panel containing on-screen documentation.
+- **CmdPalette**: Display the interactive fuzzy-search Command Palette for manual trigger / dry-run testing.
+- **WinInfo**: Display active window physical bounds, handle ID, class name, and executable system path.
+- **PeekUnderMouse**: Show context of window beneath mouse cursor coordinates.
+- **CopyCommands**: Copy all available action commands name dictionary to system clipboard.
+- **CopyBindings**: Copy all active hotkeys keybindings dictionary map to system clipboard.
+- **CopyCommandsHelp**: Copy this fully categorized action commands reference with descriptions to system clipboard.
+- **BindingsAlpha**: Copy active keybindings map sorted alphabetically by command name to system clipboard.
+- **BindingsLocation**: Copy active keybindings map grouped by keyboard hardware location to system clipboard.
+- **ToggleSuspension**: Suspend or resume all HotWinAHK modifier triggers and mouse gestures instantly.
+- **ReloadConfig**: Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically.
+- **EditConfig**: Open HotWinAHK.ini configurations in system default text editor.
+- **ExitProgram**: Safely close physical hooks and terminate the HotWinAHK background process.
+- **RestartProgram**: Instantly reload configuration parameters and reboot the active execution engine.
+- **Active Window Dot**: Draws a persistent telemetry status dot at the active window's top-left margin of the target layout.
+
+#### 🪟 WINDOW (Attributes & Trays)
+- **AlwaysOnTop**: Toggle Always-On-Top focus pinning attribute on active window frame.
+- **SetOpacity70**: Set alpha opacity transparency level to 70% on active window frame.
+- **RemoveOpacity**: Restore active window opacity to full solid visibility.
+- **SendToBack**: Push active window frame to the bottom of the active desktop stack.
+- **MinimizeToTray**: Stow active window into an autonomous system-tray notification process.
+- **PickFromTray**: Open stowed window tray instances via right-click contextual list.
+- **DragWindow**: Shift focus to translucent DragWindow movement mode to position via directional mouse coordinates.
+
+#### 🏠 HOME (Window Persistence)
+- **SetHome**: Save active window class/process/fuzzy title signature to persistent home location.
+- **ClearHome**: Delete saved home location configuration for active window.
+- **GoHome**: Relocate window to its persistent home position.
+- **Home**: Intelligent Home behavior (Move to home, or restore to pre-homed, or strip home config upon confirmation).
+- **HomePeek**: Momentarily draw a transparent overlay footprint of the window's home location on screen.
+
+#### 🎯 FOCUS (Z-Order Management)
+- **NextWindow**: Cycle focus smoothly forward across open desktop window frames.
+- **PrevWindow**: Cycle focus smoothly backward across open desktop window frames.
+- **NextClassWindow**: Cycle focus specifically forward between windows of identical process class.
+- **PrevClassWindow**: Cycle focus specifically backward between windows of identical process class.
+- **FocusDeepestWindow**: Activate the deepest window in the Z-order list.
+
+#### 🫥 TUCK (Docker & Auto-Hide)
+- **TuckLeft**: Tuck window past left screen wall, exposing a 20px dock indicator bar.
+- **TuckRight**: Tuck window past right screen wall, exposing a 20px dock indicator bar.
+- **TuckUp**: Tuck window past top screen wall, exposing a 20px dock indicator bar.
+- **TuckDown**: Tuck window past bottom screen wall, exposing a 20px dock indicator bar.
+- **BumpEdgeUntuck**: Trigger untuck peeking when cursor reaches tucked window edge indicator.
+- **BumpEdgeUntuckActivate**: Fully restore tucked window when pulled/clicked past the pop-off threshold.
+- **UntuckLeft** / **UntuckRight** / **UntuckTop** / **UntuckBottom**: Untuck the window tucked at the specified edge.
+- **TuckPeekLeft** / **TuckPeekRight** / **TuckPeekTop** / **TuckPeekBottom**: Reveal/peek tucked windows on the specified edge sequentially.
+
+#### 🗺️ MOVE (Grid Matrix Positioning)
+- **Center**: Move active window to center of screen without sizing changes.
+- **MoveLeft10px** / **MoveRight10px** / **MoveUp10px** / **MoveDown10px**: Shift active window by 10 pixels coarse-scale.
+- **MoveLeft1px** / **MoveRight1px** / **MoveUp1px** / **MoveDown1px**: Nudge active window with 1 pixel fine precision.
+- **EdgeLeft** / **EdgeRight** / **EdgeTop** / **EdgeBottom**: Align window to the screen's specified border.
+- **EdgeTopLeft** / **EdgeTopRight** / **EdgeBottomLeft** / **EdgeBottomRight**: Align window to the screen's specified corner.
+- **EdgeCenter**: Position active window to the exact horizontal and vertical center of monitor.
+- **EdgeInLeft** / **EdgeInRight** / **EdgeInTop** / **EdgeInBottom** / **EdgeInTopLeft** / **EdgeInTopRight** / **EdgeInBottomLeft** / **EdgeInBottomRight**: Set/align window offset one grid cell from the specified screen edge/corner.
+- **JumpGridLeft** / **JumpGridRight** / **JumpGridUp** / **JumpGridDown** / **JumpGridTopLeft** / **JumpGridTopRight** / **JumpGridBottomLeft** / **JumpGridBottomRight**: Hop window position to the specified virtual grid quartile partition.
+- **MoveToGridLeft** / **MoveToGridRight** / **MoveToGridUp** / **MoveToGridDown** / **MoveToGridTopLeft** / **MoveToGridTopRight** / **MoveToGridBottomLeft** / **MoveToGridBottomRight**: Shift active window between virtual grid units/aspects.
+
+#### 📐 SIZE (Boundary Scaling, Margins & Trimming)
+- **MouseToGrid**: Warp window beneath mouse cursor directly to closest grid block.
+- **MouseRelativeSize**: Resize window dynamically relative to cursor movement boundary vectors.
+- **SnapToGridEnlarge**: Grow active window boundaries to span next adjacent grid aspect cell.
+- **SnapToGridShrink**: Contract active window grid spanning aspect cell size.
+- **ScaleExpand10px** / **ScaleReduce10px**: Expand / shrink active window bounds by 10px symmetrically in all directions.
+- **ScaleExpandGridPart** / **ScaleReduceGridPart**: Expand / shrink active window bounds symmetrically matching half-grid step parts.
+- **TrimTop** / **TrimBottom** / **TrimLeft** / **TrimRight** / **TrimAll** / **TrimTopLeft** / **TrimTopRight** / **TrimBottomLeft** / **TrimBottomRight**: Trim specified boundary/boundaries from active window margin(s).
+- **AddTop** / **AddBottom** / **AddLeft** / **AddRight** / **AddTopLeft** / **AddTopRight** / **AddBottomLeft** / **AddBottomRight**: Grow specified boundary/boundaries outward to nearest grid margin(s) or midpoint grid cell.
+- **GrowLeft** / **GrowRight** / **GrowTop** / **GrowBottom** / **GrowAll** / **GrowTopLeft** / **GrowTopRight** / **GrowBottomLeft** / **GrowBottomRight**: Symmetrically grow specified boundary/boundaries outward by step width.
+- **SubtractTop** / **SubtractBottom** / **SubtractLeft** / **SubtractRight** / **SubtractTopLeft** / **SubtractTopRight** / **SubtractBottomLeft** / **SubtractBottomRight**: Contract specified boundary/boundaries inward to nearest grid/midpoint cell or toward center.
+- **HalfSizeLeft** / **HalfSizeRight** / **HalfSizeTop** / **HalfSizeBottom**: Halve window width/height from specified side.
+- **DoubleSizeLeft** / **DoubleSizeRight** / **DoubleSizeTop** / **DoubleSizeBottom**: Double window width/height from specified side.
+- **StretchToGridLeft** / **StretchToGridRight** / **StretchToGridUp** / **StretchToGridDown** / **StretchToGridTopLeft** / **StretchToGridTopRight** / **StretchToGridBottomLeft** / **StretchToGridBottomRight**: Stretch target boundary/boundaries to nearest grid edge/corner.
+- **PullToGridLeft** / **PullToGridRight** / **PullToGridUp** / **PullToGridDown** / **PullToGridTopLeft** / **PullToGridTopRight** / **PullToGridBottomLeft** / **PullToGridBottomRight**: Pull target boundary/boundaries inward to nearest grid edge/corner.
+- **StretchLeft** / **StretchRight** / **StretchTop** / **StretchBottom** / **StretchTopLeft** / **StretchTopRight** / **StretchBottomLeft** / **StretchBottomRight**: Extend target boundary/boundaries to touch screen margins.
+
 ## 🔧 5. Workspace Build & Configuration
 - **Script Customization**: Changes to standard profiles are added to the `HotWinAHK.ini` table.
 - **On-The-Fly Compilation**: Hotkeys automatically re-compile and reboot on save or whenever `ReloadConfig` triggers.

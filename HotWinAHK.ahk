@@ -506,7 +506,7 @@ CompileIniToStaticHotkeys() {
                 sPrefix := ""
             }
             ScriptBuffer .= sPrefix sAHKStroke ":: {`n"
-            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "PeekTucked" || sCmd == "Untuck" || sCmd == "CmdPalette") {
+            if (sCmd == "ToggleSuspension" || sCmd == "ExitProgram" || sCmd == "RestartProgram" || sCmd == "ReloadConfig" || sCmd == "EditConfig" || sCmd == "HelpScreen" || sCmd == "WinInfo" || sCmd == "CopyCommands" || sCmd == "CopyBindings" || sCmd == "CopyCommandsHelp" || sCmd == "BindingsAlpha" || sCmd == "BindingsLocation" || sCmd == "PeekTucked" || sCmd == "Untuck" || sCmd == "CmdPalette") {
                 ScriptBuffer .= '    try Suspend("Permit")`n'
             }
             ScriptBuffer .= '    ExecuteActionWithCondition("' sCmd '", "' sCond '")`n'
@@ -577,7 +577,7 @@ LoadHotkeysAtRuntime() {
 ; #region  _engine 
 IsMetaCommand(sCmd) {
     ; Add your untuck commands to the meta-command bypass list
-    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette")) {
+    if (InStr(sCmd, "BumpEdgeUntuck") || InStr(sCmd, "HelpScreen") || InStr(sCmd, "ReloadConfig") || InStr(sCmd, "CopyCommands") || InStr(sCmd, "CopyBindings") || InStr(sCmd, "CopyCommandsHelp") || InStr(sCmd, "BindingsAlpha") || InStr(sCmd, "BindingsLocation") || InStr(sCmd, "PeekTucked") || InStr(sCmd, "Untuck") || InStr(sCmd, "CmdPalette")) {
         return true
     }
 
@@ -666,6 +666,9 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "RestartProgram": Reload()
         case "CopyCommands": CopyCommands()
         case "CopyBindings": CopyBindings()
+        case "CopyCommandsHelp": CopyCommandsHelp()
+        case "BindingsAlpha": BindingsAlpha()
+        case "BindingsLocation": BindingsLocation()
     }
 
     ; --- DYNAMIC POSITION PIXEL SHIFT MOVEMENT MATRIX ---
@@ -3112,110 +3115,181 @@ ShowHelpScreen(hWnd := 0) {
 
 GetGlobalCommandList() {
     static commandList := [
-        {cat: "Administrative", cmd: "HelpScreen", key: "Win + /", desc: "Display this interactive keyboard command reference panel."},
-        {cat: "Administrative", cmd: "CmdPalette", key: "Win + Ctrl + Shift + C", desc: "Display the interactive fuzzy-search Command Palette for manual trigger / dry run testing."},
-        {cat: "Administrative", cmd: "WinInfo", key: "Win + Ctrl + /", desc: "Display active window physical bounds, handle ID, class, and executable name."},
-        {cat: "Administrative", cmd: "ToggleSuspension", key: "Win + Alt + S", desc: "Suspend or resume all HotWinAHK modifier triggers instantly."},
-        {cat: "Administrative", cmd: "ReloadConfig", key: "Win + F12", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
-        {cat: "Administrative", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
-        {cat: "Administrative", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
-        {cat: "Administrative", cmd: "RestartProgram", key: "Win + Ctrl + F12", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
-        {cat: "Administrative", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
-        
-        {cat: "System Layer", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},
-        {cat: "System Layer", cmd: "SetOpacity70", key: "Win + Shift + O", desc: "Set alpha opacity transparency level to 70% on active window frame."},
-        {cat: "System Layer", cmd: "RemoveOpacity", key: "Win + Alt + Shift + O", desc: "Restore active window opacity to full solid visibility."},
-        {cat: "System Layer", cmd: "SendToBack", key: "Win + Backspace", desc: "Push active window frame to the bottom of the active desktop stack."},
-        {cat: "System Layer", cmd: "MinimizeToTray", key: "Win + Shift + PgDn", desc: "Stow active window into an autonomous system-tray notification process."},
-        {cat: "System Layer", cmd: "PickFromTray", key: "Win + Shift + PgUp", desc: "Open stowed window tray instances via right-click contextual list."},
-        
-        {cat: "Pixel Nudges", cmd: "MoveLeft10px", key: "Win + Ctrl + Left", desc: "Shift active window left by 10 pixels coarse-scale."},
-        {cat: "Pixel Nudges", cmd: "MoveRight10px", key: "Win + Ctrl + Right", desc: "Shift active window right by 10 pixels coarse-scale."},
-        {cat: "Pixel Nudges", cmd: "MoveUp10px", key: "Win + Ctrl + Up", desc: "Shift active window up by 10 pixels coarse-scale."},
-        {cat: "Pixel Nudges", cmd: "MoveDown10px", key: "Win + Ctrl + Down", desc: "Shift active window down by 10 pixels coarse-scale."},
-        {cat: "Pixel Nudges", cmd: "MoveLeft1px", key: "Win + Shift + Left", desc: "Nudge active window left with 1 pixel fine precision."},
-        {cat: "Pixel Nudges", cmd: "MoveRight1px", key: "Win + Shift + Right", desc: "Nudge active window right with 1 pixel fine precision."},
-        {cat: "Pixel Nudges", cmd: "MoveUp1px", key: "Win + Shift + Up", desc: "Nudge active window up with 1 pixel fine precision."},
-        {cat: "Pixel Nudges", cmd: "MoveDown1px", key: "Win + Shift + Down", desc: "Nudge active window down with 1 pixel fine precision."},
-        
-        {cat: "Sizing & Margins", cmd: "ScaleExpandGridPart", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds symmetrically matching half-grid step parts."},
-        {cat: "Sizing & Margins", cmd: "ScaleReduceGridPart", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds symmetrically matching half-grid step parts."},
-        {cat: "Sizing & Margins", cmd: "ScaleExpand10px", key: "Alt + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
-        {cat: "Sizing & Margins", cmd: "ScaleReduce10px", key: "Alt + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
-        {cat: "Sizing & Margins", cmd: "TrimLeft", key: "Win + Alt + Shift + Numpad 6", desc: "Trim left boundary from active window margin."},
-        {cat: "Sizing & Margins", cmd: "TrimRight", key: "Win + Alt + Shift + Numpad 4", desc: "Trim right boundary from active window margin."},
-        {cat: "Sizing & Margins", cmd: "TrimTop", key: "Win + Alt + Shift + Numpad 8", desc: "Trim top boundary from active window margin."},
-        {cat: "Sizing & Margins", cmd: "TrimBottom", key: "Win + Alt + Shift + Numpad 2", desc: "Trim bottom boundary from active window margin."},
-        {cat: "Sizing & Margins", cmd: "TrimAll", key: "Win + Alt + Numpad 5", desc: "Symmetrically trim all 4 sides of the active window margin."},
-        {cat: "Sizing & Margins", cmd: "GrowLeft", key: "Win + Ctrl + Shift + Numpad 6", desc: "Grow left boundary outward from active window margin by step width."},
-        {cat: "Sizing & Margins", cmd: "GrowRight", key: "Win + Ctrl + Shift + Numpad 4", desc: "Grow right boundary outward from active window margin by step width."},
-        {cat: "Sizing & Margins", cmd: "GrowTop", key: "Win + Ctrl + Shift + Numpad 8", desc: "Grow top boundary outward from active window margin by step width."},
-        {cat: "Sizing & Margins", cmd: "GrowBottom", key: "Win + Ctrl + Shift + Numpad 2", desc: "Grow bottom boundary outward from active window margin by step width."},
-        {cat: "Sizing & Margins", cmd: "GrowAll", key: "Win + Ctrl + Shift + Numpad 5", desc: "Symmetrically grow all 4 sides of the active window margin."},
-        {cat: "Sizing & Margins", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "AddBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "SubtractLeft", key: "Win + Ctrl + Alt + Left", desc: "Contract left boundary inward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary inward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary inward to nearest grid or midpoint grid cell."},
-        {cat: "Sizing & Margins", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary inward to nearest grid or midpoint grid cell."},
-        
-        {cat: "Window Home", cmd: "SetHome", key: "Win + Ctrl + .", desc: "Save active window class/process/fuzzy title signature to persistent home location."},
-        {cat: "Window Home", cmd: "ClearHome", key: "Win + Ctrl + Shift + .", desc: "Delete saved home location configuration for active window."},
-        {cat: "Window Home", cmd: "GoHome", key: "Win + Alt + .", desc: "Relocate window to its persistent home position."},
-        {cat: "Window Home", cmd: "Home", key: "Win + .", desc: "Intelligent Home behavior: Move to home, or restore to pre-homed, or strip home config upon confirmation."},
-        {cat: "Window Home", cmd: "HomePeek", key: "Win + Shift + .", desc: "Momentarily draw a transparent overlay footprint of the window's home location on screen."},
-        
-        {cat: "Grid Matrix", cmd: "Center", key: "Numpad5", desc: "Move active window to center of screen without sizing changes."},
-        {cat: "Grid Matrix", cmd: "JumpGridLeft", key: "Alt + Numpad 4", desc: "Hop window position to the left virtual grid quartile partition."},
-        {cat: "Grid Matrix", cmd: "JumpGridRight", key: "Alt + Numpad 6", desc: "Hop window position to the right virtual grid quartile partition."},
-        {cat: "Grid Matrix", cmd: "JumpGridUp", key: "Alt + Numpad 8", desc: "Hop window position to the up virtual grid quartile partition."},
-        {cat: "Grid Matrix", cmd: "JumpGridDown", key: "Alt + Numpad 2", desc: "Hop window position to the down virtual grid quartile partition."},
-        {cat: "Grid Matrix", cmd: "MouseToGrid", key: "Win + RButton", desc: "Warp window beneath mouse cursor directly to closest grid block."},
-        {cat: "Grid Matrix", cmd: "SnapToGridEnlarge", key: "NumpadAdd", desc: "Grow active window boundaries to span next adjacent grid aspect cell."},
-        {cat: "Grid Matrix", cmd: "SnapToGridShrink", key: "NumpadSub", desc: "Contract active window grid spanning aspect cell size."},
-        {cat: "Grid Matrix", cmd: "MoveToGridLeft", key: "Numpad 4", desc: "Shift active window leftward between virtual grid units."},
-        {cat: "Grid Matrix", cmd: "MoveToGridRight", key: "Numpad 6", desc: "Shift active window rightward between virtual grid units."},
-        {cat: "Grid Matrix", cmd: "MoveToGridDown", key: "Numpad 2", desc: "Shift active window downward between virtual grid units."},
-        {cat: "Grid Matrix", cmd: "MoveToGridUp", key: "Numpad 8", desc: "Shift active window upward between virtual grid units."},
-        {cat: "Grid Matrix", cmd: "StretchToGridLeft", key: "Win + Numpad 4", desc: "Stretch left boundary outward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridRight", key: "Win + Numpad 6", desc: "Stretch right boundary outward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridUp", key: "Win + Numpad 8", desc: "Stretch top boundary outward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "StretchToGridDown", key: "Win + Numpad 2", desc: "Stretch bottom boundary outward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "PullToGridLeft", key: "Win + Alt + Numpad 4", desc: "Pull left boundary inward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "PullToGridRight", key: "Win + Alt + Numpad 6", desc: "Pull right boundary inward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "PullToGridDown", key: "Win + Alt + Numpad 2", desc: "Pull bottom boundary inward to nearest grid or midpoint grid cell edge."},
-        {cat: "Grid Matrix", cmd: "PullToGridUp", key: "Win + Alt + Numpad 8", desc: "Pull top boundary inward to nearest grid or midpoint grid cell edge."},
-        
-        {cat: "Docking & Fling", cmd: "TuckLeft", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
-        {cat: "Docking & Fling", cmd: "TuckRight", key: "Win + Ctrl + Shift + Right", desc: "Tuck window past right screen wall, exposing a 20px dock indicator bar."},
-        {cat: "Docking & Fling", cmd: "TuckUp", key: "Win + Ctrl + Shift + Up", desc: "Tuck window past top screen wall, exposing a 20px dock indicator bar."},
-        {cat: "Docking & Fling", cmd: "TuckDown", key: "Win + Ctrl + Shift + Down", desc: "Tuck window past bottom screen wall, exposing a 20px dock indicator bar."},
-        {cat: "Docking & Fling", cmd: "PeekTucked", key: "Win + Ctrl + Shift + P", desc: "Offers a menu of all tucked windows listing their titles and edge."},
-        {cat: "Docking & Fling", cmd: "Untuck", key: "Win + Ctrl + Shift + U", desc: "Offers a menu of all tucked windows to completely restore them."},
-        {cat: "Docking & Fling", cmd: "UntuckLeft", key: "Custom", desc: "Untuck the window tucked at the left edge."},
-        {cat: "Docking & Fling", cmd: "UntuckRight", key: "Custom", desc: "Untuck the window tucked at the right edge."},
-        {cat: "Docking & Fling", cmd: "UntuckTop", key: "Custom", desc: "Untuck the window tucked at the top edge."},
-        {cat: "Docking & Fling", cmd: "UntuckBottom", key: "Custom", desc: "Untuck the window tucked at the bottom edge."},
-        {cat: "Docking & Fling", cmd: "TuckPeekLeft", key: "Custom", desc: "Reveal/peek tucked windows on the left edge sequentially."},
-        {cat: "Docking & Fling", cmd: "TuckPeekRight", key: "Custom", desc: "Reveal/peek tucked windows on the right edge sequentially."},
-        {cat: "Docking & Fling", cmd: "TuckPeekTop", key: "Custom", desc: "Reveal/peek tucked windows on the top edge sequentially."},
-        {cat: "Docking & Fling", cmd: "TuckPeekBottom", key: "Custom", desc: "Reveal/peek tucked windows on the bottom edge sequentially."},
-        {cat: "Sizing & Margins", cmd: "EdgeInLeft", key: "Custom", desc: "Set window alignment offset one grid cell from screen left edge."},
-        {cat: "Sizing & Margins", cmd: "EdgeInRight", key: "Custom", desc: "Set window alignment offset one grid cell from screen right edge."},
-        {cat: "Sizing & Margins", cmd: "EdgeInTop", key: "Custom", desc: "Set window alignment offset one grid cell from screen top edge."},
-        {cat: "Sizing & Margins", cmd: "EdgeInBottom", key: "Custom", desc: "Set window alignment offset one grid cell from screen bottom edge."},
-        {cat: "Sizing & Margins", cmd: "EdgeInTopLeft", key: "Custom", desc: "Align window offset one grid cell from screen top-left corner."},
-        {cat: "Sizing & Margins", cmd: "EdgeInTopRight", key: "Custom", desc: "Align window offset one grid cell from screen top-right corner."},
-        {cat: "Sizing & Margins", cmd: "EdgeInBottomLeft", key: "Custom", desc: "Align window offset one grid cell from screen bottom-left corner."},
-        {cat: "Sizing & Margins", cmd: "EdgeInBottomRight", key: "Custom", desc: "Align window offset one grid cell from screen bottom-right corner."},
-        {cat: "System Layer", cmd: "DragWindow", key: "Custom", desc: "Initiate DragWindow mode: Make window and ones above translucent, move with cursor, click/Enter to place, Esc to cancel."},
-        
-        {cat: "Window Cycling", cmd: "NextWindow", key: "Win + PgUp", desc: "Cycle focus smoothly forward across open desktop window frames."},
-        {cat: "Window Cycling", cmd: "PrevWindow", key: "Win + PgDn", desc: "Cycle focus smoothly backward across open desktop window frames."},
-        {cat: "Window Cycling", cmd: "NextClassWindow", key: "Win + Alt + PgUp", desc: "Cycle focus specifically forward between windows of identical process class."},
-        {cat: "Window Cycling", cmd: "PrevClassWindow", key: "Win + Alt + PgDn", desc: "Cycle focus specifically backward between windows of identical process class."}
+        ; == SYSTEM ==
+        {cat: "SYSTEM", cmd: "HelpScreen", key: "Win + /", desc: "Display this interactive keyboard command reference panel."},
+        {cat: "SYSTEM", cmd: "CmdPalette", key: "Win + Ctrl + Shift + C", desc: "Display the interactive fuzzy-search Command Palette for manual trigger / dry run testing."},
+        {cat: "SYSTEM", cmd: "WinInfo", key: "Win + Ctrl + /", desc: "Display active window physical bounds, handle ID, class, and executable name."},
+        {cat: "SYSTEM", cmd: "PeekUnderMouse", key: "Double + LWin + P", desc: "Display class of window beneath mouse cursor."},
+        {cat: "SYSTEM", cmd: "CopyCommands", key: "Win + Ctrl + C", desc: "Copy all available action commands dictionary to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyBindings", key: "Win + Alt + C", desc: "Copy active keybindings dictionary map to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyCommandsHelp", key: "Win + Ctrl + Shift + H", desc: "Copy all categorized action commands with full explanations to clipboard."},
+        {cat: "SYSTEM", cmd: "BindingsAlpha", key: "Win + Ctrl + Shift + A", desc: "Copy active keybindings map sorted alphabetically by command name to clipboard."},
+        {cat: "SYSTEM", cmd: "BindingsLocation", key: "Win + Ctrl + Shift + L", desc: "Copy active keybindings map grouped by keyboard hardware location to clipboard."},
+        {cat: "SYSTEM", cmd: "ToggleSuspension", key: "Win + Alt + S", desc: "Suspend or resume all HotWinAHK modifier triggers instantly."},
+        {cat: "SYSTEM", cmd: "ReloadConfig", key: "Win + F12", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
+        {cat: "SYSTEM", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
+        {cat: "SYSTEM", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
+        {cat: "SYSTEM", cmd: "RestartProgram", key: "Win + Ctrl + F12", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
+        {cat: "SYSTEM", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
+
+        ; == WINDOW ==
+        {cat: "WINDOW", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},
+        {cat: "WINDOW", cmd: "SetOpacity70", key: "Win + Shift + O", desc: "Set alpha opacity transparency level to 70% on active window frame."},
+        {cat: "WINDOW", cmd: "RemoveOpacity", key: "Win + Alt + Shift + O", desc: "Restore active window opacity to full solid visibility."},
+        {cat: "WINDOW", cmd: "SendToBack", key: "Win + Backspace", desc: "Push active window frame to the bottom of the active desktop stack."},
+        {cat: "WINDOW", cmd: "MinimizeToTray", key: "Win + Shift + PgDn", desc: "Stow active window into an autonomous system-tray notification process."},
+        {cat: "WINDOW", cmd: "PickFromTray", key: "Win + Shift + PgUp", desc: "Open stowed window tray instances via right-click contextual list."},
+        {cat: "WINDOW", cmd: "DragWindow", key: "Custom", desc: "Initiate DragWindow mode: Make window and ones above translucent, move with cursor, click/Enter to place, Esc to cancel."},
+
+        ; == HOME ==
+        {cat: "HOME", cmd: "SetHome", key: "Win + Ctrl + .", desc: "Save active window class/process/fuzzy title signature to persistent home location."},
+        {cat: "HOME", cmd: "ClearHome", key: "Win + Ctrl + Shift + .", desc: "Delete saved home location configuration for active window."},
+        {cat: "HOME", cmd: "GoHome", key: "Win + Alt + .", desc: "Relocate window to its persistent home position."},
+        {cat: "HOME", cmd: "Home", key: "Win + .", desc: "Intelligent Home behavior: Move to home, or restore to pre-homed, or strip home config upon confirmation."},
+        {cat: "HOME", cmd: "HomePeek", key: "Win + Shift + .", desc: "Momentarily draw a transparent overlay footprint of the window's home location on screen."},
+
+        ; == FOCUS ==
+        {cat: "FOCUS", cmd: "NextWindow", key: "Win + PgUp", desc: "Cycle focus smoothly forward across open desktop window frames."},
+        {cat: "FOCUS", cmd: "PrevWindow", key: "Win + PgDn", desc: "Cycle focus smoothly backward across open desktop window frames."},
+        {cat: "FOCUS", cmd: "NextClassWindow", key: "Win + Alt + PgUp", desc: "Cycle focus specifically forward between windows of identical process class."},
+        {cat: "FOCUS", cmd: "PrevClassWindow", key: "Win + Alt + PgDn", desc: "Cycle focus specifically backward between windows of identical process class."},
+        {cat: "FOCUS", cmd: "FocusDeepestWindow", key: "Win + Ctrl + Backspace", desc: "Activate the deepest window in the Z-order list."},
+
+        ; == TUCK ==
+        {cat: "TUCK", cmd: "TuckLeft", key: "Win + Ctrl + Shift + Left", desc: "Tuck window past left screen wall, exposing a 20px dock indicator bar."},
+        {cat: "TUCK", cmd: "TuckRight", key: "Win + Ctrl + Shift + Right", desc: "Tuck window past right screen wall, exposing a 20px dock indicator bar."},
+        {cat: "TUCK", cmd: "TuckUp", key: "Win + Ctrl + Shift + Up", desc: "Tuck window past top screen wall, exposing a 20px dock indicator bar."},
+        {cat: "TUCK", cmd: "TuckDown", key: "Win + Ctrl + Shift + Down", desc: "Tuck window past bottom screen wall, exposing a 20px dock indicator bar."},
+        {cat: "TUCK", cmd: "BumpEdgeUntuck", key: "Edge Bump", desc: "Trigger untuck peeking when cursor reaches tucked window edge indicator."},
+        {cat: "TUCK", cmd: "BumpEdgeUntuckActivate", key: "Edge Click/Drag", desc: "Fully restore tucked window when pulled/clicked past the pop-off threshold."},
+        {cat: "TUCK", cmd: "UntuckLeft", key: "Custom", desc: "Untuck the window tucked at the left edge."},
+        {cat: "TUCK", cmd: "UntuckRight", key: "Custom", desc: "Untuck the window tucked at the right edge."},
+        {cat: "TUCK", cmd: "UntuckTop", key: "Custom", desc: "Untuck the window tucked at the top edge."},
+        {cat: "TUCK", cmd: "UntuckBottom", key: "Custom", desc: "Untuck the window tucked at the bottom edge."},
+        {cat: "TUCK", cmd: "TuckPeekLeft", key: "Custom", desc: "Reveal/peek tucked windows on the left edge sequentially."},
+        {cat: "TUCK", cmd: "TuckPeekRight", key: "Custom", desc: "Reveal/peek tucked windows on the right edge sequentially."},
+        {cat: "TUCK", cmd: "TuckPeekTop", key: "Custom", desc: "Reveal/peek tucked windows on the top edge sequentially."},
+        {cat: "TUCK", cmd: "TuckPeekBottom", key: "Custom", desc: "Reveal/peek tucked windows on the bottom edge sequentially."},
+
+        ; == MOVE ==
+        {cat: "MOVE", cmd: "Center", key: "Numpad5", desc: "Move active window to center of screen without sizing changes."},
+        {cat: "MOVE", cmd: "MoveLeft10px", key: "Win + Alt + Left", desc: "Shift active window left by 10 pixels coarse-scale."},
+        {cat: "MOVE", cmd: "MoveRight10px", key: "Win + Alt + Right", desc: "Shift active window right by 10 pixels coarse-scale."},
+        {cat: "MOVE", cmd: "MoveUp10px", key: "Win + Alt + Up", desc: "Shift active window up by 10 pixels coarse-scale."},
+        {cat: "MOVE", cmd: "MoveDown10px", key: "Win + Alt + Down", desc: "Shift active window down by 10 pixels coarse-scale."},
+        {cat: "MOVE", cmd: "MoveLeft1px", key: "Win + Shift + Left", desc: "Nudge active window left with 1 pixel fine precision."},
+        {cat: "MOVE", cmd: "MoveRight1px", key: "Win + Shift + Right", desc: "Nudge active window right with 1 pixel fine precision."},
+        {cat: "MOVE", cmd: "MoveUp1px", key: "Win + Shift + Up", desc: "Nudge active window up with 1 pixel fine precision."},
+        {cat: "MOVE", cmd: "MoveDown1px", key: "Win + Shift + Down", desc: "Nudge active window down with 1 pixel fine precision."},
+        {cat: "MOVE", cmd: "EdgeLeft", key: "Custom", desc: "Align window to the screen's left border."},
+        {cat: "MOVE", cmd: "EdgeRight", key: "Custom", desc: "Align window to the screen's right border."},
+        {cat: "MOVE", cmd: "EdgeTop", key: "Custom", desc: "Align window to the screen's top border."},
+        {cat: "MOVE", cmd: "EdgeBottom", key: "Custom", desc: "Align window to the screen's bottom border."},
+        {cat: "MOVE", cmd: "EdgeTopLeft", key: "Custom", desc: "Align window to the screen's top-left corner."},
+        {cat: "MOVE", cmd: "EdgeTopRight", key: "Custom", desc: "Align window to the screen's top-right corner."},
+        {cat: "MOVE", cmd: "EdgeBottomLeft", key: "Custom", desc: "Align window to the screen's bottom-left corner."},
+        {cat: "MOVE", cmd: "EdgeBottomRight", key: "Custom", desc: "Align window to the screen's bottom-right corner."},
+        {cat: "MOVE", cmd: "EdgeCenter", key: "Custom", desc: "Position active window to the exact horizontal and vertical center of monitor."},
+        {cat: "MOVE", cmd: "EdgeInLeft", key: "Custom", desc: "Set window alignment offset one grid cell from screen left edge."},
+        {cat: "MOVE", cmd: "EdgeInRight", key: "Custom", desc: "Set window alignment offset one grid cell from screen right edge."},
+        {cat: "MOVE", cmd: "EdgeInTop", key: "Custom", desc: "Set window alignment offset one grid cell from screen top edge."},
+        {cat: "MOVE", cmd: "EdgeInBottom", key: "Custom", desc: "Set window alignment offset one grid cell from screen bottom edge."},
+        {cat: "MOVE", cmd: "EdgeInTopLeft", key: "Custom", desc: "Align window offset one grid cell from screen top-left corner."},
+        {cat: "MOVE", cmd: "EdgeInTopRight", key: "Custom", desc: "Align window offset one grid cell from screen top-right corner."},
+        {cat: "MOVE", cmd: "EdgeInBottomLeft", key: "Custom", desc: "Align window offset one grid cell from screen bottom-left corner."},
+        {cat: "MOVE", cmd: "EdgeInBottomRight", key: "Custom", desc: "Align window offset one grid cell from screen bottom-right corner."},
+        {cat: "MOVE", cmd: "JumpGridLeft", key: "Alt + Numpad 4", desc: "Hop window position to the left virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridRight", key: "Alt + Numpad 6", desc: "Hop window position to the right virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridUp", key: "Alt + Numpad 8", desc: "Hop window position to the up virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridDown", key: "Alt + Numpad 2", desc: "Hop window position to the down virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridTopLeft", key: "Custom", desc: "Hop window position to the top-left virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridTopRight", key: "Custom", desc: "Hop window position to the top-right virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridBottomLeft", key: "Custom", desc: "Hop window position to the bottom-left virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "JumpGridBottomRight", key: "Custom", desc: "Hop window position to the bottom-right virtual grid quartile partition."},
+        {cat: "MOVE", cmd: "MoveToGridLeft", key: "Numpad 4", desc: "Shift active window leftward between virtual grid units."},
+        {cat: "MOVE", cmd: "MoveToGridRight", key: "Numpad 6", desc: "Shift active window rightward between virtual grid units."},
+        {cat: "MOVE", cmd: "MoveToGridUp", key: "Numpad 8", desc: "Shift active window upward between virtual grid units."},
+        {cat: "MOVE", cmd: "MoveToGridDown", key: "Numpad 2", desc: "Shift active window downward between virtual grid units."},
+        {cat: "MOVE", cmd: "MoveToGridTopLeft", key: "Custom", desc: "Shift active window to top-left virtual grid aspects."},
+        {cat: "MOVE", cmd: "MoveToGridTopRight", key: "Custom", desc: "Shift active window to top-right virtual grid aspects."},
+        {cat: "MOVE", cmd: "MoveToGridBottomLeft", key: "Custom", desc: "Shift active window to bottom-left virtual grid aspects."},
+        {cat: "MOVE", cmd: "MoveToGridBottomRight", key: "Custom", desc: "Shift active window to bottom-right virtual grid aspects."},
+
+        ; == SIZE ==
+        {cat: "SIZE", cmd: "MouseToGrid", key: "Win + RButton", desc: "Warp window beneath mouse cursor directly to closest grid block."},
+        {cat: "SIZE", cmd: "MouseRelativeSize", key: "Win + LButton", desc: "Resize window dynamically relative to cursor movement boundary vectors."},
+        {cat: "SIZE", cmd: "SnapToGridEnlarge", key: "NumpadAdd", desc: "Grow active window boundaries to span next adjacent grid aspect cell."},
+        {cat: "SIZE", cmd: "SnapToGridShrink", key: "NumpadSub", desc: "Contract active window grid spanning aspect cell size."},
+        {cat: "SIZE", cmd: "ScaleExpand10px", key: "Alt + NumpadAdd", desc: "Expand active window bounds by 10px symmetrically in all directions."},
+        {cat: "SIZE", cmd: "ScaleReduce10px", key: "Alt + NumpadSub", desc: "Shrink active window bounds by 10px symmetrically in all directions."},
+        {cat: "SIZE", cmd: "ScaleExpandGridPart", key: "Ctrl + NumpadAdd", desc: "Expand active window bounds symmetrically matching half-grid step parts."},
+        {cat: "SIZE", cmd: "ScaleReduceGridPart", key: "Ctrl + NumpadSub", desc: "Shrink active window bounds symmetrically matching half-grid step parts."},
+        {cat: "SIZE", cmd: "TrimTop", key: "Win + Alt + Shift + Numpad 8", desc: "Trim top boundary from active window margin."},
+        {cat: "SIZE", cmd: "TrimBottom", key: "Win + Alt + Shift + Numpad 2", desc: "Trim bottom boundary from active window margin."},
+        {cat: "SIZE", cmd: "TrimLeft", key: "Win + Alt + Shift + Numpad 6", desc: "Trim left boundary from active window margin."},
+        {cat: "SIZE", cmd: "TrimRight", key: "Win + Alt + Shift + Numpad 4", desc: "Trim right boundary from active window margin."},
+        {cat: "SIZE", cmd: "TrimAll", key: "Win + Alt + Numpad 5", desc: "Symmetrically trim all 4 sides of the active window margin."},
+        {cat: "SIZE", cmd: "TrimTopLeft", key: "Custom", desc: "Trim top-left boundaries from active window margins."},
+        {cat: "SIZE", cmd: "TrimTopRight", key: "Custom", desc: "Trim top-right boundaries from active window margins."},
+        {cat: "SIZE", cmd: "TrimBottomLeft", key: "Custom", desc: "Trim bottom-left boundaries from active window margins."},
+        {cat: "SIZE", cmd: "TrimBottomRight", key: "Custom", desc: "Trim bottom-right boundaries from active window margins."},
+        {cat: "SIZE", cmd: "AddTop", key: "Win + Alt + Shift + Up", desc: "Grow top boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "AddBottom", key: "Win + Alt + Shift + Down", desc: "Grow bottom boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "AddLeft", key: "Win + Alt + Shift + Left", desc: "Grow left boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "AddRight", key: "Win + Alt + Shift + Right", desc: "Grow right boundary outward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "AddTopLeft", key: "Custom", desc: "Grow top-left boundaries outward to nearest grid margins."},
+        {cat: "SIZE", cmd: "AddTopRight", key: "Custom", desc: "Grow top-right boundaries outward to nearest grid margins."},
+        {cat: "SIZE", cmd: "AddBottomLeft", key: "Custom", desc: "Grow bottom-left boundaries outward to nearest grid margins."},
+        {cat: "SIZE", cmd: "AddBottomRight", key: "Custom", desc: "Grow bottom-right boundaries outward to nearest grid margins."},
+        {cat: "SIZE", cmd: "GrowLeft", key: "Win + Ctrl + Shift + Numpad 6", desc: "Grow left boundary outward from active window margin by step width."},
+        {cat: "SIZE", cmd: "GrowRight", key: "Win + Ctrl + Shift + Numpad 4", desc: "Grow right boundary outward from active window margin by step width."},
+        {cat: "SIZE", cmd: "GrowTop", key: "Win + Ctrl + Shift + Numpad 8", desc: "Grow top boundary outward from active window margin by step width."},
+        {cat: "SIZE", cmd: "GrowBottom", key: "Win + Ctrl + Shift + Numpad 2", desc: "Grow bottom boundary outward from active window margin by step width."},
+        {cat: "SIZE", cmd: "GrowAll", key: "Win + Ctrl + Shift + Numpad 5", desc: "Symmetrically grow all 4 sides of the active window margin."},
+        {cat: "SIZE", cmd: "GrowTopLeft", key: "Custom", desc: "Symmetrically grow top-left boundaries of active window."},
+        {cat: "SIZE", cmd: "GrowTopRight", key: "Custom", desc: "Symmetrically grow top-right boundaries of active window."},
+        {cat: "SIZE", cmd: "GrowBottomLeft", key: "Custom", desc: "Symmetrically grow bottom-left boundaries of active window."},
+        {cat: "SIZE", cmd: "GrowBottomRight", key: "Custom", desc: "Symmetrically grow bottom-right boundaries of active window."},
+        {cat: "SIZE", cmd: "SubtractTop", key: "Win + Ctrl + Alt + Up", desc: "Contract top boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "SubtractBottom", key: "Win + Ctrl + Alt + Down", desc: "Contract bottom boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "SubtractLeft", key: "Win + Ctrl + Alt + Left", desc: "Contract left boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "SubtractRight", key: "Win + Ctrl + Alt + Right", desc: "Contract right boundary inward to nearest grid or midpoint grid cell."},
+        {cat: "SIZE", cmd: "SubtractTopLeft", key: "Custom", desc: "Contract top-left boundaries inward toward centers of monitor."},
+        {cat: "SIZE", cmd: "SubtractTopRight", key: "Custom", desc: "Contract top-right boundaries inward toward centers of monitor."},
+        {cat: "SIZE", cmd: "SubtractBottomLeft", key: "Custom", desc: "Contract bottom-left boundaries inward toward centers of monitor."},
+        {cat: "SIZE", cmd: "SubtractBottomRight", key: "Custom", desc: "Contract bottom-right boundaries inward toward centers of monitor."},
+        {cat: "SIZE", cmd: "HalfSizeLeft", key: "Custom", desc: "Halve window width from the left side."},
+        {cat: "SIZE", cmd: "HalfSizeRight", key: "Custom", desc: "Halve window width from the right side."},
+        {cat: "SIZE", cmd: "HalfSizeTop", key: "Custom", desc: "Halve window height from the top side."},
+        {cat: "SIZE", cmd: "HalfSizeBottom", key: "Custom", desc: "Halve window height from the bottom side."},
+        {cat: "SIZE", cmd: "DoubleSizeLeft", key: "Custom", desc: "Double window width from the left side."},
+        {cat: "SIZE", cmd: "DoubleSizeRight", key: "Custom", desc: "Double window width from the right side."},
+        {cat: "SIZE", cmd: "DoubleSizeTop", key: "Custom", desc: "Double window height from the top side."},
+        {cat: "SIZE", cmd: "DoubleSizeBottom", key: "Custom", desc: "Double window height from the bottom side."},
+        {cat: "SIZE", cmd: "StretchToGridLeft", key: "Win + Numpad 4", desc: "Stretch left boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "StretchToGridRight", key: "Win + Numpad 6", desc: "Stretch right boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "StretchToGridUp", key: "Win + Numpad 8", desc: "Stretch top boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "StretchToGridDown", key: "Win + Numpad 2", desc: "Stretch bottom boundary outward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "StretchToGridTopLeft", key: "Custom", desc: "Stretch top-left boundaries toward the nearest grid corners."},
+        {cat: "SIZE", cmd: "StretchToGridTopRight", key: "Custom", desc: "Stretch top-right boundaries toward the nearest grid corners."},
+        {cat: "SIZE", cmd: "StretchToGridBottomLeft", key: "Custom", desc: "Stretch bottom-left boundaries toward the nearest grid corners."},
+        {cat: "SIZE", cmd: "StretchToGridBottomRight", key: "Custom", desc: "Stretch bottom-right boundaries toward the nearest grid corners."},
+        {cat: "SIZE", cmd: "PullToGridLeft", key: "Win + Alt + Numpad 4", desc: "Pull left boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridRight", key: "Win + Alt + Numpad 6", desc: "Pull right boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridUp", key: "Win + Alt + Numpad 8", desc: "Pull top boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridDown", key: "Win + Alt + Numpad 2", desc: "Pull bottom boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridTopLeft", key: "Custom", desc: "Pull top-left boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridTopRight", key: "Custom", desc: "Pull top-right boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridBottomLeft", key: "Custom", desc: "Pull bottom-left boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "PullToGridBottomRight", key: "Custom", desc: "Pull bottom-right boundary inward to nearest grid or midpoint grid cell edge."},
+        {cat: "SIZE", cmd: "StretchLeft", key: "Custom", desc: "Extend side width of target window to touch screen left bounds."},
+        {cat: "SIZE", cmd: "StretchRight", key: "Custom", desc: "Extend side width of target window to touch screen right bounds."},
+        {cat: "SIZE", cmd: "StretchTop", key: "Custom", desc: "Extend top height of target window to touch screen top bounds."},
+        {cat: "SIZE", cmd: "StretchBottom", key: "Custom", desc: "Extend bottom height of target window to touch screen bottom bounds."},
+        {cat: "SIZE", cmd: "StretchTopLeft", key: "Custom", desc: "Extend top-left coordinate vectors of target window bounds to touch screen margins."},
+        {cat: "SIZE", cmd: "StretchTopRight", key: "Custom", desc: "Extend top-right coordinate vectors of target window bounds to touch screen margins."},
+        {cat: "SIZE", cmd: "StretchBottomLeft", key: "Custom", desc: "Extend bottom-left coordinate vectors of target window bounds to touch screen margins."},
+        {cat: "SIZE", cmd: "StretchBottomRight", key: "Custom", desc: "Extend bottom-right coordinate vectors of target window bounds to touch screen margins."}
     ]
     return commandList
 }
@@ -3636,13 +3710,32 @@ CopyCommands() {
         "TuckPeekLeft", "TuckPeekRight", "TuckPeekTop", "TuckPeekBottom",
         "EdgeInLeft", "EdgeInRight", "EdgeInTop", "EdgeInBottom", "EdgeInTopLeft", "EdgeInTopRight", "EdgeInBottomLeft", "EdgeInBottomRight",
         "DragWindow",
-        "FocusDeepestWindow", "CopyCommands", "CopyBindings"
+        "FocusDeepestWindow", "CopyCommands", "CopyBindings", "CopyCommandsHelp", "BindingsAlpha", "BindingsLocation"
     ]
     for cmd in commands {
         commandsList .= cmd . "`r`n"
     }
     A_Clipboard := commandsList
     ShowTargetToolTip("Copied Available Commands to Clipboard!")
+}
+
+CopyCommandsHelp() {
+    commandList := GetGlobalCommandList()
+    
+    outText := "=== HotWinAHK Categorized Commands & Explanations ===`r`n`r`n"
+    currentCategory := ""
+    
+    for item in commandList {
+        if (item.cat != currentCategory) {
+            currentCategory := item.cat
+            outText .= "== " . currentCategory . " ==`r`n"
+        }
+        outText .= "- " . item.cmd . ": " . item.desc . "`r`n"
+    }
+    
+    outText := RTrim(outText, "`r`n ") . "`r`n"
+    A_Clipboard := outText
+    ShowTargetToolTip("Copied Categorized Commands Help to Clipboard!")
 }
 
 CopyBindings() {
@@ -3676,6 +3769,217 @@ CopyBindings() {
     
     A_Clipboard := bindingsList
     ShowTargetToolTip("Copied Active Bindings to Clipboard!")
+}
+
+BindingsAlpha() {
+    global g_sIniFile
+    if !FileExist(g_sIniFile) {
+        ShowTargetToolTip("INI File not found!")
+        return
+    }
+    
+    lines := []
+    sectionsText := IniRead(g_sIniFile)
+    
+    loop parse, sectionsText, "`n", "`r" {
+        sCmd := Trim(A_LoopField)
+        if (sCmd == "" || SubStr(sCmd, 1, 1) == "-") {
+            continue
+        }
+        
+        loop 10 {
+            currentKeyProp := "keys" A_Index
+            keyValue := IniRead(g_sIniFile, sCmd, currentKeyProp, "")
+            if (keyValue == "") {
+                break
+            }
+            
+            lines.Push("[" . sCmd . "] -> " . keyValue)
+        }
+    }
+    
+    if (lines.Length == 0) {
+        ShowTargetToolTip("No active bindings found!")
+        return
+    }
+    
+    flatText := ""
+    for idx, line in lines {
+        flatText .= line . "`r`n"
+    }
+    flatText := RTrim(flatText, "`r`n")
+    sortedText := Sort(flatText)
+    
+    outText := "=== HotWinAHK Active Keybindings ===`r`n`r`n" . sortedText . "`r`n"
+    A_Clipboard := outText
+    ShowTargetToolTip("Copied Alphabetic Bindings to Clipboard!")
+}
+
+BindingsLocation() {
+    global g_sIniFile
+    if !FileExist(g_sIniFile) {
+        ShowTargetToolTip("INI File not found!")
+        return
+    }
+    
+    sectionsText := IniRead(g_sIniFile)
+    
+    modifierGroups := [
+        "_", "c", "ca", "a", "as", "s", "cs", "cas",
+        "w+ _", "w+ c", "w+ ca", "w+ a", "w+ as", "w+ s", "w+ cs", "w+ cas"
+    ]
+    
+    alphanumericMap := Map()
+    arrowsMap := Map()
+    numpadMap := Map()
+    
+    for modGrp in modifierGroups {
+        alphanumericMap[modGrp] := []
+        arrowsMap[modGrp] := []
+        numpadMap[modGrp] := []
+    }
+    
+    loop parse, sectionsText, "`n", "`r" {
+        sCmd := Trim(A_LoopField)
+        if (sCmd == "" || SubStr(sCmd, 1, 1) == "-") {
+            continue
+        }
+        
+        loop 10 {
+            currentKeyProp := "keys" A_Index
+            keyValue := IniRead(g_sIniFile, sCmd, currentKeyProp, "")
+            if (keyValue == "") {
+                break
+            }
+            
+            sStroke := keyValue
+            if InStr(keyValue, "|") {
+                aSplit := StrSplit(keyValue, "|")
+                sStroke := Trim(aSplit[1])
+            }
+            
+            modGrp := GetModifierGroupCode(sStroke)
+            category := GetHardwareCategory(sStroke)
+            lineStr := "[" . sCmd . "] -> " . keyValue
+            
+            if (category == "Arrows") {
+                arrowsMap[modGrp].Push(lineStr)
+            } else if (category == "Numpad") {
+                numpadMap[modGrp].Push(lineStr)
+            } else {
+                alphanumericMap[modGrp].Push(lineStr)
+            }
+        }
+    }
+    
+    outText := "=== HotWinAHK Active Keybindings by Location ===`r`n`r`n"
+    
+    outText .= "== Alphabetic, Number, Punctuation Keys ==`r`n"
+    hasAnyAlpha := false
+    for modGrp in modifierGroups {
+        lines := alphanumericMap[modGrp]
+        if (lines.Length > 0) {
+            hasAnyAlpha := true
+            outText .= "--- [" . modGrp . "] ---`r`n"
+            flatText := ""
+            for line in lines {
+                flatText .= line . "`r`n"
+            }
+            flatText := RTrim(flatText, "`r`n")
+            sortedText := Sort(flatText)
+            outText .= sortedText . "`r`n`r`n"
+        }
+    }
+    if (!hasAnyAlpha) {
+        outText .= "(No active bindings on Alphabetic, Number, or Punctuation keys)`r`n`r`n"
+    }
+    
+    outText .= "== Arrow Keys ==`r`n"
+    hasAnyArrows := false
+    for modGrp in modifierGroups {
+        lines := arrowsMap[modGrp]
+        if (lines.Length > 0) {
+            hasAnyArrows := true
+            outText .= "--- [" . modGrp . "] ---`r`n"
+            flatText := ""
+            for line in lines {
+                flatText .= line . "`r`n"
+            }
+            flatText := RTrim(flatText, "`r`n")
+            sortedText := Sort(flatText)
+            outText .= sortedText . "`r`n`r`n"
+        }
+    }
+    if (!hasAnyArrows) {
+        outText .= "(No active bindings on Arrow keys)`r`n`r`n"
+    }
+    
+    outText .= "== Numpad Keys ==`r`n"
+    hasAnyNumpad := false
+    for modGrp in modifierGroups {
+        lines := numpadMap[modGrp]
+        if (lines.Length > 0) {
+            hasAnyNumpad := true
+            outText .= "--- [" . modGrp . "] ---`r`n"
+            flatText := ""
+            for line in lines {
+                flatText .= line . "`r`n"
+            }
+            flatText := RTrim(flatText, "`r`n")
+            sortedText := Sort(flatText)
+            outText .= sortedText . "`r`n`r`n"
+        }
+    }
+    if (!hasAnyNumpad) {
+        outText .= "(No active bindings on Numpad keys)`r`n`r`n"
+    }
+    
+    outText := RTrim(outText, "`r`n ") . "`r`n"
+    A_Clipboard := outText
+    ShowTargetToolTip("Copied Bindings by Location to Clipboard!")
+}
+
+GetModifierGroupCode(sStroke) {
+    bCtrl := RegExMatch(sStroke, "i)(Ctrl|LCtrl|RCtrl)")
+    bAlt := RegExMatch(sStroke, "i)(Alt|LAlt|RAlt)")
+    bShift := RegExMatch(sStroke, "i)(Shift|LShift|RShift)")
+    bWin := RegExMatch(sStroke, "i)(Win|LWin|RWin)")
+
+    prefix := bWin ? "w+ " : ""
+    
+    suffix := ""
+    if (bCtrl && bAlt && bShift)
+        suffix := "cas"
+    else if (bCtrl && bAlt)
+        suffix := "ca"
+    else if (bCtrl && bShift)
+        suffix := "cs"
+    else if (bCtrl)
+        suffix := "c"
+    else if (bAlt && bShift)
+        suffix := "as"
+    else if (bAlt)
+        suffix := "a"
+    else if (bShift)
+        suffix := "s"
+    else
+        suffix := "_"
+        
+    return prefix . suffix
+}
+
+GetHardwareCategory(sStroke) {
+    sCleanKey := RegExReplace(sStroke, "i)(LCtrl\+|RCtrl\+|Ctrl\+|LAlt\+|RAlt\+|Alt\+|LShift\+|RShift\+|Shift\+|LWin\+|RWin\+|Win\+|Double\+)", "")
+    sCleanKey := StrReplace(sCleanKey, " ", "")
+    sCleanLower := StrLower(sCleanKey)
+    
+    if (sCleanLower == "left" || sCleanLower == "right" || sCleanLower == "up" || sCleanLower == "down") {
+        return "Arrows"
+    } else if (InStr(sCleanLower, "numpad") == 1) {
+        return "Numpad"
+    } else {
+        return "Alphanumeric"
+    }
 }
 
 #HotIf (g_ActiveUntuckedHwnd != 0 && IsMouseOverHwnd(g_ActiveUntuckedHwnd))

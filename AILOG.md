@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-feat(stow-drag): implement untuck, tuckpeek, edgein and dragwindow modes
+feat(commands): implement BindingsAlpha, BindingsLocation, and CopyCommandsHelp + categorized MANUAL documentation
 ```
 
 <!-- Example AI Log Entry
@@ -31,6 +31,57 @@ subsections/tree bullets
 bulleted file list
 -->
 ## Log Entries
+
+## [2026-06-16T09:44:00Z]
+### 🎯 Primary Goals & Requirements
+- **Git Commit Trigger Lifecycle**: Process the "Committed" workflow, clear the active commit message, and archive all recently completed incoming development checklist tasks into permanent logs.
+
+### 🛠️ Completed Changes in this Session
+- **Cleared Commit Message**: Reset the current workspace commit message placeholder to blank.
+- **Transferred Completed Tasks**: Archived the following finished incoming chat items from `AITASKS.md` into this log record:
+  - Implement 'Untuck' in four dimensions (Left, Right, Top, Bottom) to completely restore stowed windows to their pre-tucked states directly
+  - Implement 'TuckPeek' in four dimensions (Left, Right, Top, Bottom) to sequential-peek stowed windows using consecutive hotkey steps, with Escape cancelling the cycle
+  - Implement 'EdgeIn' in eight dimensions to align window exactly one grid cell spacing inward from the relative screen border
+  - Implement 'DragWindow' mode to draw the active window and overlapping windows translucent, following the mouse smoothly until LButton/Enter is pressed or restoring position on Escape
+  - Put a comprehensive categorized action commands checklist with descriptions in MANUAL.md
+  - Implement 'CopyCommandsHelp' command and bind to Win+Ctrl+Shift+H to copy categorized action commands with descriptions to clipboard
+  - Move untucked window to the top of the Z-order index upon edge bump
+  - Implement physical drag resistance (4x perpendicular and 2x parallel damping tension) when pulling nestled windows from stowed bounds
+  - Implement hysteresis pop-off release threshold (120px) to restore normal free-floating window states
+  - Add dynamic Ctrl-hold Dock-Seeking mechanism with translucent cyan (`00FFCC`) predicted edge indicator band and snap-to-dock binding on release
+  - Reverse engineer HotWinAHK window nudging and docking codebase
+  - Complete README.md with detailed script features and description
+  - Complete BUILD.md documenting compilation and asset pipelines
+  - Complete SPEC.md outlining requested specifications and solved technical concerns
+  - Complete MANUAL.md detailing structural architecture and core algorithms
+  - Complete FEATURES.md organizing and detailing individual feature items
+  - Complete TESTING.md outlining detailed testing procedures and interactive checklists
+  - Rename WindowNudger, WindowHotkeys.ahk, and WindowHotkeys.ini to HotWinAHK/displayName variants, and update all codebase references
+  - Rename helper subprocess script from TrayHelper.ahk to HotWinAHK_tray.ahk and update all reference models
+  - Implement SnapToGridEnlarge/Shrink grid snapping and multi-sided enlargement/shrinkage logic
+  - Make app single-instance with auto-replacement of existing instance, silent on parameter-driven restarts, and direct command-line parameter execution on the hovered window's parent ancestor
+  - Implement diagonal and corner variants (TopLeft, TopRight, BottomLeft, BottomRight) for MoveToGrid, StretchToGrid, PullToGrid, Grow, Trim, Add, Subtract, Stretch, and JumpGrid commands
+
+### 🔸 Affected Files
+- `/AITASKS.md`
+- `/AILOG.md`
+
+## [2026-06-16T09:40:00Z]
+### 🎯 Primary Goals & Requirements
+- **Categorized Commands Reference**: Complete the `MANUAL.md` documentation by listing all available action commands sorted by category with detailed explanations.
+- **CopyCommandsHelp Action**: Create a new command `CopyCommandsHelp` (bound to `Win+Ctrl+Shift+H`) which generates and copies a fully categorized list of all commands and their descriptions to the clipboard.
+
+### 🛠️ Completed Changes in this Session
+- **Updated MANUAL.md**: Injected a comprehensive reference section (`### 📋 Categorized Action Commands Reference`) organizing all commands under system, window, home, focus, tuck, move, and size groups alongside clear functional explanations.
+- **Implemented CopyCommandsHelp**: Built the dynamic `CopyCommandsHelp()` subroutine querying `GetGlobalCommandList()` dynamically to construct a beautifully formatted text summary of all active commands grouped under their corresponding categories.
+- **Registered command and keybinding**: Embedded the new command in the system bypass list and in `ExecuteAction`, and mapped `[CopyCommandsHelp]` in `HotWinAHK.ini` to its default shortcut `Win+Ctrl+Shift+H`.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/HotWinAHK.ini`
+- `/MANUAL.md`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-16T08:50:00Z]
 ### 🎯 Primary Goals & Requirements

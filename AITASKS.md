@@ -15,27 +15,7 @@
 <!-- Ai To Maintain and work from this list -->
 [Open Notepad Safely](aip://open/c:/windows/notepad.exe)
 
-## [x] Incoming tasks from chat
-- [x] Implement 'Untuck' in four dimensions (Left, Right, Top, Bottom) to completely restore stowed windows to their pre-tucked states directly
-- [x] Implement 'TuckPeek' in four dimensions (Left, Right, Top, Bottom) to sequential-peek stowed windows using consecutive hotkey steps, with Escape cancelling the cycle
-- [x] Implement 'EdgeIn' in eight dimensions to align window exactly one grid cell spacing inward from the relative screen border
-- [x] Implement 'DragWindow' mode to draw the active window and overlapping windows translucent, following the mouse smoothly until LButton/Enter is pressed or restoring position on Escape
-- [x] Move untucked window to the top of the Z-order index upon edge bump
-- [x] Implement physical drag resistance (4x perpendicular and 2x parallel damping tension) when pulling nestled windows from stowed bounds
-- [x] Implement hysteresis pop-off release threshold (120px) to restore normal free-floating window states
-- [x] Add dynamic Ctrl-hold Dock-Seeking mechanism with translucent cyan (`00FFCC`) predicted edge indicator band and snap-to-dock binding on release
-- [x] Reverse engineer HotWinAHK window nudging and docking codebase
-- [x] Complete README.md with detailed script features and description
-- [x] Complete BUILD.md documenting compilation and asset pipelines
-- [x] Complete SPEC.md outlining requested specifications and solved technical concerns
-- [x] Complete MANUAL.md detailing structural architecture and core algorithms
-- [x] Complete FEATURES.md organizing and detailing individual feature items
-- [x] Complete TESTING.md outlining detailed testing procedures and interactive checklists
-- [x] Rename WindowNudger, WindowHotkeys.ahk, and WindowHotkeys.ini to HotWinAHK/displayName variants, and update all codebase references
-- [x] Rename helper subprocess script from TrayHelper.ahk to HotWinAHK_tray.ahk and update all reference models
-- [x] Implement SnapToGridEnlarge/Shrink grid snapping and multi-sided enlargement/shrinkage logic
-- [x] Make app single-instance with auto-replacement of existing instance, silent on parameter-driven restarts, and direct command-line parameter execution on the hovered window's parent ancestor
-- [x] Implement diagonal and corner variants (TopLeft, TopRight, BottomLeft, BottomRight) for MoveToGrid, StretchToGrid, PullToGrid, Grow, Trim, Add, Subtract, Stretch, and JumpGrid commands
+## [ ] Incoming tasks from chat
 
 ## [x] Errors
 - [x] lint 1: Resolved warning where `ExecuteActionWithCondition` was considered an unassigned local variable. Fixed by placing the `#Include "HotWinAHK_aux.ahk"` statement at the bottom of `HotWinAHK.ahk` after the global function definitions.
