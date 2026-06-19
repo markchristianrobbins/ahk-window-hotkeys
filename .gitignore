@@ -1,3 +1,22 @@
+node_modules/
+build/
+dist/
+coverage/
+test-fixture/
+.DS_Store
+
+.idea
+.obsidian/
+.smart-env/
+
+*.log
+*.vsix
+*.zip
+.env*
+!.env.example
+\!*.*
+test-fixture/parent/extension.ts
+
 # Logs
 logs
 *.log
@@ -7,18 +26,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
 dist
 dist-ssr
 
-node_modules
 copilot/
 .obsidian
 .makemd
@@ -26,8 +36,6 @@ copilot/
 .space
 
 
-_/
-___/
 *.local
 *.zip
 \!*.*
