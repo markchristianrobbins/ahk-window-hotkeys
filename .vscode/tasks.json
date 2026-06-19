@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Local Window Hotkeys Script",
+            "type": "shell",
+            "command": "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe",
+            "args": [
+                "${workspaceFolder}/HotWinAHK.ahk"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -6,20 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.obsidian
-_/
-___/
-copilot/
-node_modules
-dist
-dist-ssr
-*.local
-*.zip
-\!*.*
-*.exe
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+
 .idea
 .DS_Store
 *.suo
@@ -28,8 +15,20 @@ dist-ssr
 *.sln
 *.sw?
 
+dist
+dist-ssr
 
-
-
-# Ignore Smart Environment folder
+node_modules
+copilot/
+.obsidian
+.makemd
 .smart-env
+.space
+
+
+_/
+___/
+*.local
+*.zip
+\!*.*
+*.exe
