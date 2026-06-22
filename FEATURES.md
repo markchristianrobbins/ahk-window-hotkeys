@@ -29,7 +29,7 @@ This component controls core engine reload, hotkey customization, logs, and proc
 <a id="z2" name="z.2"></a>
 Align active application frames directly against physical monitor workspace margins.
 - **[Absolute Monitor Border Snapping](#absolute-monitor-border-snapping)** - Warp window corners straight onto screen edges including corners, bottom, and center.
-- **[Pixel-Precision Fine-Nudging](#pixel-precision-fine-nudging)** - Shift positions by highly precise 1px or 10px coordinates.
+- **[Pixel-Precision Fine-Nudging](#pixel-precision-fine-nudging)** - Shift positions by exact horizontal and vertical precision step coordinates.
 - **[Proportional Multi-Monitor Spanning](#proportional-multi-monitor-spanning)** - Detect monitor coordinates under target windows and expand layouts across monitor boundaries safely.
 
 ### 📐 3. Proportional Grid Tiles & Sizing Utilities
@@ -88,7 +88,7 @@ Suspends and restores all active keyboard listeners to prevent collisions when t
 
 ### Pixel-Precision Fine-Nudging
 - Group: [Screen Snapping & Monitor Positioning Matrix](#z2)
-Nudges window layouts around monitor workspaces using fine 1px or standard 10px step sizes for exact layout placement.
+Nudges window layouts around monitor workspaces using fine precision (10px horizontal / 5px vertical) or tactical coarse-scale steps (106px horizontal / 58px vertical matching 1/4 cell dimensions) for exact layout placement.
 
 ### Proportional Multi-Monitor Spanning
 - Group: [Screen Snapping & Monitor Positioning Matrix](#z2)

@@ -1,0 +1,174 @@
+,.wc Settings
+pause.wc ToggleSuspension
+f2.wc EditConfig
+f5.wc ReloadConfig
+f5.wca RestartProgram
+f4.wc  ExitProgram
+f6.w   DragWindow
+f6.w   DragWindow
+
+sl.w   Home
+sl.wc  SetHome
+sl.wa  HomePeek
+sl.ws  GoHome
+sl.wcs ClearHome
+
+wheeldown.a NextWindow
+wheelup.a   PrevWindow
+
+pd.w  NextWindow
+pd.wc WindowHistoryNext
+pd.wa NextClassWindow
+pd.ws MinimizeToTray
+
+pu.w  PrevWindow
+pu.wc WindowHistoryPrev
+pu.wa PrevClassWindow
+pu.ws PickFromTray
+
+bs.w  SendToBack
+bs.wc FocusDeepestWindow
+bs.ws FocusLastActiveWindow
+
+
+/.w HelpScreen
+/.wc WinInfo
+/.ws PeekUnderMouse
+
+\.w   CmdPalette
+\.wc  CopyCommands
+\.wcs CopyCommandsHelp
+\.ws  CopyCommandsAlpha
+
+..w    SysMenu
+..wc   CopyBindings
+..wca  KeyDiagnostics
+..wa   KeyQuery
+..ws   Gridify
+..wcs  CopyBindingsAlpha
+..wcas CopyBindingsLocation
+
+
+tab.wc WindowPicker
+`.w   WindowPicker
+`.wc  TuckPeekAll
+`.wa  PeekTucked
+
+-.w    MinimizeAll
+-.wca  MinimizeAllRestored
+-.wcas MinimizeAllMaximized
+-.ws   SwapMinimizedRestored
+
+O.ws   SetOpacity70
+O.was  RemoveOpacity
+
+[.w     (RestoreAll)
+[.wca   (RestoreAllMinimized)
+[.wcas  RestoreAllMaximized
+
+].w    (MaximizeAll)
+].wca  MaximizeAllRestored
+].wcas MaximizeAllMinimized
+].ws   SwapMaximizedRestored
+
+T.wc AlwaysOnTop
+
+rb.w MouseToGrid
+lb.w MouseRelativeSize
+
+
+
+Cmds
+a._    -
+a.c    -
+a.ca   -
+a.a    -
+a.as   -
+a.s    -
+a.cs   -
+a.cas  -
+a.w    (maxrest etc)
+a.wc   TuckPeek
+a.wca  Untuck
+a.wa   MoveTad -
+a.was  DoubleSizeLeft
+a.ws   Movepx -
+a.wcs  Tuck           ?Dir.s
+a.wca  Untuck         ?Dir.s
+a.wcas HalfSize       ?Dir.s
+
+5._   Center
+5.w   ** StretchToGridAll
+5.wc  Grow
+5.wca ** SubtactAll
+5.wa  ** PullToGridAll
+5.was ** AddAll
+5.ws  TrimAll
+5.wcs ** StretchAll
+
+add._ SnapToGridEnlarge
+add.a ScaleExpand10px
+add.c ScaleExpandGridPart
+sub._ SnapToGridShrink
+sub.a ScaleReduce10px
+sub.c ScaleReduceGridPart
+
+n._   MoveToGrid     ?Dir.a-c
+n.c   JumpGrid       Dir.s
+n.ca  -
+n.a   MoveTad
+n.as  Movepx
+n.s   Edge           Dir.a-c
+n.cs  EdgeIn
+n.cas -
+
+n.w   StretchToGrid  Pull
+n.wa  PullToGrid     Pull.a
+n.wcs Stretch        Pull
+n.wc  Grow           Pull.c
+n.ws  Trim           Dir.s
+n.was Add            ?Dir.s
+n.wca Subtract       ?Dir.s
+n.wcas Half
+
+
+================================================================================
+UNASSIGNED & CONSERVED COMMANDS (Vacated/Reserved Key Slots)
+================================================================================
+The following hotkey combinations are now vacant or reserved to conserve Arrow and Numpad key usage:
+
+1. Numpad Coarse Precision Shifting (Vacated on Numpad):
+   - n.a   (Alt + Numpad) - vacated MoveTad family (Left, Right, Up, Down) -> Moved exclusively to a.wa (Win+Alt+Arrows)
+2. Numpad Fine Precision Nudges (Vacated on Numpad):
+   - n.as  (Alt+Shift + Numpad) - vacated Movepx family (Left, Right, Up, Down) -> Moved exclusively to a.ws (Win+Shift+Arrows)
+3. Arrow Sizing Duplicates (Vacated on Arrows):
+   - a.was (Win+Alt+Shift + Arrows) - vacated DoubleSize family (Left, Right, Up, Down) -> Kept strictly on physical Numpad keys
+   - a.wcas (Win+Ctrl+Alt+Shift + Arrows) - vacated HalfSize family (Left, Right, Up, Down) -> Kept strictly on physical Numpad keys
+
+4. Non-Standard Diagonals & Unmapped Code-Only Commands (Unassigned in INI):
+   - Diagonal Alignment / Edge Snapping: EdgeTopLeft, EdgeTopRight, EdgeBottomLeft, EdgeBottomRight
+   - Diagonal Grid Shifting: JumpGridTopLeft, JumpGridTopRight, JumpGridBottomLeft, JumpGridBottomRight, MoveToGridTopLeft, MoveToGridTopRight, MoveToGridBottomLeft, MoveToGridBottomRight
+   - Diagonal Boundary Trimming: TrimTopLeft, TrimTopRight, TrimBottomLeft, TrimBottomRight
+   - Diagonal Boundary Expanding: AddTopLeft, AddTopRight, AddBottomLeft, AddBottomRight, GrowTopLeft, GrowTopRight, GrowBottomLeft, GrowBottomRight
+   - Diagonal Grid Stretching: StretchToGridTopLeft, StretchToGridTopRight, StretchToGridBottomLeft, StretchToGridBottomRight
+   - Diagonal Grid Pulling: PullToGridTopLeft, PullToGridTopRight, PullToGridBottomLeft, PullToGridBottomRight
+   - Desktop Swapping Interactions: Swap, SwapSize, SwapPosition, SwapPick, SwapPickSize, SwapPickPosition
+
+
+================================================================================
+LOGICALLY MISSING COMMANDS (Architectural Framework Opportunities)
+================================================================================
+These commands are defined conceptually in layout charts and matrices but currently remain unimplemented as first-class, individual actions in HotWinAHK.ahk's engine:
+
+1. Bulk Symmetrical Window Restorations (Bulk-Restore)
+   - RestoreAll            - Symmetrically restores all desktop windows back to normal size, regardless of maximized/minimized status.
+   - RestoreAllMinimized   - Selectively restores minimized windows back to normal size while leaving maximized windows locked.
+   - MaximizeAll           - Symmetrically maximizes all open window handles, irrespective of whether they are minimized or restored.
+
+2. Four-Sided Symmetrical Grid-Snapping & Border Streches
+   - StretchToGridAll      - Symmetrically snaps and stretches all four borders of the active window outward to meet the nearest boundary grid line.
+   - PullToGridAll         - Symmetrically snaps and pulls all four borders of the active window inward to meet the nearest boundary grid line.
+   - AddAll                - Symmetrically grows all four window borders outward to the next set of cell coordinates.
+   - SubtractAll           - Symmetrically contracts all four window borders inward to the next set of cell coordinates.
+   - StretchAll            - Symmetrically extends all coordinates of the active window outward until all edges touch physical monitor boundaries.
+

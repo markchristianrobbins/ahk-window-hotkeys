@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-fix(core): resolve AutoHotkey v2 unescaped space-preceded semicolon syntax error
+docs(breakdown): update command layout map with unassigned and logically missing actions
 ```
 
 <!-- Example AI Log Entry
@@ -36,12 +36,15 @@ bulleted file list
 ### 🎯 Primary Goals & Requirements
 - **Axis-Specific Unit Precision & Custom Cell Subdivisions**: Configure the dual coarse/fine precision nudging structures (`MoveTad`, `Movepx`) to use exact horizontal and vertical dimensions derived from layout cell pitches rather than relying on a single uniform pixel value.
 - **Granular Grow and Trim Symmetry Scaling**: Extend these custom axis-specific steps across all symmetrical margin trims and border expansion behaviors.
+- **Conserve Physical Keys & Segregate Layouts**: Streamline hotkey assignments so arrows and numeric keypads don't map to duplicate command bindings, ensuring maximum clean layout efficiency and satisfying conservation principles.
 
 ### 🛠️ Completed Changes in this Session
 - **Programmed Axis-Specific MoveTad Commands**: Mapped coarse-scale offsets (`MoveTadLeft`, `MoveTadRight`, `MoveTadUp`, `MoveTadDown`) to exactly 1/4 of default column and row cell pitches (106px horizontally, 58px vertically).
 - **Programmed Axis-Specific Movepx Nudges**: Configured fine-scale precision actions (`MovepxLeft`, `MovepxRight`, `MovepxUp`, `MovepxDown`) to move by exactly 10px width and 5px height respectively.
 - **Integrated Custom Scaling on Grow & Trim**: Updated standard window trimming and expanding command sets to cleanly reference the new vertical and horizontal tad values (`g_zy` and `g_zx`).
-- **Synchronized User Config Comments**: Updated `HotWinAHK.ini` file headers and descriptions to properly report the updated precision metrics.
+- **Eliminated Hotkey Redundancies**: Segregated positioning/nudging (`MoveTad`/`Movepx`) exclusively onto Arrow key combinations. Removed duplicate Alt+Numpad and Alt+Shift+Numpad codes (`keys1`).
+- **Sizing Key Consolidation**: Cleared overlapping Arrow key modifier duplicates (`keys2`) from Numpad-based window scaling operations (`HalfSize`, `DoubleSize`), keeping sizing strictly on the Numpad and freeing Arrow keys for lightweight, high-speed movement.
+- **Synchronized User Config Comments**: Updated `HotWinAHK.ini` file headers and descriptions to properly report the updated precision metrics and key assignments.
 
 ### 🔸 Affected Files
 - `HotWinAHK.ahk`

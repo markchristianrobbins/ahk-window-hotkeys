@@ -18,7 +18,7 @@ Hotkeys to make your windows jump through hoops! HotWinAHK is a highly optimized
 - ▪️[TESTING.md](TESTING.md)
 
 ---
-- **Pixel-Precision Control**: Shift windows around monitors by 1px or 10px (customizable) step frames.
+- **Pixel-Precision Control**: Shift windows around monitors down to fine precision (10px horizontal / 5px vertical) or tactical coarse steps (106px horizontal / 58px vertical) aligned with 1/4 layout cells.
 - **Proportional Grid Matrix**: Align windows to mathematically derived aspect tiles (defaulting to 15px grid pads, 418x226px tiles, and 6px gap bounds).
 - **Edge Tucking & Docking**: Tuck active frames into off-screen slots on client margins, keeping a thin tactile accent edge visible (e.g. 20px).
 - **Velocity Bump Untuck Engine**: Polls mouse movements natively at 25ms interval vectors. Sliding the cursor aggressively past screen wall thresholds pulls tucked frames back into immediate view.

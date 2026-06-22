@@ -15,6 +15,15 @@
 <!-- Ai To Maintain and work from this list -->
 [Open Notepad Safely](aip://open/c:/windows/notepad.exe)
 
+## 💡 Suggestions & Opportunities
+- [ ] **Implementation of Symmetrical Bulk Window Actions**: Code and register the first-class missing bulk commands: `RestoreAll`, `RestoreAllMinimized`, and `MaximizeAll` to provide a complete layout-restoration experience.
+- [ ] **Implementation of Four-Sided Symmetrical Sizing/Grid Snaps**: Program the logically missing four-sided symmetrical commands (`StretchToGridAll`, `PullToGridAll`, `AddAll`, `SubtractAll`, and `StretchAll`) in `HotWinAHK.ahk` to grant full multi-side bounding control.
+- [ ] **Diagonal Integration for Move/Stretch Commands**: Introduce key mappings or Command Palette integrations for diagonal operations (e.g., `StretchToGridTopLeft`, `PullToGridBottomRight`) to fully bridge the corner positioning gap.
+
+## 🚀 Next Steps
+1. **Analyze Symmetrical Grid Snapping Implementation**: Formulate helper functions in `HotWinAHK.ahk` that can calculate overlapping coordinate increments across all four borders simultaneously during `AddAll` and `SubtractAll` calls.
+2. **Standardize Action Handlers**: Register case statements for `StretchToGridAll`, `PullToGridAll`, `AddAll`, `SubtractAll`, and `StretchAll` under the primary `ExecuteCommandRegistry()` to route multi-border operations cleanly.
+
 ## [x] Incoming tasks from chat
 - [x] Mathematically corrected StretchToGrid/PullToGrid boundary offset snap states to guarantee perfect direction-oriented outward and inward window stretching/pulling
 - [x] Programmed gorgeous multi-line cursor tooltips for active actions, resolving command names against `GetGlobalCommandList()` to automatically format and present categories, descriptions, and defaults
@@ -40,6 +49,7 @@
 - [x] Interactive Search Window Picker: Programmed a dark-themed GUI matching the overall system aesthetics allowing live fuzzy search by titles and executable names to instantly refocus chosen windows on Enter or click
 - [x] Immersive 3D Parallax Rotation Mode: Coded the `Desk3d` depth-based parallax workspace that rotates active non-tucked windows on mouse movement with mathematical scaling weights based on layered distance index, cleanly resetting on Escape
 - [x] Configured Custom Axis-Specific Precision Step Dimensions: Tailored the coarse-scale MoveTad shifting increments to cleanly equal exactly 1/4 of default cell width and height settings (106 x 58 pixels), and adjusted fine-scale Movepx nudging bounds to exactly 10px width and 5px height respectively. Integrated these parameters across Grow and Trim scale actions.
+- [x] Eliminated Hotkey Redundancies & Consolidated Layout: Segregated the spatial and sizing tasks into completely unique physical layouts. Restricted the precision nudging (`MoveTad`, `Movepx`) command families exclusively to the Arrow keys. Cleanly removed duplicate arrow key mappings (`keys2`) from the Numpad-focused scaling operations (`HalfSize`, `DoubleSize`), completely conserving hotkey combinations and preventing duplicate execution overlap.
 
 
 ## [x] Errors
