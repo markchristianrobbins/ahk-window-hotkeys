@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-fix(alignment): repair coordinate finder boundaries and unified fall-through cases for StretchToGrid/PullToGrid snaps
+feat(menu): overhaul SysMenu structure with logical separators and transition all help/palette keys to compact .wcas notation
 ```
 
 <!-- Example AI Log Entry
@@ -26,6 +26,29 @@ fix(alignment): repair coordinate finder boundaries and unified fall-through cas
 ...
 -->
 ## Log Entries
+
+## [2026-06-22T14:20:00Z]
+### 🎯 Primary Goals & Requirements
+- **Overhaul SysMenu Structure**: Group management commands and utility tools with logically grouped separators conforming precisely to requested layout.
+- **Implement .wcas Compact Modifier Notation**: Replace all verbose "Win + Ctrl + Alt + Shift" hotkey layout descriptions in both display lists, dynamic settings and the help panel with condensed `.wcas` format mappings (e.g. `S.wcs`, `/.w`).
+- **Complete HelpScreen Restructuring**: Revamp the 3-column reference matrix above the live search grid using `.wcas` shorthand and update search list populating to omit arrows and numpad layout keys.
+
+### 🛠️ Completed Changes in this Session
+- **Programmed .wcas String Conversion Engines**:
+  - Authored `FormatKeyToWcas(keyStr)` parse utility in `HotWinAHK.ahk` to convert arbitrary descriptive strings like `"Win + Alt + Shift + Left"` into concise standard `.wcas` mappings (e.g. `left.was`).
+  - Authored `GetActiveWcasKey(sCmd)` to dynamically look up customized keys active in `HotWinAHK.ini` and output them formatted in `.wcas` format, ensuring user overrides display perfectly.
+- **Overhauled system SysMenu Structure**:
+  - Re-implemented `SysMenu()` utilising a hardcoded structure tracking all management verbs (`SysMenu`, `HelpScreen`, `CmdPalette`, `ReloadConfig`, `EditConfig`, `Settings`, etc.) and inserting menu separators cleanly to partition groupings.
+  - Resolved command display names by retrieving active `.wcas` notation suffixes dynamically.
+- **Revamped HelpScreen Layout**:
+  - Broadened the header and GroupBoxes (`NUMPAD SHIFTS`, `NUMPAD BOUNDS & SIZES`, and `ARROWS & MOUSE`) to utilize spatial columns centering compact `.wcas` triggers.
+  - Refined list filtration inside `PopulateLV` to automatically skip standard sizing and movement commands, preserving focus for clipboard, swaps, homes, and utility diagnostics.
+- **Consolidated Command Palette Display**:
+  - Integrated `.wcas` key notation lookups inside `ShowCmdPalette()` list renderer.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/AILOG.md`
 
 ## [2026-06-22T14:08:00Z]
 ### 🎯 Primary Goals & Requirements

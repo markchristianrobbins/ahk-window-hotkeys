@@ -3651,91 +3651,136 @@ ShowHelpScreen(hWnd := 0) {
     helpGui.Add("Text", "w940 Center x30 y+4", "Precision Window Management & Gesture Edge-Docking Suite")
 
     ; --- 3-COLUMN REFERENCE MATRIX (ABOVE THE LOOKUP GRID) ---
-    helpGui.Add("GroupBox", "x30 y60 w360 h170 c55555C", "NUMPAD MATRIX")
-    helpGui.Add("GroupBox", "x410 y60 w260 h170 c55555C", "ARROW MOVEMENT")
-    helpGui.Add("GroupBox", "x690 y60 w280 h170 c55555C", "MOUSE ACTIONS")
+    helpGui.Add("GroupBox", "x30 y60 w290 h220 c55555C", "NUMPAD SHIFTS")
+    helpGui.Add("GroupBox", "x340 y60 w310 h220 c55555C", "NUMPAD BOUNDS & SIZES")
+    helpGui.Add("GroupBox", "x670 y60 w300 h220 c55555C", "ARROWS & MOUSE")
 
-    ; --- COLUMN 1: NUMPAD ---
+    ; --- COLUMN 1: NUMPAD SHIFTS ---
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x45 y80 w140", "MoveToGrid")
-    helpGui.Add("Text", "x200 y80 w180", "Numpad 1-9")
+    helpGui.Add("Text", "x45 y80 w120", "MoveToGrid")
+    helpGui.Add("Text", "x180 y80 w120", "n._")
 
     helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
-    helpGui.Add("Text", "x45 y98 w140", "JumpGrid")
-    helpGui.Add("Text", "x200 y98 w180", "Alt + Numpad 1-9")
-
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
-    helpGui.Add("Text", "x45 y116 w140", "Edge")
-    helpGui.Add("Text", "x200 y116 w180", "Ctrl + Numpad 1-9")
-
-    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI")
-    helpGui.Add("Text", "x45 y134 w140", "StretchToGrid")
-    helpGui.Add("Text", "x200 y134 w180", "Win + Numpad 1-9")
-
-    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
-    helpGui.Add("Text", "x45 y152 w140", "PullToGrid")
-    helpGui.Add("Text", "x200 y152 w180", "Win + Alt + Numpad")
-
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
-    helpGui.Add("Text", "x45 y170 w140", "Stretch")
-    helpGui.Add("Text", "x200 y170 w180", "Win + Ctrl + Numpad")
-
-    helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x45 y188 w140", "SnapToGridEnlarge/Shrink")
-    helpGui.Add("Text", "x200 y188 w180", "Add / Subtract")
-
-    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
-    helpGui.Add("Text", "x45 y206 w140", "ScaleExpand/Reduce")
-    helpGui.Add("Text", "x200 y206 w180", "Ctrl + Add / Subtract")
-
-    ; --- COLUMN 2: ARROW MOVEMENT ---
-    helpGui.SetFont("s9 bold c4476ff", "Segoe UI")
-    helpGui.Add("Text", "x425 y80 w110", "MoveTad")
-    helpGui.Add("Text", "x545 y80 w110", "Win + Alt + Arrows")
+    helpGui.Add("Text", "x45 y98 w120", "JumpGrid")
+    helpGui.Add("Text", "x180 y98 w120", "n.c")
 
     helpGui.SetFont("s9 bold cFFCC00", "Segoe UI")
-    helpGui.Add("Text", "x425 y98 w110", "Movepx")
-    helpGui.Add("Text", "x545 y98 w110", "Win + Shift + Arrows")
+    helpGui.Add("Text", "x45 y116 w120", "MoveTad")
+    helpGui.Add("Text", "x180 y116 w120", "n.a")
 
     helpGui.SetFont("s9 bold c44FF44", "Segoe UI")
-    helpGui.Add("Text", "x425 y116 w110", "Add (Grow)")
-    helpGui.Add("Text", "x545 y116 w110", "Win+Alt+Shift+Arrows")
+    helpGui.Add("Text", "x45 y134 w120", "Movepx")
+    helpGui.Add("Text", "x180 y134 w120", "n.as")
+
+    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI")
+    helpGui.Add("Text", "x45 y152 w120", "Edge")
+    helpGui.Add("Text", "x180 y152 w120", "n.s")
 
     helpGui.SetFont("s9 bold cCC66FF", "Segoe UI")
-    helpGui.Add("Text", "x425 y134 w110", "Sub (Shrink)")
-    helpGui.Add("Text", "x545 y134 w110", "Win+Ctrl+Alt+Arrows")
+    helpGui.Add("Text", "x45 y170 w120", "EdgeIn")
+    helpGui.Add("Text", "x180 y170 w120", "n.cs")
 
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x425 y152 w110", "Trim")
-    helpGui.Add("Text", "x545 y152 w110", "Win + Alt + Arrows")
+    helpGui.Add("Text", "x45 y188 w120", "SnapToGrid")
+    helpGui.Add("Text", "x180 y188 w120", "add._ / sub._")
 
-    ; --- COLUMN 3: MOUSE ACTIONS ---
+    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
+    helpGui.Add("Text", "x45 y206 w120", "Scale10px")
+    helpGui.Add("Text", "x180 y206 w120", "add.a / sub.a")
+    
+    helpGui.SetFont("s9 bold cFF9900", "Segoe UI")
+    helpGui.Add("Text", "x45 y224 w120", "ScaleGridPart")
+    helpGui.Add("Text", "x180 y224 w120", "add.c / sub.c")
+
+    ; --- COLUMN 2: NUMPAD BOUNDS & SIZES ---
+    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI")
+    helpGui.Add("Text", "x355 y80 w150", "StretchToGrid")
+    helpGui.Add("Text", "x525 y80 w110", "n.w")
+
+    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
+    helpGui.Add("Text", "x355 y98 w150", "PullToGrid")
+    helpGui.Add("Text", "x525 y98 w110", "n.wa")
+
+    helpGui.SetFont("s9 bold cFF4444", "Segoe UI")
+    helpGui.Add("Text", "x355 y116 w150", "Stretch (Max)")
+    helpGui.Add("Text", "x525 y116 w110", "n.wcs")
+
+    helpGui.SetFont("s9 bold c4476ff", "Segoe UI")
+    helpGui.Add("Text", "x355 y134 w150", "Grow")
+    helpGui.Add("Text", "x525 y134 w110", "n.wc")
+
     helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
-    helpGui.Add("Text", "x705 y80 w100", "ToGrid")
-    helpGui.Add("Text", "x815 y80 w140", "Win + MButton")
+    helpGui.Add("Text", "x355 y152 w150", "Trim")
+    helpGui.Add("Text", "x525 y152 w110", "n.ws")
 
-    helpGui.Add("Text", "x705 y98 w100", "RelativeSize")
-    helpGui.Add("Text", "x815 y98 w140", "Win + LButton")
+    helpGui.SetFont("s9 bold cCC66FF", "Segoe UI")
+    helpGui.Add("Text", "x355 y170 w150", "Add (Grow)")
+    helpGui.Add("Text", "x525 y170 w110", "n.was")
+
+    helpGui.SetFont("s9 bold cFFCC00", "Segoe UI")
+    helpGui.Add("Text", "x355 y188 w150", "Subtract")
+    helpGui.Add("Text", "x525 y188 w110", "n.wca")
+
+    helpGui.SetFont("s9 bold c44FF44", "Segoe UI")
+    helpGui.Add("Text", "x355 y206 w150", "Half Size")
+    helpGui.Add("Text", "x525 y206 w110", "n.wcas")
+
+    ; --- COLUMN 3: ARROWS & MOUSE ---
+    helpGui.SetFont("s9 bold c4476ff", "Segoe UI")
+    helpGui.Add("Text", "x685 y80 w120", "MoveTad/Coarse")
+    helpGui.Add("Text", "x825 y80 w130", "a.wa")
+
+    helpGui.SetFont("s9 bold cFFCC00", "Segoe UI")
+    helpGui.Add("Text", "x685 y98 w120", "Movepx/Fine")
+    helpGui.Add("Text", "x825 y98 w130", "a.ws")
+
+    helpGui.SetFont("s9 bold c44FF44", "Segoe UI")
+    helpGui.Add("Text", "x685 y116 w120", "Grow/Add")
+    helpGui.Add("Text", "x825 y116 w130", "a.was")
+
+    helpGui.SetFont("s9 bold cCC66FF", "Segoe UI")
+    helpGui.Add("Text", "x685 y134 w120", "Shrink/Sub")
+    helpGui.Add("Text", "x825 y134 w130", "a.wca")
+
+    helpGui.SetFont("s9 bold c00FFCC", "Segoe UI")
+    helpGui.Add("Text", "x685 y152 w120", "Tuck Window")
+    helpGui.Add("Text", "x825 y152 w130", "a.wcs")
+
+    helpGui.SetFont("s9 bold c00FFFF", "Segoe UI")
+    helpGui.Add("Text", "x685 y170 w120", "Untuck Window")
+    helpGui.Add("Text", "x825 y170 w130", "a.wca")
+
+    helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
+    helpGui.Add("Text", "x685 y188 w120", "MouseToGrid")
+    helpGui.Add("Text", "x825 y188 w130", "rb.w")
+
+    helpGui.SetFont("s9 norm cE0E0E6", "Segoe UI")
+    helpGui.Add("Text", "x685 y206 w120", "MouseRelSize")
+    helpGui.Add("Text", "x825 y206 w130", "lb.w")
+    
+    helpGui.SetFont("s9 bold cFF9900", "Segoe UI")
+    helpGui.Add("Text", "x685 y224 w120", "Center Window")
+    helpGui.Add("Text", "x825 y224 w130", "5._")
 
     ; --- INTERACTION SEPARATOR ---
-    helpGui.Add("Text", "w940 h1 Background3A3A3D x30 y242", "")
+    helpGui.Add("Text", "w940 h1 Background3A3A3D x30 y287", "")
 
     ; Live Dynamic Filter Box Row
     helpGui.SetFont("s10 bold c00FFCC", "Segoe UI")
-    helpGui.Add("Text", "w100 x30 y255 h24 +0x200", "Live Filter:")
+    helpGui.Add("Text", "w100 x30 y300 h24 +0x200", "Live Filter:")
     helpGui.SetFont("s10 norm cFFFFFF", "Segoe UI")
-    searchBox := helpGui.Add("Edit", "w400 x115 y255 Background1E1E22 cFFFFFF Border r1 h24", "")
+    searchBox := helpGui.Add("Edit", "w400 x115 y300 Background1E1E22 cFFFFFF Border r1 h24", "")
     
     helpGui.SetFont("s9 c8A8A93", "Segoe UI")
-    helpGui.Add("Text", "w320 x650 y255 h24 +0x200 Right", "Press [ESC] at any time to close")
+    helpGui.Add("Text", "w320 x650 y300 h24 +0x200 Right", "Press [ESC] at any time to close")
 
     ; Create the Main ListView
     helpGui.SetFont("s10 cE0E0E6", "Segoe UI")
-    helpLV := helpGui.Add("ListView", "x30 y290 w940 h350 Background111112 cFFFFFF +Grid -Multi -ReadOnly", ["Category", "Action Command", "Trigger Key combo", "Functional Description"])
+    helpLV := helpGui.Add("ListView", "x30 y335 w940 h305 Background111112 cFFFFFF +Grid -Multi -ReadOnly", ["Category", "Action Command", "Trigger Key combo", "Functional Description"])
     
     helpLV.ModifyCol(1, 140) ; Category
-    helpLV.ModifyCol(2, 150) ; Action Command
-    helpLV.ModifyCol(3, 160) ; Trigger Key combo
+    helpLV.ModifyCol(2, 170) ; Action Command
+    helpLV.ModifyCol(3, 140) ; Trigger Key combo
     helpLV.ModifyCol(4, 490) ; Functional Description
 
     ; Populate rows based on global list
@@ -3748,15 +3793,25 @@ ShowHelpScreen(hWnd := 0) {
         
         for row in localHelpRows {
             ; FILTER OUT ARROWS AND NUMPAD COMBOS FROM LIST
-            if (RegExMatch(row.key, "i)Arrows|Arrow|Left|Right|Up|Down|Numpad|Add|Sub|Subtract")) {
-                continue
+            if (row.cat == "MOVE" || row.cat == "SIZE") {
+                if (!InStr(row.cmd, "Mouse") && !InStr(row.cmd, "Swap") && !InStr(row.cmd, "Gridify")) {
+                    continue
+                }
             }
+            
             if (searchTerm != "") {
                 if (!InStr(row.cat, searchTerm) && !InStr(row.cmd, searchTerm) && !InStr(row.key, searchTerm) && !InStr(row.desc, searchTerm)) {
                     continue
                 }
             }
-            helpLV.Add("", row.cat, row.cmd, row.key, row.desc)
+            
+            ; Get active key in .wcas format
+            displayKey := GetActiveWcasKey(row.cmd)
+            if (displayKey == "") {
+                displayKey := FormatKeyToWcas(row.key)
+            }
+            
+            helpLV.Add("", row.cat, row.cmd, displayKey, row.desc)
         }
         helpLV.Opt("+Redraw")
     }
@@ -4059,12 +4114,17 @@ ShowCmdPalette(targetHwnd := 0) {
         cmdLV.Delete()
         
         for row in commandList {
+            ; Get active key in .wcas format
+            displayKey := GetActiveWcasKey(row.cmd)
+            if (displayKey == "") {
+                displayKey := FormatKeyToWcas(row.key)
+            }
             if (searchTerm != "") {
-                if (!InStr(row.cmd, searchTerm) && !InStr(row.cat, searchTerm) && !InStr(row.desc, searchTerm) && !InStr(row.key, searchTerm)) {
+                if (!InStr(row.cmd, searchTerm) && !InStr(row.cat, searchTerm) && !InStr(row.desc, searchTerm) && !InStr(displayKey, searchTerm)) {
                     continue
                 }
             }
-            cmdLV.Add("", row.cmd, row.key, row.desc, row.cat)
+            cmdLV.Add("", row.cmd, displayKey, row.desc, row.cat)
         }
         
         if (cmdLV.GetCount() > 0) {
@@ -5868,27 +5928,176 @@ RestoreTargetWindowState(hWnd) {
 
 
 
-SysMenu() {
-    sysCmds := []
-    commandList := GetGlobalCommandList()
-    for item in commandList {
-        if (item.cat == "SYSTEM") {
-            sysCmds.Push(item)
-        }
+FormatKeyToWcas(keyStr) {
+    if (keyStr == "" || keyStr == "Custom" || keyStr == "Auto Indicator" || keyStr == "Edge Bump" || keyStr == "Edge Click/Drag") {
+        return keyStr
     }
     
-    sysMenu := Menu()
-    for item in sysCmds {
-        targetCmd := item.cmd
-        displayName := targetCmd
-        if (item.key != "" && item.key != "Custom" && item.key != "Auto Indicator") {
-            displayName .= "  (" . item.key . ")"
+    cleaned := Trim(keyStr)
+    
+    ; Check modifiers (case-insensitive)
+    bWin := RegExMatch(cleaned, "i)(Win|LWin|RWin|Windows)")
+    bCtrl := RegExMatch(cleaned, "i)(Ctrl|LCtrl|RCtrl|Control)")
+    bAlt := RegExMatch(cleaned, "i)(Alt|LAlt|RAlt)")
+    bShift := RegExMatch(cleaned, "i)(Shift|LShift|RShift)")
+    
+    ; Extract base key
+    baseKey := cleaned
+    baseKey := RegExReplace(baseKey, "i)\b(Win|LWin|RWin|Windows|Ctrl|LCtrl|RCtrl|Control|Alt|LAlt|RAlt|Shift|LShift|RShift)\b", "")
+    baseKey := StrReplace(baseKey, "+", "")
+    baseKey := Trim(baseKey)
+    while (InStr(baseKey, "  ")) {
+        baseKey := StrReplace(baseKey, "  ", " ")
+    }
+    
+    ; Map modifiers suffix
+    modSuffix := ""
+    if (bWin)
+        modSuffix .= "w"
+    if (bCtrl)
+        modSuffix .= "c"
+    if (bAlt)
+        modSuffix .= "a"
+    if (bShift)
+        modSuffix .= "s"
+        
+    if (modSuffix == "") {
+        modSuffix := "_"
+    }
+    
+    ; Map base keys to compact notation according to breakdown.txt
+    lowerBase := StrLower(baseKey)
+    if (lowerBase == "backspace") {
+        baseKey := "bs"
+    } else if (lowerBase == "tab") {
+        baseKey := "tab"
+    } else if (lowerBase == "escape" || lowerBase == "esc") {
+        baseKey := "esc"
+    } else if (lowerBase == "pageup" || lowerBase == "pgup") {
+        baseKey := "pgup"
+    } else if (lowerBase == "pagedown" || lowerBase == "pgdn") {
+        baseKey := "pgdn"
+    } else if (lowerBase == "numpadadd") {
+        baseKey := "add"
+    } else if (lowerBase == "numpadsub") {
+        baseKey := "sub"
+    } else if (lowerBase == "rbutton") {
+        baseKey := "rb"
+    } else if (lowerBase == "lbutton") {
+        baseKey := "lb"
+    } else if (lowerBase == "mbutton") {
+        baseKey := "mb"
+    } else if (lowerBase == "left") {
+        baseKey := "left"
+    } else if (lowerBase == "right") {
+        baseKey := "right"
+    } else if (lowerBase == "up") {
+        baseKey := "up"
+    } else if (lowerBase == "down") {
+        baseKey := "down"
+    } else if (lowerBase == "numpad 5" || lowerBase == "numpad5") {
+        baseKey := "5"
+    } else if (lowerBase == "numpad 1" || lowerBase == "numpad1") {
+        baseKey := "1"
+    } else if (lowerBase == "numpad 2" || lowerBase == "numpad2") {
+        baseKey := "2"
+    } else if (lowerBase == "numpad 3" || lowerBase == "numpad3") {
+        baseKey := "3"
+    } else if (lowerBase == "numpad 4" || lowerBase == "numpad4") {
+        baseKey := "4"
+    } else if (lowerBase == "numpad 6" || lowerBase == "numpad6") {
+        baseKey := "6"
+    } else if (lowerBase == "numpad 7" || lowerBase == "numpad7") {
+        baseKey := "7"
+    } else if (lowerBase == "numpad 8" || lowerBase == "numpad8") {
+        baseKey := "8"
+    } else if (lowerBase == "numpad 9" || lowerBase == "numpad9") {
+        baseKey := "9"
+    } else {
+        baseKey := lowerBase
+    }
+    
+    return baseKey . "." . modSuffix
+}
+
+GetActiveWcasKey(sCmd) {
+    global g_sIniFile
+    if !FileExist(g_sIniFile) {
+        return ""
+    }
+    try {
+        keyValue := IniRead(g_sIniFile, sCmd, "keys1", "")
+        if (keyValue != "") {
+            return FormatKeyToWcas(keyValue)
         }
-        sysMenu.Add(displayName, SysMenuHandler.Bind(targetCmd))
+    }
+    return ""
+}
+
+SysMenu() {
+    sysMenu := Menu()
+    commandList := GetGlobalCommandList()
+    
+    ; Define precise structure requested by the user
+    menuStructure := [
+        {type: "item", cmd: "SysMenu", label: "SysMenu"},
+        {type: "item", cmd: "HelpScreen", label: "HelpScreen"},
+        {type: "item", cmd: "CmdPalette", label: "CmdPalette"},
+        {type: "item", cmd: "ReloadConfig", label: "ReloadConfig"},
+        {type: "item", cmd: "EditConfig", label: "EditConfig"},
+        {type: "item", cmd: "Settings", label: "Settings"},
+        {type: "separator"},
+        {type: "item", cmd: "KeyQuery", label: "KeyQuery"},
+        {type: "item", cmd: "KeyDiagnostics", label: "KeyDiagnostics"},
+        {type: "item", cmd: "CommandTest", label: "CommandTest"},
+        {type: "item", cmd: "KeyboardTest", label: "KeyboardTest"},
+        {type: "separator"},
+        {type: "item", cmd: "Active Window Dot", label: "ActiveWindowDot"},
+        {type: "item", cmd: "PeekUnderMouse", label: "PeekUnderMouse"},
+        {type: "item", cmd: "WinInfo", label: "WinInfo"},
+        {type: "separator"},
+        {type: "item", cmd: "ToggleSuspension", label: "ToggleSuspension"},
+        {type: "item", cmd: "RestartProgram", label: "RestartProgram"},
+        {type: "item", cmd: "ExitProgram", label: "ExitProgram"},
+        {type: "separator"},
+        {type: "item", cmd: "CopyCommands", label: "CopyCommands"},
+        {type: "item", cmd: "CopyCommandsHelp", label: "CopyCommandsHelp"},
+        {type: "item", cmd: "CopyCommandsAlpha", label: "CopyCommandsAlpha"},
+        {type: "item", cmd: "CopyBindings", label: "CopyBindings"},
+        {type: "item", cmd: "CopyBindingsAlpha", label: "CopyBindingsAlpha"},
+        {type: "item", cmd: "CopyBindingsLocation", label: "CopyBindingsLocation"}
+    ]
+    
+    cmdMap := Map()
+    for item in commandList {
+        cmdMap[StrLower(item.cmd)] := item
+    }
+    
+    for element in menuStructure {
+        if (element.type == "separator") {
+            sysMenu.Add()
+        } else {
+            targetCmd := element.cmd
+            displayName := element.label
+            
+            activeKey := GetActiveWcasKey(targetCmd)
+            if (activeKey == "") {
+                keyToLookup := StrLower(targetCmd)
+                if (cmdMap.Has(keyToLookup)) {
+                    activeKey := FormatKeyToWcas(cmdMap[keyToLookup].key)
+                }
+            }
+            
+            if (activeKey != "" && activeKey != "Custom" && activeKey != "Auto Indicator") {
+                displayName .= "  (" . activeKey . ")"
+            }
+            sysMenu.Add(displayName, SysMenuHandler.Bind(targetCmd))
+        }
     }
     
     sysMenu.Show()
 }
+
 SysMenuHandler(targetCmd, itemName, itemPos, actualMenu) {
     ExecuteActionWithCondition(targetCmd, "")
 }
