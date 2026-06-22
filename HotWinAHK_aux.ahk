@@ -97,6 +97,14 @@ $^#,:: {
     ExecuteActionWithCondition("Settings", "")
 }
 
+$^!#t:: {
+    ExecuteActionWithCondition("CommandTest", "")
+}
+
+$^!#k:: {
+    ExecuteActionWithCondition("KeyboardTest", "")
+}
+
 $^#t:: {
     ExecuteActionWithCondition("AlwaysOnTop", "")
 }
@@ -123,6 +131,18 @@ $+#pgup:: {
 
 $#f6:: {
     ExecuteActionWithCondition("DragWindow", "")
+}
+
+$#[:: {
+    ExecuteActionWithCondition("RestoreAll", "")
+}
+
+$^#[:: {
+    ExecuteActionWithCondition("RestoreAllMinimized", "")
+}
+
+$#]:: {
+    ExecuteActionWithCondition("MaximizeAll", "")
 }
 
 $^!+#[:: {

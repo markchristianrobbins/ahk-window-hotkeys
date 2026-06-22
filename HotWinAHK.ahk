@@ -2356,6 +2356,129 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "Home": InteractiveHome(hWnd)
         case "HomePeek": ShowHomePeek(hWnd)
         case "StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "StretchToGridTopLeft", "StretchToGridTopRight", "StretchToGridBottomLeft", "StretchToGridBottomRight", "StretchToGridAll", "PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "PullToGridTopLeft", "PullToGridTopRight", "PullToGridBottomLeft", "PullToGridBottomRight", "PullToGridAll":
+            ; 1. Base Grid Constants
+            gX := 15, gY := 15
+            pX := 424, pY := 232 ; Pitch spacing (Box width/height + 6px gap)
+
+            ; 2. Fetch Monitor Boundary Data
+            hMon := DllCall("MonitorFromWindow", "ptr", hWnd, "uint", 2, "ptr")
+            MI := Buffer(40)
+            NumPut("uint", 40, MI, 0)
+
+            if (DllCall("GetMonitorInfo", "ptr", hMon, "ptr", MI)) {
+                mLeft := NumGet(MI, 20, "int")
+                mTop := NumGet(MI, 24, "int")
+                mRight := NumGet(MI, 28, "int")
+                mBottom := NumGet(MI, 32, "int")
+
+                ; Compute max valid grid columns and rows fitting inside the screen
+                maxCols := Floor((mRight - gX) / pX)
+                maxRows := Floor((mBottom - gY) / pY)
+
+                ; 3. Establish Perfect Snap Grid Unit Boundaries First
+                ; Using exact float divisions to determine if we are already on a boundary line
+                exactLeft   := (X - gX) / pX
+                exactRight  := (X + W - gX) / pX
+                exactTop    := (Y - gY) / pY
+                exactBottom := (Y + H - gY) / pY
+
+                cLeft   := Round(exactLeft)
+                cRight  := Round(exactRight)
+                rTop    := Round(exactTop)
+                rBottom := Round(exactBottom)
+
+                ; Tolerance threshold to declare an edge "already perfectly aligned to grid"
+                tol := 0.05
+
+                ; 4. Execute Step-Based Edge Stretching
+                switch sCmd, false {
+                    ; --- STRETCH COMMANDS (Pushes individual edges OUTWARD by 1 unit) ---
+                    case "StretchToGridLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft - 1 : Floor(exactLeft)
+                    case "StretchToGridRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight + 1 : Ceil(exactRight)
+                    case "StretchToGridUp":
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop - 1 : Floor(exactTop)
+                    case "StretchToGridDown":
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom + 1 : Ceil(exactBottom)
+                    
+                    case "StretchToGridTopLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft - 1 : Floor(exactLeft)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop - 1 : Floor(exactTop)
+                    case "StretchToGridTopRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight + 1 : Ceil(exactRight)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop - 1 : Floor(exactTop)
+                    case "StretchToGridBottomLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft - 1 : Floor(exactLeft)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom + 1 : Ceil(exactBottom)
+                    case "StretchToGridBottomRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight + 1 : Ceil(exactRight)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom + 1 : Ceil(exactBottom)
+                    case "StretchToGridAll":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft - 1 : Floor(exactLeft)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop - 1 : Floor(exactTop)
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight + 1 : Ceil(exactRight)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom + 1 : Ceil(exactBottom)
+
+                    ; --- PULL COMMANDS (Pulls individual edges INWARD by 1 unit) ---
+                    case "PullToGridLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft + 1 : Ceil(exactLeft)
+                    case "PullToGridRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight - 1 : Floor(exactRight)
+                    case "PullToGridUp":
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop + 1 : Ceil(exactTop)
+                    case "PullToGridDown":
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom - 1 : Floor(exactBottom)
+
+                    case "PullToGridTopLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft + 1 : Ceil(exactLeft)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop + 1 : Ceil(exactTop)
+                    case "PullToGridTopRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight - 1 : Floor(exactRight)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop + 1 : Ceil(exactTop)
+                    case "PullToGridBottomLeft":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft + 1 : Ceil(exactLeft)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom - 1 : Floor(exactBottom)
+                    case "PullToGridBottomRight":
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight - 1 : Floor(exactRight)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom - 1 : Floor(exactBottom)
+                    case "PullToGridAll":
+                        cLeft := (Abs(exactLeft - cLeft) < tol) ? cLeft + 1 : Ceil(exactLeft)
+                        rTop := (Abs(exactTop - rTop) < tol) ? rTop + 1 : Ceil(exactTop)
+                        cRight := (Abs(exactRight - cRight) < tol) ? cRight - 1 : Floor(exactRight)
+                        rBottom := (Abs(exactBottom - rBottom) < tol) ? rBottom - 1 : Floor(exactBottom)
+                }
+
+                ; 5. INTERCEPT & TRIM BOUNDS (If it pushes past the monitor edges)
+                if (cLeft < 0) {
+                    cLeft := 0 
+                }
+                if (rTop < 0) {
+                    rTop := 0  
+                }
+                if (cRight > maxCols) {
+                    cRight := maxCols 
+                }
+                if (rBottom > maxRows) {
+                    rBottom := maxRows 
+                }
+
+                ; Guard against collapsing below a 1x1 block
+                if (cRight <= cLeft) {
+                    cRight := cLeft + 1
+                }
+                if (rBottom <= rTop) {
+                    rBottom := rTop + 1
+                }
+
+                ; 6. Translate Final Grid Indices back to exact Pixels
+                nX := gX + (cLeft * pX)
+                nY := gY + (rTop * pY)
+                nW := (cRight - cLeft) * pX - 6
+                nH := (rBottom - rTop) * pY - 6
+
+                SafeMove(nX, nY, nW, nH, hWnd)
+            }
         case "AddTop", "AddBottom", "AddLeft", "AddRight", "AddTopLeft", "AddTopRight", "AddBottomLeft", "AddBottomRight", "AddAll", "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight", "SubtractAll":
             ; 1. Fetch Active Monitor Work Surface Bound Data via Windows API
             hMon := DllCall("MonitorFromWindow", "ptr", hWnd, "uint", 2, "ptr")
@@ -3971,24 +4094,24 @@ GetGlobalCommandList() {
         {cat: "SYSTEM", cmd: "CmdPalette", key: "Win + Ctrl + Shift + C", desc: "Display the interactive fuzzy-search Command Palette for manual trigger / dry run testing."},
         {cat: "SYSTEM", cmd: "WinInfo", key: "Win + Ctrl + /", desc: "Display active window physical bounds, handle ID, class, and executable name."},
         {cat: "SYSTEM", cmd: "PeekUnderMouse", key: "Double + LWin + P", desc: "Display class of window beneath mouse cursor."},
-        {cat: "SYSTEM", cmd: "CopyCommands", key: "Win + Ctrl + C", desc: "Copy all available action commands sorted by category to clipboard."},
-        {cat: "SYSTEM", cmd: "CopyBindings", key: "Win + Alt + C", desc: "Copy active keybindings dictionary map to clipboard."},
-        {cat: "SYSTEM", cmd: "CopyCommandsHelp", key: "Win + Ctrl + Shift + H", desc: "Copy all categorized action commands with full explanations to clipboard."},
-        {cat: "SYSTEM", cmd: "CopyCommandsAlpha", key: "Win + Ctrl + Shift + A", desc: "Copy all available action commands sorted alphabetically to clipboard."},
-        {cat: "SYSTEM", cmd: "CopyBindingsAlpha", key: "Win + Ctrl + Shift + B", desc: "Copy active keybindings map sorted alphabetically by command name to clipboard."},
-        {cat: "SYSTEM", cmd: "CopyBindingsLocation", key: "Win + Ctrl + Shift + L", desc: "Copy active keybindings map grouped by keyboard hardware location to clipboard."},
-        {cat: "SYSTEM", cmd: "SysMenu", key: "Win + Ctrl + Shift + S", desc: "Show popup menu of all system commands to quickly select and run."},
+        {cat: "SYSTEM", cmd: "CopyCommands", key: "Win + Ctrl + \", desc: "Copy all available action commands sorted by category to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyBindings", key: "Win + Ctrl + .", desc: "Copy active keybindings dictionary map to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyCommandsHelp", key: "Win + Ctrl + Shift + \", desc: "Copy all categorized action commands with full explanations to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyCommandsAlpha", key: "Win + Shift + \", desc: "Copy all available action commands sorted alphabetically to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyBindingsAlpha", key: "Win + Ctrl + Shift + .", desc: "Copy active keybindings map sorted alphabetically by command name to clipboard."},
+        {cat: "SYSTEM", cmd: "CopyBindingsLocation", key: "Win + Ctrl + Alt + Shift + .", desc: "Copy active keybindings map grouped by keyboard hardware location to clipboard."},
+        {cat: "SYSTEM", cmd: "SysMenu", key: "Win + .", desc: "Show popup menu of all system commands to quickly select and run."},
         {cat: "SYSTEM", cmd: "ToggleSuspension", key: "Win + Alt + S", desc: "Suspend or resume all HotWinAHK modifier triggers instantly."},
-        {cat: "SYSTEM", cmd: "ReloadConfig", key: "Win + F12", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
-        {cat: "SYSTEM", cmd: "EditConfig", key: "Win + Alt + E", desc: "Open HotWinAHK.ini configurations in system default text editor."},
-        {cat: "SYSTEM", cmd: "ExitProgram", key: "Win + Alt + X", desc: "Safely terminate the HotWinAHK background orchestrator process."},
-        {cat: "SYSTEM", cmd: "RestartProgram", key: "Win + Ctrl + F12", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
-        {cat: "SYSTEM", cmd: "KeyDiagnostics", key: "Win + Ctrl + Shift + K", desc: "Verify and test physical modifier combos on keypad and arrow keys."},
-        {cat: "SYSTEM", cmd: "KeyQuery", key: "Win + Ctrl + Shift + Q", desc: "Fuzzy query real-time keyboard strokes to identify active command bindings."},
-        {cat: "SYSTEM", cmd: "Settings", key: "Win + Ctrl + Shift + I", desc: "Open the interactive configurations panel to customize sounds, clicks, and tooltips."},
-        {cat: "SYSTEM", cmd: "CommandTest", key: "Win + Ctrl + Alt + Shift + T", desc: "Start or resume the interactive command-by-command testing walkthrough."},
-        {cat: "SYSTEM", cmd: "KeyboardTest", key: "Win + Ctrl + Alt + Shift + K", desc: "Start or resume the interactive keyboard keybinding verification test."},
-        {cat: "SYSTEM", cmd: "Active Window Dot", key: "Auto Indicator", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
+        {cat: "SYSTEM", cmd: "ReloadConfig", key: "Win + Ctrl + F5", desc: "Hot-reload preferences from HotWinAHK.ini and compile hotkeys dynamically."},
+        {cat: "SYSTEM", cmd: "EditConfig", key: "Win + Ctrl + F2", desc: "Open HotWinAHK.ini configurations in system default text editor."},
+        {cat: "SYSTEM", cmd: "ExitProgram", key: "Win + Ctrl + F4", desc: "Safely terminate the HotWinAHK background orchestrator process."},
+        {cat: "SYSTEM", cmd: "RestartProgram", key: "Win + Ctrl + Alt + F5", desc: "Instantly reload and reboot the HotWinAHK execution engine."},
+        {cat: "SYSTEM", cmd: "KeyDiagnostics", key: "Win + Ctrl + Alt + .", desc: "Verify and test physical modifier combos on keypad and arrow keys."},
+        {cat: "SYSTEM", cmd: "KeyQuery", key: "Win + Alt + \\", desc: "Fuzzy query real-time keyboard strokes to identify active command bindings."},
+        {cat: "SYSTEM", cmd: "Settings", key: "Win + Ctrl + ,", desc: "Open the interactive configurations panel to customize sounds, clicks, and tooltips."},
+        {cat: "SYSTEM", cmd: "CommandTest", key: "Win + Ctrl + Alt + T", desc: "Start or resume the interactive command-by-command testing walkthrough."},
+        {cat: "SYSTEM", cmd: "KeyboardTest", key: "Win + Ctrl + Alt K", desc: "Start or resume the interactive keyboard keybinding verification test."},
+        {cat: "SYSTEM", cmd: "Active Window Dot", key: "Win + Alt + I", desc: "Draws green dot at active window's top-left (yellow when program is suspended)."},
 
         ; == WINDOW ==
         {cat: "WINDOW", cmd: "AlwaysOnTop", key: "Win + Ctrl + T", desc: "Toggle Always-On-Top focus pinning attribute on active window frame."},

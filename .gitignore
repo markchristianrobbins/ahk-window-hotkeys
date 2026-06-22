@@ -40,3 +40,4 @@ copilot/
 *.zip
 \!*.*
 *.exe
+tests.ini
