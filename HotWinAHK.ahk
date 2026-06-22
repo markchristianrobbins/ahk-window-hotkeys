@@ -11,6 +11,7 @@ if not A_IsAdmin {
 
 ; #region _globals 
 Global g_sIniFile := A_ScriptDir "\HotWinAHK.ini"
+Global g_sTestsIniFile := A_ScriptDir "\tests.ini"
 Global g_sGeneratedFile := A_ScriptDir "\HotWinAHK_aux.ahk"
 Global g_SettingsSilenceAll := false
 Global g_SettingsSilentOnWinCmds := false
@@ -5507,7 +5508,7 @@ GetCommandTestList() {
 }
 
 StartCommandTestDialog() {
-    global g_sIniFile, g_CommandTestCurrentIndex, g_CommandTestTargetHwnd
+    global g_sTestsIniFile, g_CommandTestCurrentIndex, g_CommandTestTargetHwnd
     
     targetHwnd := WinExist("A")
     if (targetHwnd == 0 || targetHwnd == WinExist("ahk_class Shell_TrayWnd") || targetHwnd == WinExist("ahk_class Progman")) {
@@ -5516,7 +5517,7 @@ StartCommandTestDialog() {
     }
     g_CommandTestTargetHwnd := targetHwnd
     
-    lastIdxStr := IniRead(g_sIniFile, "CommandTestState", "CurrentIndex", "1")
+    lastIdxStr := IniRead(g_sTestsIniFile, "CommandTestState", "CurrentIndex", "1")
     lastIdx := 1
     try {
         lastIdx := Integer(lastIdxStr)
@@ -5545,7 +5546,7 @@ StartCommandTestDialog() {
 }
 
 ShowCommandTestGui() {
-    global g_sIniFile, g_CommandTestCurrentIndex, g_CommandTestTargetHwnd
+    global g_sTestsIniFile, g_CommandTestCurrentIndex, g_CommandTestTargetHwnd
     static cmdTestGui := ""
     
     if (cmdTestGui != "") {
@@ -5709,17 +5710,17 @@ ShowCommandTestGui() {
         }
         
         timeStr := FormatTime(, "yyyy-MM-dd HH:mm:ss")
-        IniWrite(result . " [" . timeStr . "]", g_sIniFile, "CommandTestLogs", activeItem.cmd)
+        IniWrite(result . " [" . timeStr . "]", g_sTestsIniFile, "CommandTestLogs", activeItem.cmd)
         
         if (g_CommandTestCurrentIndex >= commandList.Length) {
-            IniWrite("1", g_sIniFile, "CommandTestState", "CurrentIndex")
-            MsgBox("🎉 Command suite walkthrough testing fully complete!`n`nAll " . commandList.Length . " command results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
+            IniWrite("1", g_sTestsIniFile, "CommandTestState", "CurrentIndex")
+            MsgBox("🎉 Command suite walkthrough testing fully complete!`n`nAll " . commandList.Length . " command results have been permanently saved in tests.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
             cmdTestGui.Destroy()
             return
         }
         
         g_CommandTestCurrentIndex += 1
-        IniWrite(String(g_CommandTestCurrentIndex), g_sIniFile, "CommandTestState", "CurrentIndex")
+        IniWrite(String(g_CommandTestCurrentIndex), g_sTestsIniFile, "CommandTestState", "CurrentIndex")
         ShowCommandTestGui()
     }
     
@@ -5730,7 +5731,7 @@ ShowCommandTestGui() {
         
         if (g_CommandTestCurrentIndex > 1) {
             g_CommandTestCurrentIndex -= 1
-            IniWrite(String(g_CommandTestCurrentIndex), g_sIniFile, "CommandTestState", "CurrentIndex")
+            IniWrite(String(g_CommandTestCurrentIndex), g_sTestsIniFile, "CommandTestState", "CurrentIndex")
             ShowCommandTestGui()
         } else {
             statusText.Text := "⚠️ Already at the very start of test (Step 1)."
@@ -5742,14 +5743,14 @@ ShowCommandTestGui() {
             RestoreTargetWindowState(g_CommandTestTargetHwnd)
         }
         
-        IniWrite(String(g_CommandTestCurrentIndex), g_sIniFile, "CommandTestState", "CurrentIndex")
+        IniWrite(String(g_CommandTestCurrentIndex), g_sTestsIniFile, "CommandTestState", "CurrentIndex")
         cmdTestGui.Destroy()
         ShowTargetToolTip("Command test progress saved at step " . g_CommandTestCurrentIndex)
     }
 }
 
 StartKeyboardTestDialog() {
-    global g_sIniFile, g_KeyboardTestCurrentIndex, g_KeyboardTestTargetHwnd, g_CommandTestTargetHwnd
+    global g_sTestsIniFile, g_KeyboardTestCurrentIndex, g_KeyboardTestTargetHwnd, g_CommandTestTargetHwnd
     
     targetHwnd := WinExist("A")
     if (targetHwnd == 0 || targetHwnd == WinExist("ahk_class Shell_TrayWnd") || targetHwnd == WinExist("ahk_class Progman")) {
@@ -5770,7 +5771,7 @@ StartKeyboardTestDialog() {
     }
     g_KeyboardTestTargetHwnd := targetHwnd
     
-    lastIdxStr := IniRead(g_sIniFile, "KeyboardTestState", "CurrentIndex", "1")
+    lastIdxStr := IniRead(g_sTestsIniFile, "KeyboardTestState", "CurrentIndex", "1")
     lastIdx := 1
     try {
         lastIdx := Integer(lastIdxStr)
@@ -5799,7 +5800,7 @@ StartKeyboardTestDialog() {
 }
 
 ShowKeyboardTestGui() {
-    global g_sIniFile, g_KeyboardTestCurrentIndex, g_KeyboardTestTargetHwnd
+    global g_sTestsIniFile, g_KeyboardTestCurrentIndex, g_KeyboardTestTargetHwnd
     static kbTestGui := ""
     
     if (kbTestGui != "") {
@@ -5921,17 +5922,17 @@ ShowKeyboardTestGui() {
         }
         
         timeStr := FormatTime(, "yyyy-MM-dd HH:mm:ss")
-        IniWrite(result . " [" . timeStr . "]", g_sIniFile, "KeyboardTestLogs", activeItem.cmd)
+        IniWrite(result . " [" . timeStr . "]", g_sTestsIniFile, "KeyboardTestLogs", activeItem.cmd)
         
         if (g_KeyboardTestCurrentIndex >= commandList.Length) {
-            IniWrite("1", g_sIniFile, "KeyboardTestState", "CurrentIndex")
-            MsgBox("🎉 Keyboard keybinding walkthrough testing fully complete!`n`nAll " . commandList.Length . " verification results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
+            IniWrite("1", g_sTestsIniFile, "KeyboardTestState", "CurrentIndex")
+            MsgBox("🎉 Keyboard keybinding walkthrough testing fully complete!`n`nAll " . commandList.Length . " verification results have been permanently saved in tests.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
             kbTestGui.Destroy()
             return
         }
         
         g_KeyboardTestCurrentIndex += 1
-        IniWrite(String(g_KeyboardTestCurrentIndex), g_sIniFile, "KeyboardTestState", "CurrentIndex")
+        IniWrite(String(g_KeyboardTestCurrentIndex), g_sTestsIniFile, "KeyboardTestState", "CurrentIndex")
         ShowKeyboardTestGui()
     }
     
@@ -5942,7 +5943,7 @@ ShowKeyboardTestGui() {
         
         if (g_KeyboardTestCurrentIndex > 1) {
             g_KeyboardTestCurrentIndex -= 1
-            IniWrite(String(g_KeyboardTestCurrentIndex), g_sIniFile, "KeyboardTestState", "CurrentIndex")
+            IniWrite(String(g_KeyboardTestCurrentIndex), g_sTestsIniFile, "KeyboardTestState", "CurrentIndex")
             ShowKeyboardTestGui()
         } else {
             statusLabel.Text := "⚠️ Already at the very start of testing (Step 1)."
@@ -5954,7 +5955,7 @@ ShowKeyboardTestGui() {
             RestoreTargetWindowState(g_KeyboardTestTargetHwnd)
         }
         
-        IniWrite(String(g_KeyboardTestCurrentIndex), g_sIniFile, "KeyboardTestState", "CurrentIndex")
+        IniWrite(String(g_KeyboardTestCurrentIndex), g_sTestsIniFile, "KeyboardTestState", "CurrentIndex")
         kbTestGui.Destroy()
         ShowTargetToolTip("Keyboard test progress saved at step " . g_KeyboardTestCurrentIndex)
     }

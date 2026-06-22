@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-fix: resolve StretchToGrid and PullToGrid hotkey compilation collisions and implement robust modifier parsing
+test: detach walkthrough test results and log states from main config to tests.ini
 ```
 
 <!-- Example AI Log Entry
@@ -26,6 +26,22 @@ fix: resolve StretchToGrid and PullToGrid hotkey compilation collisions and impl
 ...
 -->
 ## Log Entries
+
+## [2026-06-22T15:21:00Z]
+### 🎯 Primary Goals & Requirements
+- **Detach Test Results and Logs from Core Configuration**: Move interactive Command and Keyboard test state tracking and ratings log history from `HotWinAHK.ini` to a dedicated `tests.ini` database.
+- **Maintain Pristine User Preferences**: Ensure that configurations related to bindings, settings, or dimensions are kept entirely isolated from testing footprints.
+
+### 🛠️ Completed Changes in this Session
+- **Decoupled Test Database (`tests.ini`)**:
+  - Configured a new global variable `g_sTestsIniFile := A_ScriptDir "\tests.ini"` in `HotWinAHK.ahk` to point to the new dedicated test files database.
+  - Redirected all testing state operations (reads/writes to `CommandTestState`, `CommandTestLogs`, `KeyboardTestState`, and `KeyboardTestLogs`) from `g_sIniFile` (`HotWinAHK.ini`) to the specialized `g_sTestsIniFile` (`tests.ini`).
+- **Complete Walkthrough UI and Message Alignment**:
+  - Updated completion prompt dialogs to explicitly notify the user that walkthrough rating results have been safely persisted under `tests.ini`.
+- **Regenerated and Compiled Hotkey Matrix**:
+  - Automated compilation of `HotWinAHK_aux.ahk` from the new clean `HotWinAHK.ini` configurations.
+- **Updated Documentation and Task Records**:
+  - Restructured `AITASKS.md` task checklists and completed descriptions to match the `tests.ini` redirection.
 
 ## [2026-06-22T15:15:00Z]
 ### 🎯 Primary Goals & Requirements
