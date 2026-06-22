@@ -5378,7 +5378,7 @@ StartCommandTestDialog() {
     
     targetHwnd := WinExist("A")
     if (targetHwnd == 0 || targetHwnd == WinExist("ahk_class Shell_TrayWnd") || targetHwnd == WinExist("ahk_class Progman")) {
-        MsgBox("Please activate the application window you want to test HotWinAHK commands on first, then trigger Command Test.", "🤖 Target Window Required", "Iconi AlwaysOnTop")
+        MsgBox("Please activate the application window you want to test HotWinAHK commands on first, then trigger Command Test.", "🤖 Target Window Required", "Iconi 262144")
         return
     }
     g_CommandTestTargetHwnd := targetHwnd
@@ -5400,7 +5400,7 @@ StartCommandTestDialog() {
     
     if (lastIdx > 1) {
         lastCmd := commandList[lastIdx]
-        res := MsgBox("A previous Command Test session was found.`n`nStep: " . lastIdx . " / " . commandList.Length . "`nCommand: " . lastCmd.cmd . "`nCategory: " . lastCmd.cat . "`n`nWould you like to resume from where you left off?", "🤖 Resume Command Test?", "YesNoCancel Icon? AlwaysOnTop")
+        res := MsgBox("A previous Command Test session was found.`n`nStep: " . lastIdx . " / " . commandList.Length . "`nCommand: " . lastCmd.cmd . "`nCategory: " . lastCmd.cat . "`n`nWould you like to resume from where you left off?", "🤖 Resume Command Test?", "YesNoCancel Icon? 262144")
         if (res == "No") {
             g_CommandTestCurrentIndex := 1
         } else if (res == "Cancel") {
@@ -5579,7 +5579,7 @@ ShowCommandTestGui() {
         
         if (g_CommandTestCurrentIndex >= commandList.Length) {
             IniWrite("1", g_sIniFile, "CommandTestState", "CurrentIndex")
-            MsgBox("🎉 Command suite walkthrough testing fully complete!`n`nAll " . commandList.Length . " command results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "AlwaysOnTop Iconi")
+            MsgBox("🎉 Command suite walkthrough testing fully complete!`n`nAll " . commandList.Length . " command results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
             cmdTestGui.Destroy()
             return
         }
@@ -5631,7 +5631,7 @@ StartKeyboardTestDialog() {
     }
     
     if (targetHwnd == 0 || targetHwnd == WinExist("ahk_class Shell_TrayWnd") || targetHwnd == WinExist("ahk_class Progman")) {
-        MsgBox("Please activate the application window you want to test HotWinAHK keybindings on first, then trigger Keyboard Test.", "🤖 Target Window Required", "Iconi AlwaysOnTop")
+        MsgBox("Please activate the application window you want to test HotWinAHK keybindings on first, then trigger Keyboard Test.", "🤖 Target Window Required", "Iconi 262144")
         return
     }
     g_KeyboardTestTargetHwnd := targetHwnd
@@ -5653,7 +5653,7 @@ StartKeyboardTestDialog() {
     
     if (lastIdx > 1) {
         lastCmd := commandList[lastIdx]
-        res := MsgBox("A previous Keyboard Test session was found.`n`nStep: " . lastIdx . " / " . commandList.Length . "`nCommand: " . lastCmd.cmd . "`n`nWould you like to resume from where you left off?", "🤖 Resume Keyboard Test?", "YesNoCancel Icon? AlwaysOnTop")
+        res := MsgBox("A previous Keyboard Test session was found.`n`nStep: " . lastIdx . " / " . commandList.Length . "`nCommand: " . lastCmd.cmd . "`n`nWould you like to resume from where you left off?", "🤖 Resume Keyboard Test?", "YesNoCancel Icon? 262144")
         if (res == "No") {
             g_KeyboardTestCurrentIndex := 1
         } else if (res == "Cancel") {
@@ -5791,7 +5791,7 @@ ShowKeyboardTestGui() {
         
         if (g_KeyboardTestCurrentIndex >= commandList.Length) {
             IniWrite("1", g_sIniFile, "KeyboardTestState", "CurrentIndex")
-            MsgBox("🎉 Keyboard keybinding walkthrough testing fully complete!`n`nAll " . commandList.Length . " verification results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "AlwaysOnTop Iconi")
+            MsgBox("🎉 Keyboard keybinding walkthrough testing fully complete!`n`nAll " . commandList.Length . " verification results have been permanently saved in HotWinAHK.ini.", "🤖 Walkthrough Testing Finished", "262144 Iconi")
             kbTestGui.Destroy()
             return
         }

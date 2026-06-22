@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-fix(gui-options): replace invalid W option with native Wrap option in Test GUIs
+fix(msgbox): change invalid AlwaysOnTop option to numeric style 262144
 ```
 
 <!-- Example AI Log Entry
@@ -26,6 +26,19 @@ fix(gui-options): replace invalid W option with native Wrap option in Test GUIs
 ...
 -->
 ## Log Entries
+
+## [2026-06-22T13:22:00Z]
+### 🎯 Primary Goals & Requirements
+- **Resolve MsgBox 'AlwaysOnTop' Option Warning**: Fix the runtime/compiler error `Error: Invalid option. Specifically: AlwaysOnTop` complaining about using the non-existent `"AlwaysOnTop"` string inside `MsgBox` parameters.
+
+### 🛠️ Completed Changes in this Session
+- **Replaced Invalid MsgBox Option String**:
+  - Replaced the string `"AlwaysOnTop"` with the standard WinAPI numeric style equivalent `262144` across all 6 walkthrough prompt `MsgBox` calls in `HotWinAHK.ahk` (lines 5381, 5403, 5582, 5634, 5656, 5794).
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+- `/AITASKS.md`
+- `/AILOG.md`
 
 ## [2026-06-22T13:13:00Z]
 ### 🎯 Primary Goals & Requirements

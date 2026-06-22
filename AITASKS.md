@@ -54,6 +54,7 @@
 
 
 ## [x] Errors
+- [x] Invalid MsgBox Option 'AlwaysOnTop': Resolved AutoHotkey v2 diagnostic/runtime crash complaining about the invalid option `AlwaysOnTop` inside `MsgBox` parameter strings. Replaced them with the correct built-in WinAPI numeric style equivalent `262144` across all 6 test suite prompt instances in `HotWinAHK.ahk`. ✅ 2026-06-22
 - [x] Invalid Option 'W' in GUI Elements: Fixed the runtime error and GUI styling crash caused by utilizing the invalid option flag `W` inside text elements. Replaced it with the correct built-in `Wrap` option on lines 5475 and 5718 of `HotWinAHK.ahk` to enable elegant word wrapping. ✅ 2026-06-22
 - [x] WinSetTranslucent local variable warning: Resolved compiler/linter diagnostics warning where `WinSetTranslucent` was flagged as an unassigned local variable. Corrected to the correct built-in function `WinSetTransparent` on line 5891 of `HotWinAHK.ahk` during opacity/translucency cleanup. ✅ 2026-06-22
 - [x] Unexpected Reserved Word in `ShowWindowPicker`: Fixed runtime compiler crash by replacing invalid block fat-arrow syntax (`(params) => { ... }`), which is unsupported in AutoHotkey v2, with proper native nested function blocks (`UpdateList(searchText) { ... }` and `ActivateSelection(*) { ... }`).
