@@ -32,6 +32,35 @@ bulleted file list
 -->
 ## Log Entries
 
+## [2026-06-22T11:42:00Z]
+### 🎯 Primary Goals & Requirements
+- **Axis-Specific Unit Precision & Custom Cell Subdivisions**: Configure the dual coarse/fine precision nudging structures (`MoveTad`, `Movepx`) to use exact horizontal and vertical dimensions derived from layout cell pitches rather than relying on a single uniform pixel value.
+- **Granular Grow and Trim Symmetry Scaling**: Extend these custom axis-specific steps across all symmetrical margin trims and border expansion behaviors.
+
+### 🛠️ Completed Changes in this Session
+- **Programmed Axis-Specific MoveTad Commands**: Mapped coarse-scale offsets (`MoveTadLeft`, `MoveTadRight`, `MoveTadUp`, `MoveTadDown`) to exactly 1/4 of default column and row cell pitches (106px horizontally, 58px vertically).
+- **Programmed Axis-Specific Movepx Nudges**: Configured fine-scale precision actions (`MovepxLeft`, `MovepxRight`, `MovepxUp`, `MovepxDown`) to move by exactly 10px width and 5px height respectively.
+- **Integrated Custom Scaling on Grow & Trim**: Updated standard window trimming and expanding command sets to cleanly reference the new vertical and horizontal tad values (`g_zy` and `g_zx`).
+- **Synchronized User Config Comments**: Updated `HotWinAHK.ini` file headers and descriptions to properly report the updated precision metrics.
+
+### 🔸 Affected Files
+- `HotWinAHK.ahk`
+- `HotWinAHK.ini`
+- `MANUAL.md`
+- `AITASKS.md`
+
+## [2026-06-22T11:29:00Z]
+### 🎯 Primary Goals & Requirements
+- **StretchToGrid Edge Behavior Correction**: Solve the reported malfunction in the `StretchToGrid` and `PullToGrid` behaviors by redesigning the underlying snap logic to evaluate strict outward/inward movement indicators relative to grid lines rather than using arbitrary pixel tolerances.
+- **Fancier and Descriptive Command Tooltips**: Elevate active command execution notifications with detailed, longer tooltips. This is achieved by extracting the command name, category, dynamic description, and default hotkey bindings from the command catalog, replacing the simple standard cursor notification.
+
+### 🛠️ Completed Changes in this Session
+- **Redesigned Spatial Snapping Mechanics**: Rewrote the inner `switch sCmd` cases of `ExecuteCommandRegistry` inside `HotWinAHK.ahk`. Replaced legacy absolute pixel bounds comparison checks with mathematically rigorous, direction-oriented bounding line checks. The left/top bounds are dynamically stretched outward when they fall behind their corresponding grid references, while the right/bottom bounds are stretched outward when they fall in front. The inward pull cases were aligned symmetrically to retract window edges inward correctly.
+- **Enriched Cursor Tooltips**: Completely refactored `ShowQuickTip` in `HotWinAHK.ahk` to resolve the invoked command names against the data catalog inside `GetGlobalCommandList()`. When matched, the tooltip now formats as a modern, stylized card block presenting the action categories, descriptions, and defaults, with an extended display duration.
+
+### 🔸 Affected Files
+- `/HotWinAHK.ahk`
+
 ## [2026-06-16T16:03:00Z]
 ### 🎯 Primary Goals & Requirements
 - **Resolve AutoHotkey v2 Syntax Compiler Error**: Rectify the "Unterminated string text" syntax error caused by comments/semicolons preceded by a space inside double-quoted strings (e.g., `"    ;   #region "`).

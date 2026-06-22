@@ -25,7 +25,9 @@ Global g_hOpacityActiveHWND := 0 ; Remembers the window handle between keypresse
 Global g_hMainScriptHWND := A_ScriptHwnd ; Locks the true physical window ID on startup
 ; --- THE LIVE WINDOW REGISTRY ---
 Global g_mHiddenWindowsRegistry := Map() ; Key: hWnd | Value: Window Title text string
-Global g_z := 40 ;
+Global g_z := 40 ; Legacy step size
+Global g_zx := 106 ; Tad width (1/4 of cell width 424)
+Global g_zy := 58  ; Tad height (1/4 of cell height 232)
 Global g_DragTuckActive := false   ; Whether a tuck indicator is active during DragWindow
 Global g_DragTuckEdge := ""        ; The edge we want to tuck to
 Global g_DragTuckIndicatorGui := "" ; Translucent tuck preview GUI
@@ -144,6 +146,7 @@ if (wasAlreadyRunning && A_Args.Length > 0) {
 
 SetProcessDarkMode()
 LoadSettings()
+SetNumLockState "AlwaysOn"
 A_IconTip := "🤖 HotWinAHK"
 SetTimer(CheckScreenEdgeBumps, 25)
 SetTimer(UpdateActiveWindowDot, 100)
@@ -359,9 +362,37 @@ PlayTinyFeedbackSound() {
     ; Snappy feedback click/tone
     SoundBeep(1600, 15)
 }
-ShowQuickTip(sText) {
-    ToolTip(sText)
-    SetTimer(() => ToolTip(), -800) ; Clear tooltip after 800ms
+ShowQuickTip(sCmd) {
+    if (SubStr(sCmd, 1, 4) == "🤖 ") {
+        sCmd := SubStr(sCmd, 5)
+    }
+
+    description := ""
+    category := ""
+    keybinding := ""
+
+    for item in GetGlobalCommandList() {
+        if (item.cmd = sCmd) {
+            description := item.desc
+            category := item.cat
+            keybinding := item.key
+            break
+        }
+    }
+
+    if (description != "") {
+        tipText := "🤖 [HotWinAction] " . sCmd . "`n"
+        tipText .= "🔹 Category: " . category . "`n"
+        tipText .= "📝 Desc: " . description
+        if (keybinding != "" && keybinding != "Custom") {
+            tipText .= "`n⌨️ Default: " . keybinding
+        }
+    } else {
+        tipText := "🤖 Running: " . sCmd
+    }
+
+    ToolTip(tipText)
+    SetTimer(() => ToolTip(), -2000)
 }
 SquareRoot(val) {
     return val ** 0.5
@@ -1054,7 +1085,7 @@ ExecuteActionWithCondition(sCmd, sCond) {
     ; Play a snappy retro click tone and show an elegant cursor tooltip
     PlayTinyFeedbackSound()
     if (g_SettingsTipWinCmds) {
-        ShowQuickTip("🤖 " . sCmd)
+        ShowQuickTip(sCmd)
     }
 
     hWndTarget := InStr(sCmd, "UnderMouse") ? MouseGetWindowHWND() : DllCall("user32\GetForegroundWindow", "ptr")
@@ -1140,22 +1171,28 @@ ExecuteCommandRegistry(sCmd, hWnd) {
     ; --- DYNAMIC POSITION PIXEL SHIFT MOVEMENT MATRIX ---
     ; --- DYNAMIC POSITION PIXEL SHIFT MOVEMENT MATRIX (INSTANT WARP) ---
     if RegExMatch(sCmd, "i)^(MoveTad|Movepx)") {
-        ; 1. Determine base macro step scale parameter
-        iStep := InStr(sCmd, "MoveTad") ? g_z : 1
+        ; 1. Determine base step parameters for horizontal and vertical axes
+        if InStr(sCmd, "MoveTad") {
+            stepX := g_zx
+            stepY := g_zy
+        } else {
+            stepX := 10
+            stepY := 5
+        }
 
         ; 2. Corrected Independent Axis Evaluation (Enables flawless compound diagonal tracking)
         dX := 0
         if (InStr(sCmd, "Left")) {
-            dX := -iStep
+            dX := -stepX
         } else if (InStr(sCmd, "Right")) {
-            dX := iStep
+            dX := stepX
         }
 
         dY := 0
         if (InStr(sCmd, "Up")) {
-            dY := -iStep
+            dY := -stepY
         } else if (InStr(sCmd, "Down")) {
-            dY := iStep
+            dY := stepY
         }
 
         ; 3. Execute instant target warp with no animation latency
@@ -2024,7 +2061,7 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                     if (mX >= centerMidPoint) {
                         nW := W + 40, nX := X - 20
                     } else {
-                        nW := W - 20, nX := X + g_z
+                        nW := W - 20, nX := X + 40
                     }
                 }
                 ; 4. CORNERS (7, 9, 1, 3): Closest corner dictates sizing anchors
@@ -2254,26 +2291,26 @@ ExecuteCommandRegistry(sCmd, hWnd) {
 
             SafeMove(nX, nY, nW, nH, hWnd)
 
-        case "ScaleExpand10px": SafeMove(X - g_z / 2, Y - g_z / 2, W + g_z, H + g_z, hWnd)
-        case "ScaleReduce10px": SafeMove(X + g_z / 2, Y + g_z / 2, W - g_z, H - g_z, hWnd)
-        case "TrimTop": SafeMove(X, Y + g_z, W, H - g_z, hWnd)
-        case "TrimBottom": SafeMove(X, Y, W, H - g_z, hWnd)
-        case "TrimLeft": SafeMove(X + g_z, Y, W - g_z, H, hWnd)
-        case "TrimRight": SafeMove(X, Y, W - g_z, H, hWnd)
-        case "TrimTopLeft": SafeMove(X + g_z, Y + g_z, W - g_z, H - g_z, hWnd)
-        case "TrimTopRight": SafeMove(X, Y + g_z, W - g_z, H - g_z, hWnd)
-        case "TrimBottomLeft": SafeMove(X + g_z, Y, W - g_z, H - g_z, hWnd)
-        case "TrimBottomRight": SafeMove(X, Y, W - g_z, H - g_z, hWnd)
-        case "TrimAll": SafeMove(X + g_z, Y + g_z, W - 2 * g_z, H - 2 * g_z, hWnd)
-        case "GrowTop": SafeMove(X, Y - g_z, W, H + g_z, hWnd)
-        case "GrowBottom": SafeMove(X, Y, W, H + g_z, hWnd)
-        case "GrowLeft": SafeMove(X - g_z, Y, W + g_z, H, hWnd)
-        case "GrowRight": SafeMove(X, Y, W + g_z, H, hWnd)
-        case "GrowTopLeft": SafeMove(X - g_z, Y - g_z, W + g_z, H + g_z, hWnd)
-        case "GrowTopRight": SafeMove(X, Y - g_z, W + g_z, H + g_z, hWnd)
-        case "GrowBottomLeft": SafeMove(X - g_z, Y, W + g_z, H + g_z, hWnd)
-        case "GrowBottomRight": SafeMove(X, Y, W + g_z, H + g_z, hWnd)
-        case "GrowAll": SafeMove(X - g_z, Y - g_z, W + 2 * g_z, H + 2 * g_z, hWnd)
+        case "ScaleExpand10px": SafeMove(X - g_zx // 2, Y - g_zy // 2, W + g_zx, H + g_zy, hWnd)
+        case "ScaleReduce10px": SafeMove(X + g_zx // 2, Y + g_zy // 2, W - g_zx, H - g_zy, hWnd)
+        case "TrimTop": SafeMove(X, Y + g_zy, W, H - g_zy, hWnd)
+        case "TrimBottom": SafeMove(X, Y, W, H - g_zy, hWnd)
+        case "TrimLeft": SafeMove(X + g_zx, Y, W - g_zx, H, hWnd)
+        case "TrimRight": SafeMove(X, Y, W - g_zx, H, hWnd)
+        case "TrimTopLeft": SafeMove(X + g_zx, Y + g_zy, W - g_zx, H - g_zy, hWnd)
+        case "TrimTopRight": SafeMove(X, Y + g_zy, W - g_zx, H - g_zy, hWnd)
+        case "TrimBottomLeft": SafeMove(X + g_zx, Y, W - g_zx, H - g_zy, hWnd)
+        case "TrimBottomRight": SafeMove(X, Y, W - g_zx, H - g_zy, hWnd)
+        case "TrimAll": SafeMove(X + g_zx, Y + g_zy, W - 2 * g_zx, H - 2 * g_zy, hWnd)
+        case "GrowTop": SafeMove(X, Y - g_zy, W, H + g_zy, hWnd)
+        case "GrowBottom": SafeMove(X, Y, W, H + g_zy, hWnd)
+        case "GrowLeft": SafeMove(X - g_zx, Y, W + g_zx, H, hWnd)
+        case "GrowRight": SafeMove(X, Y, W + g_zx, H, hWnd)
+        case "GrowTopLeft": SafeMove(X - g_zx, Y - g_zy, W + g_zx, H + g_zy, hWnd)
+        case "GrowTopRight": SafeMove(X, Y - g_zy, W + g_zx, H + g_zy, hWnd)
+        case "GrowBottomLeft": SafeMove(X - g_zx, Y, W + g_zx, H + g_zy, hWnd)
+        case "GrowBottomRight": SafeMove(X, Y, W + g_zx, H + g_zy, hWnd)
+        case "GrowAll": SafeMove(X - g_zx, Y - g_zy, W + 2 * g_zx, H + 2 * g_zy, hWnd)
         case "SetHome": SetWindowHome(hWnd)
         case "ClearHome": ClearWindowHome(hWnd)
         case "GoHome": GoWindowHome(hWnd)
@@ -2301,124 +2338,124 @@ ExecuteCommandRegistry(sCmd, hWnd) {
 
             switch sCmd {
                 case "StretchToGridLeft", "AddLeft":
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX >= X - 2) {
                         iLeft := iLeft - 1
                     }
                 case "StretchToGridRight", "AddRight":
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight <= (X + W) + 2) {
                         jRight := jRight + 1
                     }
                 case "StretchToGridUp", "AddTop":
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY >= Y - 2) {
                         kTop := kTop - 1
                     }
                 case "StretchToGridDown", "AddBottom":
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom <= (Y + H) + 2) {
                         lBottom := lBottom + 1
                     }
                 case "StretchToGridTopLeft", "AddTopLeft":
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX >= X - 2) {
                         iLeft := iLeft - 1
                     }
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY >= Y - 2) {
                         kTop := kTop - 1
                     }
                 case "StretchToGridTopRight", "AddTopRight":
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight <= (X + W) + 2) {
                         jRight := jRight + 1
                     }
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY >= Y - 2) {
                         kTop := kTop - 1
                     }
                 case "StretchToGridBottomLeft", "AddBottomLeft":
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX >= X - 2) {
                         iLeft := iLeft - 1
                     }
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom <= (Y + H) + 2) {
                         lBottom := lBottom + 1
                     }
                 case "StretchToGridBottomRight", "AddBottomRight":
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight <= (X + W) + 2) {
                         jRight := jRight + 1
                     }
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom <= (Y + H) + 2) {
                         lBottom := lBottom + 1
                     }
                 case "PullToGridLeft", "SubtractLeft":
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX <= X + 2) {
                         iLeft := iLeft + 1
                     }
                     if (iLeft >= jRight) {
                         iLeft := jRight - 1
                     }
                 case "PullToGridRight", "SubtractRight":
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight >= (X + W) - 2) {
                         jRight := jRight - 1
                     }
                     if (jRight <= iLeft) {
                         jRight := iLeft + 1
                     }
                 case "PullToGridUp", "SubtractTop":
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY <= Y + 2) {
                         kTop := kTop + 1
                     }
                     if (kTop >= lBottom) {
                         kTop := lBottom - 1
                     }
                 case "PullToGridDown", "SubtractBottom":
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom >= (Y + H) - 2) {
                         lBottom := lBottom - 1
                     }
                     if (lBottom <= kTop) {
                         lBottom := kTop + 1
                     }
                 case "PullToGridTopLeft", "SubtractTopLeft":
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY <= Y + 2) {
                         kTop := kTop + 1
                     }
                     if (kTop >= lBottom) {
                         kTop := lBottom - 1
                     }
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX <= X + 2) {
                         iLeft := iLeft + 1
                     }
                     if (iLeft >= jRight) {
                         iLeft := jRight - 1
                     }
                 case "PullToGridTopRight", "SubtractTopRight":
-                    if (Abs(Y - snapY) < 10) {
+                    if (snapY <= Y + 2) {
                         kTop := kTop + 1
                     }
                     if (kTop >= lBottom) {
                         kTop := lBottom - 1
                     }
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight >= (X + W) - 2) {
                         jRight := jRight - 1
                     }
                     if (jRight <= iLeft) {
                         jRight := iLeft + 1
                     }
                 case "PullToGridBottomLeft", "SubtractBottomLeft":
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom >= (Y + H) - 2) {
                         lBottom := lBottom - 1
                     }
                     if (lBottom <= kTop) {
                         lBottom := kTop + 1
                     }
-                    if (Abs(X - snapX) < 10) {
+                    if (snapX <= X + 2) {
                         iLeft := iLeft + 1
                     }
                     if (iLeft >= jRight) {
                         iLeft := jRight - 1
                     }
                 case "PullToGridBottomRight", "SubtractBottomRight":
-                    if (Abs((Y + H) - snapBottom) < 10) {
+                    if (snapBottom >= (Y + H) - 2) {
                         lBottom := lBottom - 1
                     }
                     if (lBottom <= kTop) {
                         lBottom := kTop + 1
                     }
-                    if (Abs((X + W) - snapRight) < 10) {
+                    if (snapRight >= (X + W) - 2) {
                         jRight := jRight - 1
                     }
                     if (jRight <= iLeft) {

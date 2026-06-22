@@ -151,8 +151,8 @@ Every action from simple moves to grid mapping is indexed inside the INI command
 
 #### 🗺️ MOVE (Grid Matrix Positioning)
 - **Center**: Move active window to center of screen without sizing changes.
-- **MoveTadLeft** / **MoveTadRight** / **MoveTadUp** / **MoveTadDown**: Shift active window by 10 pixels coarse-scale (tad nudge).
-- **MovepxLeft** / **MovepxRight** / **MovepxUp** / **MovepxDown**: Nudge active window with 1 pixel fine precision (px nudge).
+- **MoveTadLeft** / **MoveTadRight** / **MoveTadUp** / **MoveTadDown**: Shift active window by 1/4 of a cell width/height (106px horizontally, 58px vertically) coarse-scale (tad nudge).
+- **MovepxLeft** / **MovepxRight** / **MovepxUp** / **MovepxDown**: Nudge active window with fine precision (10px horizontally, 5px vertically) (px nudge).
 - **EdgeLeft** / **EdgeRight** / **EdgeTop** / **EdgeBottom**: Align window to the screen's specified border.
 - **EdgeTopLeft** / **EdgeTopRight** / **EdgeBottomLeft** / **EdgeBottomRight**: Align window to the screen's specified corner.
 - **EdgeCenter**: Position active window to the exact horizontal and vertical center of monitor.

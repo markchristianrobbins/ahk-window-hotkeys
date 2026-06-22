@@ -16,6 +16,8 @@
 [Open Notepad Safely](aip://open/c:/windows/notepad.exe)
 
 ## [x] Incoming tasks from chat
+- [x] Mathematically corrected StretchToGrid/PullToGrid boundary offset snap states to guarantee perfect direction-oriented outward and inward window stretching/pulling
+- [x] Programmed gorgeous multi-line cursor tooltips for active actions, resolving command names against `GetGlobalCommandList()` to automatically format and present categories, descriptions, and defaults
 - [x] Refactored HotWinAHK.ini formatting (no blank lines, updated matrix header, descriptive region comments for each command family, and newly invented active key bindings for historically unbound commands)
 - [x] Recursively structured folding region config matrix for HotWinAHK.ini and synchronized descriptive documentation
 - [x] Dark theme for popup menus (SysMenu, tray, etc.) using undocumented ordinals 135 and 136 in uxtheme
@@ -37,6 +39,7 @@
 - [x] Parameterized Tucked Peeking Lists: Refactored stowed list items with custom filter arguments and clear hexadecimal HWND labels (e.g. `[Left] Notepad [0x1D04FE]`)
 - [x] Interactive Search Window Picker: Programmed a dark-themed GUI matching the overall system aesthetics allowing live fuzzy search by titles and executable names to instantly refocus chosen windows on Enter or click
 - [x] Immersive 3D Parallax Rotation Mode: Coded the `Desk3d` depth-based parallax workspace that rotates active non-tucked windows on mouse movement with mathematical scaling weights based on layered distance index, cleanly resetting on Escape
+- [x] Configured Custom Axis-Specific Precision Step Dimensions: Tailored the coarse-scale MoveTad shifting increments to cleanly equal exactly 1/4 of default cell width and height settings (106 x 58 pixels), and adjusted fine-scale Movepx nudging bounds to exactly 10px width and 5px height respectively. Integrated these parameters across Grow and Trim scale actions.
 
 
 ## [x] Errors
