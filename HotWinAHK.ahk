@@ -2356,11 +2356,29 @@ ExecuteCommandRegistry(sCmd, hWnd) {
         case "HomePeek": ShowHomePeek(hWnd)
         case "StretchToGridLeft", "StretchToGridRight", "StretchToGridUp", "StretchToGridDown", "StretchToGridTopLeft", "StretchToGridTopRight", "StretchToGridBottomLeft", "StretchToGridBottomRight", "StretchToGridAll", "PullToGridLeft", "PullToGridRight", "PullToGridUp", "PullToGridDown", "PullToGridTopLeft", "PullToGridTopRight", "PullToGridBottomLeft", "PullToGridBottomRight", "PullToGridAll":
         case "AddTop", "AddBottom", "AddLeft", "AddRight", "AddTopLeft", "AddTopRight", "AddBottomLeft", "AddBottomRight", "AddAll", "SubtractTop", "SubtractBottom", "SubtractLeft", "SubtractRight", "SubtractTopLeft", "SubtractTopRight", "SubtractBottomLeft", "SubtractBottomRight", "SubtractAll":
-            ; 1. Base Grid Geometry Configurations (using half-grid / mid-point cells)
-            gX := 15
-            gY := 15
+            ; 1. Fetch Active Monitor Work Surface Bound Data via Windows API
+            hMon := DllCall("MonitorFromWindow", "ptr", hWnd, "uint", 2, "ptr")
+            MI := Buffer(40)
+            NumPut("uint", 40, MI, 0)
+            if (DllCall("GetMonitorInfo", "ptr", hMon, "ptr", MI)) {
+                mLeft := NumGet(MI, 20, "int")
+                mTop := NumGet(MI, 24, "int")
+                mRight := NumGet(MI, 28, "int")
+                mBottom := NumGet(MI, 32, "int")
+            } else {
+                mLeft := 0
+                mTop := 0
+                mRight := A_ScreenWidth
+                mBottom := A_ScreenHeight
+            }
+
+            gX := mLeft + 15
+            gY := mTop + 15
             pX := 424
             pY := 232
+
+            maxCols := Floor((mRight - mLeft - 15) / pX)
+            maxRows := Floor((mBottom - mTop - 15) / pY)
 
             nX := X
             nY := Y
@@ -2374,14 +2392,23 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 if (InStr(sCmd, "StretchToGrid") || InStr(sCmd, "Add")) {
                     if (snapX >= X - 2) {
                         iLeft := iLeft - 1
-                        snapX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
                     }
                 } else if (InStr(sCmd, "PullToGrid") || InStr(sCmd, "Subtract")) {
                     if (snapX <= X + 2) {
                         iLeft := iLeft + 1
-                        snapX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
                     }
                 }
+                
+                ; Enforce index limits to stay within monitor boundaries
+                if (iLeft < 0) {
+                    iLeft := 0
+                }
+                maxI := 2 * maxCols
+                if (iLeft > maxI) {
+                    iLeft := maxI
+                }
+
+                snapX := gX + Floor(iLeft / 2) * pX + (Mod(iLeft, 2) == 0 ? 0 : 209)
                 
                 ; Calculate new Left boundary and check safety minimum width of 150
                 targetX := snapX
@@ -2400,14 +2427,23 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 if (InStr(sCmd, "StretchToGrid") || InStr(sCmd, "Add")) {
                     if (snapRight <= (X + W) + 2) {
                         jRight := jRight + 1
-                        snapRight := gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)
                     }
                 } else if (InStr(sCmd, "PullToGrid") || InStr(sCmd, "Subtract")) {
                     if (snapRight >= (X + W) - 2) {
                         jRight := jRight - 1
-                        snapRight := gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)
                     }
                 }
+                
+                ; Enforce index limits to stay within monitor boundaries
+                if (jRight < 1) {
+                    jRight := 1
+                }
+                maxJ := 2 * maxCols + 2
+                if (jRight > maxJ) {
+                    jRight := maxJ
+                }
+
+                snapRight := gX + Floor(jRight / 2) * pX + (Mod(jRight, 2) == 0 ? -6 : 209)
                 
                 ; Calculate new Right boundary and check safety minimum width of 150
                 targetRight := snapRight
@@ -2425,14 +2461,23 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 if (InStr(sCmd, "StretchToGrid") || InStr(sCmd, "Add")) {
                     if (snapY >= Y - 2) {
                         kTop := kTop - 1
-                        snapY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
                     }
                 } else if (InStr(sCmd, "PullToGrid") || InStr(sCmd, "Subtract")) {
                     if (snapY <= Y + 2) {
                         kTop := kTop + 1
-                        snapY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
                     }
                 }
+                
+                ; Enforce index limits to stay within monitor boundaries
+                if (kTop < 0) {
+                    kTop := 0
+                }
+                maxK := 2 * maxRows
+                if (kTop > maxK) {
+                    kTop := maxK
+                }
+
+                snapY := gY + Floor(kTop / 2) * pY + (Mod(kTop, 2) == 0 ? 0 : 113)
                 
                 ; Calculate new Top boundary and check safety minimum height of 150
                 targetY := snapY
@@ -2451,14 +2496,23 @@ ExecuteCommandRegistry(sCmd, hWnd) {
                 if (InStr(sCmd, "StretchToGrid") || InStr(sCmd, "Add")) {
                     if (snapBottom <= (Y + H) + 2) {
                         lBottom := lBottom + 1
-                        snapBottom := gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)
                     }
                 } else if (InStr(sCmd, "PullToGrid") || InStr(sCmd, "Subtract")) {
                     if (snapBottom >= (Y + H) - 2) {
                         lBottom := lBottom - 1
-                        snapBottom := gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)
                     }
                 }
+                
+                ; Enforce index limits to stay within monitor boundaries
+                if (lBottom < 1) {
+                    lBottom := 1
+                }
+                maxL := 2 * maxRows + 2
+                if (lBottom > maxL) {
+                    lBottom := maxL
+                }
+
+                snapBottom := gY + Floor(lBottom / 2) * pY + (Mod(lBottom, 2) == 0 ? -6 : 113)
                 
                 ; Calculate new Bottom boundary and check safety minimum height of 150
                 targetBottom := snapBottom

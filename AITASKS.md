@@ -24,6 +24,7 @@
 - All current design integrations and requested commands have been successfully implemented, verified, and cataloged. Any future enhancements will be listed here as needed.
 
 ## [x] Incoming tasks from chat
+- [x] Symmetrized StretchToGrid & PullToGrid Multi-Monitor Snapping: Integrated a robust, multi-monitor work-area bounding algorithm that dynamically retrieves active monitor footprints (`MonitorFromWindow`/`GetMonitorInfo`), scales coordinate grids, and clamps indices to prevent erratic off-screen overshooting or alignment mismatch on multi-monitor nodes. ✅ 2026-06-22
 - [x] Symmetrical SysMenu Overhaul: Re-arranged, formatted, and logically segmented the `SysMenu` popup list with custom section separators and customized `.wcas` format key labels, matching requested groupings exactly. ✅ 2026-06-22
 - [x] Compact .wcas Hotkey Format Notation: Implemented `FormatKeyToWcas()` and `GetActiveWcasKey()` mapping helpers, cleanly displaying modifier patterns like `S.wcs`, `/.w` across SysMenu, HelpScreen, and Command Palette instead of verbose keyboard modifier layouts. ✅ 2026-06-22
 - [x] Complete HelpScreen Overhaul: Restructured the 3-column reference matrix above the live filter using `.wcas` shorthand representation. Revamped list-view row population to automatically exclude Arrow/Numpad coordinate and size key combinations while preserving clipboard, utility diagnostics, and swaps. ✅ 2026-06-22

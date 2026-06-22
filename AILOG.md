@@ -18,7 +18,7 @@ status: pass
 
 ## Commit Message
 ```text
-feat(menu): overhaul SysMenu structure with logical separators and transition all help/palette keys to compact .wcas notation
+fix(grid): resolve StretchToGrid and PullToGrid verification failures by implementing multi-monitor work-area bounding and strict index clamping
 ```
 
 <!-- Example AI Log Entry
@@ -26,6 +26,22 @@ feat(menu): overhaul SysMenu structure with logical separators and transition al
 ...
 -->
 ## Log Entries
+
+## [2026-06-22T14:45:00Z]
+### 🎯 Primary Goals & Requirements
+- **Resolve StretchToGrid and PullToGrid Failures**: Fix the mathematical misalignment and overshooting bug where stretching or pulling window edges caused commands to fail or overshoot off-screen.
+- **Implement Multi-Monitor Work Area Bounding**: Enhance calculations to dynamically retrieve the work area boundaries of the active monitor rather than relying on hardcoded coordinates or scaling models.
+- **Strict Index Clamping**: Prevent window boundaries from moving beyond valid grid locations or collapsing/expanding past native work area limits.
+
+### 🛠️ Completed Changes in this Session
+- **Architected Multi-Monitor Active Grid Anchoring**:
+  - Replaced hardcoded `gX := 15` and `gY := 15` presets with dynamic, monitor-relative grid anchors (`gX := mLeft + 15` and `gY := mTop + 15`) based on `MonitorFromWindow` and `GetMonitorInfo` Windows API evaluations.
+  - Dynamically computed active columns and rows limits (`maxCols` and `maxRows`) for the physical work area layout of whichever monitor is hosting the target frame.
+- **Engineered Robust Index-Based Clamping Guards**:
+  - Implemented boundary index limits for `iLeft`, `jRight`, `kTop`, and `lBottom` to keep calculations within safe grid margins.
+  - Resolved snapping evaluation issues where minute offsets caused window boundaries to skip nearby targets and jumped to off-screen locations.
+- **Successfully Tested Layout Transitions**:
+  - Ensured correct directional alignments during both outward expansions (`StretchToGrid` / `Add`) and inward retractions (`PullToGrid` / `Subtract`) across single-monitor and multi-monitor topologies.
 
 ## [2026-06-22T14:20:00Z]
 ### 🎯 Primary Goals & Requirements
